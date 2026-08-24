@@ -1,4 +1,69 @@
 {
+  "tabs": {
+    "overview": "Přehled",
+    "account": "Osobní údaje",
+    "integrations": "Integrace",
+    "security": "Zabezpečení",
+    "notifications": "Oznámení"
+  },
+  "progress": {
+    "title": "Postup studiem",
+    "subtitle": "Přehled získaných kreditů a splněných předmětů.",
+    "credits": "Kredity",
+    "creditsFoot": "{{current}} z {{total}} kreditů",
+    "semesterFoot": "{{semester}}. semestr",
+    "completedSubjects": "Splněné předměty",
+    "averageGrade": "Průměr",
+    "target": "Cíl",
+    "status": "Na dobré cestě"
+  },
+  "sidebar": {
+    "badge": "INSTITUCIONÁLNÍ ÚČET",
+    "role": "Student",
+    "currentStudy": "AKTUÁLNÍ STUDIUM",
+    "active": "AKTIVNÍ",
+    "studyMode": "Forma",
+    "fullTime": "Prezenční",
+    "logout": "Odhlásit se",
+    "copyId": "Kopírovat ID"
+  },
+  "intro": {
+    "badge": "NASTAVENÍ ÚČTU",
+    "title": "Profil a nastavení",
+    "subtitle": "Spravujte své osobní údaje a preference účtu.",
+    "syncedAgo": "Synchronizováno před 2 min"
+  },
+  "overview": {
+    "personalInfo": "Osobní údaje",
+    "personalInfoDesc": "Základní informace z univerzitního systému.",
+    "edit": "Upravit",
+    "phoneHint": "Viditelné pouze vám",
+    "securityTitle": "Bezpečnost účtu",
+    "securityDesc": "Váš účet je chráněný a v pořádku.",
+    "secured": "Zabezpečeno",
+    "twoFactor": "Dvoufázové ověření",
+    "twoFactorDesc": "Přidejte další vrstvu ochrany při přihlašování.",
+    "password": "Heslo",
+    "passwordDesc": "Naposledy změněno před 3 měsíci.",
+    "changePassword": "Změnit heslo",
+    "integrationsTitle": "Univerzitní integrace",
+    "integrationsDesc": "Propojené služby a synchronizace.",
+    "moodle": "Moodle",
+    "moodleDesc": "Kurzy, úkoly a termíny",
+    "calendar": "Kalendář",
+    "calendarDesc": "Export rozvrhu do kalendáře",
+    "connected": "Připojeno",
+    "disconnected": "Odpojeno"
+  },
+  "actions": {
+    "exportData": "Exportovat údaje",
+    "addToCalendar": "Přidat do kalendáře"
+  },
+  "footer": {
+    "help": "Potřebujete pomoc?",
+    "contactSupport": "Kontaktujte podporu",
+    "version": "Verze 2.4.1"
+  },
   "validation": {
     "studentIdRequired": "Studentské ID je povinné.",
     "usernameRequired": "Uživatelské jméno je povinné.",
@@ -28,11 +93,54 @@
     "faculty": "Fakulta",
     "studyProgram": "Studijní program",
     "academicYear": "Ročník",
+    "phone": "Telefonní číslo",
+    "appLanguage": "Jazyk aplikace",
+    "infoBanner": "Pro změnu osobních údajů kontaktujte studijní oddělení.",
+    "infoBannerSub": "Osobní identifikační údaje jsou synchronizovány s centrální univerzitní databází a nelze je upravovat přímo v aplikaci.",
     "defaults": {
       "university": "Univerzita Palackého v Olomouci",
       "faculty": "Přírodovědecká fakulta",
       "studyProgram": "Aplikovaná informatika",
-      "academicYear": "1. ročník"
+      "academicYear": "1. ročník",
+      "phone": "+420 123 456 789",
+      "appLanguage": "Čeština (CS)"
+    }
+  },
+  "security": {
+    "twoFactor": {
+      "title": "Dvoufaktorové ověření (2FA)",
+      "subtitle": "Zabezpečte svůj účet vyžadováním ověřovacího kódu při každém přihlášení.",
+      "status": "Stav dvoufaktorového ověření",
+      "active": "Aktivní",
+      "inactive": "Neaktivní",
+      "mockNote": "Mock nastavení"
+    },
+    "password": {
+      "title": "Heslo k účtu",
+      "subtitle": "Heslo je spravováno centrální identitou Univerzity Palackého (Portal UP).",
+      "action": "Změnit heslo"
+    },
+    "sessions": {
+      "title": "Aktivní relace",
+      "subtitle": "Můžete se odhlásit ze všech ostatních zařízení a prohlížečů, kde jste přihlášeni.",
+      "action": "Odhlásit všechna zařízení"
+    }
+  },
+  "notifications": {
+    "title": "Nastavení oznámení",
+    "subtitle": "Zvolte, které kanály a typy upozornění chcete dostávat.",
+    "mockNote": "Oznámení jsou ukládána pouze lokálně ve vašem prohlížeči (mock režim).",
+    "emailNews": {
+      "title": "E-mailové novinky a souhrny",
+      "subtitle": "Dostávat týdenní přehled splněných a nadcházejících studijních povinností."
+    },
+    "moodleSync": {
+      "title": "Moodle synchronizační notifikace",
+      "subtitle": "Upozornit na nově vypsané úkoly a změněné termíny odevzdání z Moodlu."
+    },
+    "calendarAlerts": {
+      "title": "Upozornění kalendáře a výuky",
+      "subtitle": "Push notifikace a připomenutí 15 minut před začátkem přednášky či cvičení."
     }
   },
   "stag": {

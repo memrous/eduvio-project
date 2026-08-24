@@ -1,4 +1,69 @@
 {
+  "tabs": {
+    "overview": "Overview",
+    "account": "Personal Details",
+    "integrations": "Integrations",
+    "security": "Security",
+    "notifications": "Notifications"
+  },
+  "progress": {
+    "title": "Study Progress",
+    "subtitle": "Overview of acquired credits and completed subjects.",
+    "credits": "Credits",
+    "creditsFoot": "{{current}} of {{total}} credits",
+    "semesterFoot": "Semester {{semester}}",
+    "completedSubjects": "Completed Subjects",
+    "averageGrade": "Average",
+    "target": "Target",
+    "status": "On track"
+  },
+  "sidebar": {
+    "badge": "INSTITUTIONAL ACCOUNT",
+    "role": "Student",
+    "currentStudy": "CURRENT STUDY",
+    "active": "ACTIVE",
+    "studyMode": "Mode",
+    "fullTime": "Full-time",
+    "logout": "Sign out",
+    "copyId": "Copy ID"
+  },
+  "intro": {
+    "badge": "ACCOUNT SETTINGS",
+    "title": "Profile & Settings",
+    "subtitle": "Manage your personal details and account preferences.",
+    "syncedAgo": "Synced 2 mins ago"
+  },
+  "overview": {
+    "personalInfo": "Personal Details",
+    "personalInfoDesc": "Basic information from the university system.",
+    "edit": "Edit",
+    "phoneHint": "Visible only to you",
+    "securityTitle": "Account Security",
+    "securityDesc": "Your account is protected and in good standing.",
+    "secured": "Secured",
+    "twoFactor": "Two-factor authentication",
+    "twoFactorDesc": "Add an extra layer of protection when signing in.",
+    "password": "Password",
+    "passwordDesc": "Last changed 3 months ago.",
+    "changePassword": "Change password",
+    "integrationsTitle": "University Integrations",
+    "integrationsDesc": "Connected services and synchronization.",
+    "moodle": "Moodle",
+    "moodleDesc": "Courses, assignments and deadlines",
+    "calendar": "Calendar",
+    "calendarDesc": "Schedule export to calendar",
+    "connected": "Connected",
+    "disconnected": "Disconnected"
+  },
+  "actions": {
+    "exportData": "Export data",
+    "addToCalendar": "Add to calendar"
+  },
+  "footer": {
+    "help": "Need help?",
+    "contactSupport": "Contact support",
+    "version": "Version 2.4.1"
+  },
   "validation": {
     "studentIdRequired": "Student ID is required.",
     "usernameRequired": "Username is required.",
@@ -28,11 +93,54 @@
     "faculty": "Faculty",
     "studyProgram": "Study Program",
     "academicYear": "Academic Year",
+    "phone": "Phone Number",
+    "appLanguage": "App Language",
+    "infoBanner": "To change personal details, please contact the study department.",
+    "infoBannerSub": "Personal identification details are synced with the central university database and cannot be modified directly in the app.",
     "defaults": {
       "university": "Palacky University Olomouc",
       "faculty": "Faculty of Science",
       "studyProgram": "Applied Informatics",
-      "academicYear": "1st Year"
+      "academicYear": "1st Year",
+      "phone": "+420 123 456 789",
+      "appLanguage": "English (EN)"
+    }
+  },
+  "security": {
+    "twoFactor": {
+      "title": "Two-Factor Authentication (2FA)",
+      "subtitle": "Secure your account by requiring a verification code on each login.",
+      "status": "Two-factor authentication status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "mockNote": "Mock setting"
+    },
+    "password": {
+      "title": "Account Password",
+      "subtitle": "Password is managed by the central identity of Palacky University (Portal UP).",
+      "action": "Change Password"
+    },
+    "sessions": {
+      "title": "Active Sessions",
+      "subtitle": "You can log out from all other devices and browsers where you are signed in.",
+      "action": "Log out from all devices"
+    }
+  },
+  "notifications": {
+    "title": "Notification Settings",
+    "subtitle": "Choose which channels and types of alerts you want to receive.",
+    "mockNote": "Notifications are stored locally in your browser only (mock mode).",
+    "emailNews": {
+      "title": "Email news and summaries",
+      "subtitle": "Receive a weekly summary of completed and upcoming study requirements."
+    },
+    "moodleSync": {
+      "title": "Moodle synchronization notifications",
+      "subtitle": "Notify about newly assigned tasks and changed deadlines from Moodle."
+    },
+    "calendarAlerts": {
+      "title": "Calendar and class reminders",
+      "subtitle": "Push notifications and reminders 15 minutes before a lecture or seminar starts."
     }
   },
   "stag": {
