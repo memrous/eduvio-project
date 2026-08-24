@@ -13,7 +13,7 @@ import queryClient from '../lib/queryClient'
  */
 
 const AuthContext = createContext(null)
-const LS_AUTH = 'studyhub:auth'
+const LS_AUTH = 'eduvio:auth'
 
 const getAuthErrorMessage = (error) => {
   switch (error) {
@@ -204,9 +204,9 @@ export const AuthProvider = ({ children }) => {
       clearSession()
       navigate('/login', { replace: true })
     }
-    window.addEventListener('studyhub:unauthorized', handleUnauthorized)
+    window.addEventListener('eduvio:unauthorized', handleUnauthorized)
     return () => {
-      window.removeEventListener('studyhub:unauthorized', handleUnauthorized)
+      window.removeEventListener('eduvio:unauthorized', handleUnauthorized)
     }
   }, [clearSession, navigate])
 

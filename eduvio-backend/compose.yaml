@@ -1,3 +1,4 @@
+name: eduvio
 services:
     laravel.queue:
         build:

@@ -97,7 +97,7 @@ const LoginPage = () => {
           <div className="w-10 h-10 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl flex items-center justify-center">
             <GraduationCap className="w-5 h-5 text-white" />
           </div>
-          <span className="font-geist font-bold text-xl text-white tracking-tight">StudyHub</span>
+          <span className="font-geist font-bold text-xl text-white tracking-tight">Eduvio</span>
         </div>
 
         {/* Headline */}
@@ -143,7 +143,7 @@ const LoginPage = () => {
             <div className="w-9 h-9 bg-[#004ac6] rounded-xl flex items-center justify-center">
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
-            <span className="font-geist font-bold text-xl text-gray-900 tracking-tight">StudyHub</span>
+            <span className="font-geist font-bold text-xl text-gray-900 tracking-tight">Eduvio</span>
           </div>
 
           {/* Heading */}
@@ -157,7 +157,7 @@ const LoginPage = () => {
             <AlertCircle className="w-4 h-4 text-[#004ac6] shrink-0 mt-0.5" />
             <p className="text-label-sm text-[#004ac6] leading-snug">
               <span className="font-bold">{t('login.demoCredentials.label')} </span>
-              student@studyhub.cz · password
+              student@eduvio.cz · password
             </p>
           </div>
 

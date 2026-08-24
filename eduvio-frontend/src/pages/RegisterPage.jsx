@@ -374,7 +374,7 @@ const RegisterPage = () => {
           <div className="w-10 h-10 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl flex items-center justify-center">
             <GraduationCap className="w-5 h-5 text-white" />
           </div>
-          <span className="font-geist font-bold text-xl text-white tracking-tight">StudyHub</span>
+          <span className="font-geist font-bold text-xl text-white tracking-tight">Eduvio</span>
         </div>
 
         <div className="relative z-10 flex flex-col gap-8">
@@ -412,7 +412,7 @@ const RegisterPage = () => {
             <div className="w-9 h-9 bg-[#004ac6] rounded-xl flex items-center justify-center">
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
-            <span className="font-geist font-bold text-xl text-gray-900 tracking-tight">StudyHub</span>
+            <span className="font-geist font-bold text-xl text-gray-900 tracking-tight">Eduvio</span>
           </div>
 
           {/* ── Progress indicator ─────────────────────────────── */}

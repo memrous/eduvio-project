@@ -5,7 +5,7 @@ const success = (data) => ({ data, error: null, status: 'success' })
 const failure = (error) => ({ data: null, error, status: 'error' })
 
 const dispatchUnauthorized = () => {
-  window.dispatchEvent(new Event('studyhub:unauthorized'))
+  window.dispatchEvent(new Event('eduvio:unauthorized'))
 }
 
 const isNetworkError = (error) => !error.response

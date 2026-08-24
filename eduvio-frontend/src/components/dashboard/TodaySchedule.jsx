@@ -42,7 +42,7 @@ const TodaySchedule = ({ schedule }) => {
 
   const getDotColorClass = (event) => {
     if (isEventActive(event)) {
-      return 'bg-live animate-[studyhub-live-pulse_1.8s_ease-in-out_infinite]'
+      return 'bg-live animate-[eduvio-live-pulse_1.8s_ease-in-out_infinite]'
     }
 
     switch (event.type) {
@@ -159,7 +159,7 @@ const TodaySchedule = ({ schedule }) => {
                   <span
                     className={`absolute -left-[7px] top-1/2 size-3 -translate-y-1/2 rounded-full border-2 bg-surface-container-lowest ${
                       isGapLive
-                        ? 'border-live animate-[studyhub-live-pulse-subtle_1.8s_ease-in-out_infinite]'
+                        ? 'border-live animate-[eduvio-live-pulse-subtle_1.8s_ease-in-out_infinite]'
                         : 'border-dashed border-outline-variant'
                     }`}
                     aria-hidden="true"

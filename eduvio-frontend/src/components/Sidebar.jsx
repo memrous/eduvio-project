@@ -32,7 +32,7 @@ const Sidebar = () => {
           <div className="w-9 h-9 bg-primary-container text-on-primary-container flex items-center justify-center rounded-md">
             <GraduationCap className="w-5 h-5 text-current" />
           </div>
-          <span className="font-geist font-bold text-xl tracking-tight text-on-surface">StudyHub</span>
+          <span className="font-geist font-bold text-xl tracking-tight text-on-surface">Eduvio</span>
         </div>
 
         {/* Navigation Links */}

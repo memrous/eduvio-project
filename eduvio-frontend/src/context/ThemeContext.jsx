@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useLayoutEffect, useMemo, useState } from 'react'
 
-const STORAGE_KEY = 'studyhub-theme'
+const STORAGE_KEY = 'eduvio-theme'
 
 const ThemeContext = createContext(null)
 

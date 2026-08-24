@@ -80,7 +80,7 @@ const AppLayout = () => {
             >
               <Menu className="w-6 h-6" />
             </button>
-            <span className="font-geist font-bold text-lg text-on-surface tracking-tight">StudyHub</span>
+            <span className="font-geist font-bold text-lg text-on-surface tracking-tight">Eduvio</span>
           </div>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
@@ -137,7 +137,7 @@ const AppLayout = () => {
                   <div className="w-9 h-9 bg-primary-container text-on-primary-container flex items-center justify-center rounded-md">
                     <GraduationCap className="w-5 h-5 text-current" />
                   </div>
-                  <span className="font-geist font-bold text-xl tracking-tight text-on-surface">StudyHub</span>
+                  <span className="font-geist font-bold text-xl tracking-tight text-on-surface">Eduvio</span>
                 </div>
                 <button
                   onClick={() => setIsDrawerOpen(false)}

@@ -230,7 +230,7 @@
   }
 }
 
-@keyframes studyhub-toast-shrink {
+@keyframes eduvio-toast-shrink {
   from {
     width: 100%;
   }
@@ -239,7 +239,7 @@
   }
 }
 
-@keyframes studyhub-live-pulse {
+@keyframes eduvio-live-pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(236, 124, 14, 0.6);
     transform: scale(1);
@@ -254,7 +254,7 @@
   }
 }
 
-@keyframes studyhub-live-pulse-subtle {
+@keyframes eduvio-live-pulse-subtle {
   0% {
     box-shadow: 0 0 0 0 rgba(236, 124, 14, 0.35);
     transform: scale(1);

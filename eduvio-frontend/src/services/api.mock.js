@@ -39,11 +39,11 @@ const sanitizeUser = (user) => {
 
 const getNamespacedKey = (userId, key) => {
   const scope = userId || 'fallback'
-  return `studyhub:${scope}:${key}`
+  return `eduvio:${scope}:${key}`
 }
 
 const getAuthTokenFromStorage = () => {
-  const authDataStr = localStorage.getItem('studyhub:auth')
+  const authDataStr = localStorage.getItem('eduvio:auth')
   if (!authDataStr) return null
 
   try {

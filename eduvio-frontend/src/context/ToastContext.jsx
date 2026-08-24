@@ -63,7 +63,7 @@ const ToastCard = ({ id, variant, message, onDismiss }) => {
       {/* Progress bar */}
       <div
         className={`absolute bottom-0 left-0 h-[3px] ${styles.bar} rounded-b-xl`}
-        style={{ animation: `studyhub-toast-shrink ${AUTO_DISMISS_MS}ms linear forwards` }}
+        style={{ animation: `eduvio-toast-shrink ${AUTO_DISMISS_MS}ms linear forwards` }}
       />
 
       <Icon className={`w-5 h-5 shrink-0 mt-0.5 ${styles.icon}`} />

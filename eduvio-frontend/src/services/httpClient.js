@@ -28,7 +28,7 @@ httpClient.interceptors.request.use(
     // If header is already set (via setAuthToken), do not overwrite it
     if (config.headers.Authorization) return config
 
-    const authDataStr = localStorage.getItem('studyhub:auth')
+    const authDataStr = localStorage.getItem('eduvio:auth')
     if (authDataStr) {
       try {
         const { token } = JSON.parse(authDataStr)
@@ -47,7 +47,7 @@ httpClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      window.dispatchEvent(new Event('studyhub:unauthorized'))
+      window.dispatchEvent(new Event('eduvio:unauthorized'))
     }
     return Promise.reject(error)
   }

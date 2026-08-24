@@ -1,4 +1,4 @@
-// Unified Mock Database and Entity Definitions for StudyHub
+// Unified Mock Database and Entity Definitions for Eduvio
 
 export const INITIAL_USER = {
   id: 1,
