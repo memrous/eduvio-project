@@ -1,9 +1,9 @@
+import PageTransition from '../components/common/PageTransition'
 import { useState } from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   X,
-  GraduationCap,
   LogOut,
   Menu
 } from 'lucide-react'
@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext'
 import CustomIcon from '../components/CustomIcon'
 import DarkModeToggle from '../components/DarkModeToggle'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import logoImg from '../assets/images/logo.png'
 
 // Desktop Components
 import Sidebar from '../components/Sidebar'
@@ -59,9 +60,9 @@ const AppLayout = () => {
             <Header />
           
             <main className="flex-1 overflow-y-auto bg-surface p-8">
-              <div className="max-w-[1600px] w-full mx-auto flex flex-col gap-6">
+              <PageTransition className="max-w-[1600px] w-full mx-auto flex flex-col gap-6">
                 <Outlet />
-              </div>
+              </PageTransition>
             </main>
           </div>
         </div>
@@ -88,8 +89,10 @@ const AppLayout = () => {
           </div>
         </header>
 
-        <main className="p-4 flex flex-col gap-6">
-          <Outlet />
+        <main className="p-4">
+          <PageTransition className="flex flex-col gap-6">
+            <Outlet />
+          </PageTransition>
         </main>
 
         {/* Mobile Bottom Nav inline */}
@@ -134,9 +137,11 @@ const AppLayout = () => {
             <div className="flex flex-col gap-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-primary-container text-on-primary-container flex items-center justify-center rounded-md">
-                    <GraduationCap className="w-5 h-5 text-current" />
-                  </div>
+                  <img
+                    src={logoImg}
+                    alt="Eduvio"
+                    className="w-9 h-9 object-contain"
+                  />
                   <span className="font-geist font-bold text-xl tracking-tight text-on-surface">Eduvio</span>
                 </div>
                 <button

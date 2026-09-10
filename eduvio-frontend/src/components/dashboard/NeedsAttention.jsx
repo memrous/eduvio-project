@@ -76,7 +76,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
                       <button
                         type="button"
                         onClick={() => onUploadClick?.(alert)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 cursor-pointer"
                       >
                         <Upload className="size-3.5" aria-hidden="true" />
                         {t('needsAttention.uploadSolution')}
@@ -85,7 +85,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
                       <button
                         type="button"
                         onClick={() => onViewSubject?.(alert.subjectId || alert)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container-high"
+                        className="inline-flex items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container-high cursor-pointer"
                       >
                         {t('needsAttention.viewDetail')}
                         <ArrowRight className="size-3.5" aria-hidden="true" />

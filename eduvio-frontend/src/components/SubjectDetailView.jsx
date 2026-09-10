@@ -73,7 +73,7 @@ const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
   const statusLabel = t(`academic:subjectDetail.status.${statusKey}`, t('academic:subjectDetail.status.inProgress'))
 
   return (
-    <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+    <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm page-section">
       {/* TOP BAR: BADGES */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
@@ -330,10 +330,10 @@ const SubjectDetailView = ({
       <SubjectHeader subject={subject} requirements={requirements} onShowInfo={() => setShowInfo(true)} />
 
       {/* 2. SUMMARY STRIP (2-3 METRIC CARDS) */}
-      <SubjectSummaryStrip subject={subject} requirements={requirements} />
+      <div className="page-section"><SubjectSummaryStrip subject={subject} requirements={requirements} /></div>
 
       {/* TABS NAVIGATION */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-outline-variant no-scrollbar pt-2">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-outline-variant no-scrollbar pt-2 page-section">
         {TABS.map(({ key, Icon }) => {
           const active = activeTab === key
           return (
@@ -354,7 +354,7 @@ const SubjectDetailView = ({
 
       {/* TAB CONTENTS */}
       {activeTab === 'requirements' && (
-        <div className="space-y-8">
+        <div className="space-y-8 page-section">
           {/* 3. MOODLE CONTINUOUS EVALUATION SECTION */}
           <SubjectMoodleActivities requirements={requirements} resources={resources} />
 
@@ -363,8 +363,8 @@ const SubjectDetailView = ({
         </div>
       )}
 
-      {activeTab === 'materials' && <MaterialsTab subject={subject} resources={resources} />}
-      {activeTab === 'notes' && <NotesTab note={note} onSaveNote={onSaveNote} />}
+      {activeTab === 'materials' && <div className="page-section"><MaterialsTab subject={subject} resources={resources} /></div>}
+      {activeTab === 'notes' && <div className="page-section"><NotesTab note={note} onSaveNote={onSaveNote} /></div>}
 
       {/* INFO DIALOG */}
       {showInfo && subject.description && (

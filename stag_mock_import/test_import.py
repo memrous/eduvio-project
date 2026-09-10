@@ -1,83 +1,72 @@
-import json
 import os
 import sys
+from datetime import date
 import requests
-from datetime import date, timedelta
 
 # --- KONFIGURACE (injected by StagSyncJob via environment variables) ---
 LARAVEL_API_URL  = os.environ.get("LARAVEL_API_URL",  "http://localhost/api")
 BEARER_TOKEN     = os.environ.get("BEARER_TOKEN",     "")
-STAG_USERNAME    = os.environ.get("STAG_USERNAME",    "")
-STAG_PASSWORD    = os.environ.get("STAG_PASSWORD",    "")
+STAG_TICKET      = os.environ.get("STAG_TICKET",      "")
+STAG_USER        = os.environ.get("STAG_USER",        "")
 STAG_STUDENT_ID  = os.environ.get("STAG_STUDENT_ID",  "")
+STAG_WS_BASE_URL = os.environ.get("STAG_WS_BASE_URL", "https://stag-ws.upol.cz/ws")
 
-def nacti_surova_data(soubor):
-    """Načte JSON soubor s mockovanými daty ze STAGu."""
-    if not os.path.exists(soubor):
-        print(f"❌ Chyba: Soubor {soubor} nebyl nalezen!")
-        return []
-    with open(soubor, "r", encoding="utf-8") as f:
-        data = json.load(f)
-        return data.get("rozvrhovaAkce", [])
 
-def spocitej_datum_akce(den_zkr):
-    """Spočítá datum nejbližšího výskytu daného dne v týdnu (od dneška, včetně dneška)."""
-    dny_mapa = {"Po": 0, "Út": 1, "St": 2, "Čt": 3, "Pá": 4, "So": 5, "Ne": 6}
-    cilovy_den = dny_mapa.get(den_zkr, 0)
-    dnes = date.today()
-    dnesni_den = dnes.weekday()
-    posun = (cilovy_den - dnesni_den) % 7
-    return (dnes + timedelta(days=posun)).isoformat()
+def zjisti_aktualni_semestr() -> str:
+    """Vrátí aktuální semestr (ZS pro září–leden, LS pro únor–srpen)."""
+    mesic = date.today().month
+    if mesic in (9, 10, 11, 12, 1):
+        return "ZS"
+    return "LS"
 
-def transformuj_data_pro_laravel(surova_data):
-    """Transformuje STAG data do formátu pro Laravel."""
+
+def nacti_predmety_ze_stagu(ticket: str, student_id: str, base_url: str, semestr: str) -> list:
+    """Načte zapsané předměty studenta ze STAG Web Services."""
+    url = f"{base_url.rstrip('/')}/services/rest2/predmety/getPredmetyByStudent"
+    params = {
+        "osCislo": student_id,
+        "semestr": semestr,
+        "outputFormat": "JSON"
+    }
+    print(f"📡 Načítám předměty ze STAG WS pro studenta {student_id} (semestr: {semestr})...")
+    try:
+        response = requests.get(url, params=params, auth=(ticket, ""), timeout=15)
+        if response.status_code != 200:
+            print(f"❌ Chyba při volání STAG WS (Status: {response.status_code}): {response.text}", file=sys.stderr)
+            sys.exit(1)
+        data = response.json()
+        return data.get("predmetStudenta", [])
+    except requests.RequestException as e:
+        print(f"❌ Chyba sítě při komunikaci se STAG WS: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+def transformuj_predmety_pro_laravel(surova_data: list, semestr: str) -> list:
+    """Transformuje surová data předmětů ze STAGu do formátu pro Laravel."""
     vysledek = []
-    for akce in surova_data:
-        katedra = akce.get("katedra", "???")
-        kod_predmetu = akce.get("predmet", "???")
-        plny_kod = f"{katedra}/{kod_predmetu}"
-        mistnost = akce.get("mistnost", None)
-        
-        ucitel_obj = akce.get("ucitel", {})
-        jmeno_vyucujiciho = f"{ucitel_obj.get('jmeno', '')} {ucitel_obj.get('prijmeni', '')}".strip() or "Neznámý"
-
-        typ_akce = akce.get("typAkceZkr", "Př")
-        full_typ = "Lecture" if typ_akce == "Př" else "Tutorial"
-        
-        laravel_payload = {
-            "subject": {
-                "code": plny_kod,
-                "name": f"Předmět {plny_kod}",
-                "credits": 5,
-                "lecturer": jmeno_vyucujiciho,
-                "semester": "Winter",
-                "completionType": "Credit",
-                "isMandatory": True
-            },
-            "event": {
-                "title": f"{full_typ} - {plny_kod}",
-                "date": spocitej_datum_akce(akce.get("denZkr", "Po")),
-                "startTime": akce.get("casOd", "00:00"),
-                "endTime": akce.get("casDo", "00:00"),
-                "type": full_typ,
-                "status": "Not Started",
-                "room": mistnost,
-                "teacherName": jmeno_vyucujiciho if jmeno_vyucujiciho != "Neznámý" else None
-            }
-        }
-        vysledek.append(laravel_payload)
+    for item in surova_data:
+        vysledek.append({
+            "code": item["zkratka"],
+            "name": item["nazev"],
+            "credits": item.get("kredity", 0),
+            "semester": f"{semestr} {item.get('rok', '')}".strip(),
+            "completionType": "Credit",
+            "isMandatory": item.get("statut") == "A",
+            "lecturer": "Nespecifikováno"
+        })
     return vysledek
 
-def odesli_data_do_laravelu(bearer_token, data):
-    """Odešle transformovaná data na chráněný endpoint."""
-    url = f"{LARAVEL_API_URL}/stag/sync-schedule"
+
+def odesli_predmety_do_laravelu(bearer_token: str, data: list):
+    """Odešle transformovaná data předmětů na chráněný endpoint /api/stag/sync-subjects."""
+    url = f"{LARAVEL_API_URL}/stag/sync-subjects"
     headers = {
         "Authorization": f"Bearer {bearer_token}",
         "Content-Type": "application/json",
         "Accept": "application/json"
     }
-    
-    print(f"📡 Odesílám {len(data)} záznamů na Laravel API...")
+
+    print(f"📡 Odesílám {len(data)} předmětů na Laravel API...")
     try:
         response = requests.post(url, json=data, headers=headers, timeout=10)
         if response.status_code == 200:
@@ -89,26 +78,35 @@ def odesli_data_do_laravelu(bearer_token, data):
         print(f"❌ Chyba sítě při odesílání dat: {e}", file=sys.stderr)
         sys.exit(1)
 
+
 if __name__ == "__main__":
-    # 1. Validate required env vars
+    # 1. Validace povinných proměnných prostředí
     if not BEARER_TOKEN:
         print("❌ Chyba: BEARER_TOKEN není nastaven. Skript musí být spuštěn přes StagSyncJob.", file=sys.stderr)
         sys.exit(1)
     if not LARAVEL_API_URL:
         print("❌ Chyba: LARAVEL_API_URL není nastaven.", file=sys.stderr)
         sys.exit(1)
+    if not STAG_TICKET:
+        print("❌ Chyba: STAG_TICKET není nastaven.", file=sys.stderr)
+        sys.exit(1)
+    if not STAG_USER:
+        print("❌ Chyba: STAG_USER není nastaven.", file=sys.stderr)
+        sys.exit(1)
+    if not STAG_STUDENT_ID:
+        print("❌ Chyba: STAG_STUDENT_ID není nastaven.", file=sys.stderr)
+        sys.exit(1)
 
-    # 2. Resolve mock data file relative to this script's location
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    soubor_s_daty = os.path.join(script_dir, "mock_stag_data.json")
+    # 2. Zjištění semestru a načtení reálných předmětů ze STAG WS
+    semestr = zjisti_aktualni_semestr()
+    surova_data = nacti_predmety_ze_stagu(STAG_TICKET, STAG_STUDENT_ID, STAG_WS_BASE_URL, semestr)
 
-    # 3. Load and transform
-    surove_akce = nacti_surova_data(soubor_s_daty)
-    pripravena_data = transformuj_data_pro_laravel(surove_akce)
+    # 3. Transformace dat pro nový endpoint
+    pripravena_data = transformuj_predmety_pro_laravel(surova_data, semestr)
 
     if not pripravena_data:
-        print("📭 Žádná data k odeslání.")
+        print("📭 Žádné předměty k odeslání.")
         sys.exit(0)
 
-    # 4. Send — token already available, no login needed
-    odesli_data_do_laravelu(BEARER_TOKEN, pripravena_data)
+    # 4. Odeslání do Laravelu
+    odesli_predmety_do_laravelu(BEARER_TOKEN, pripravena_data)

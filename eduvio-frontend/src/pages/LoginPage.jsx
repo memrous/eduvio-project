@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import {
-  GraduationCap,
   Mail,
   Lock,
   Eye,
@@ -16,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import CustomIcon from '../components/CustomIcon'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useAuth } from '../context/AuthContext'
+import logoImg from '../assets/images/logo.png'
 
 // ── Left brand panel feature list ────────────────────────────────
 const FEATURES = [
@@ -94,9 +94,11 @@ const LoginPage = () => {
 
         {/* Logo */}
         <div className="flex items-center gap-3 relative z-10">
-          <div className="w-10 h-10 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl flex items-center justify-center">
-            <GraduationCap className="w-5 h-5 text-white" />
-          </div>
+          <img
+            src={logoImg}
+            alt="Eduvio"
+            className="w-10 h-10 object-contain"
+          />
           <span className="font-geist font-bold text-xl text-white tracking-tight">Eduvio</span>
         </div>
 
@@ -140,9 +142,11 @@ const LoginPage = () => {
 
           {/* Mobile logo (hidden on desktop) */}
           <div className="flex lg:hidden items-center gap-3">
-            <div className="w-9 h-9 bg-[#004ac6] rounded-xl flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </div>
+            <img
+              src={logoImg}
+              alt="Eduvio"
+              className="w-9 h-9 object-contain"
+            />
             <span className="font-geist font-bold text-xl text-gray-900 tracking-tight">Eduvio</span>
           </div>
 

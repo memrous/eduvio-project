@@ -1,3 +1,4 @@
+import { CalendarSkeleton } from '../components/common/Skeleton'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -51,7 +52,7 @@ const CalendarPage = () => {
   }, [location.state?.openEventId, navigate, location.pathname])
 
   if (isLoading) {
-    return <PageState variant="loading" title={t('loading')} />
+    return <CalendarSkeleton />
   }
 
   if (error) {

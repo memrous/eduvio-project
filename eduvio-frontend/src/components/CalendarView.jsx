@@ -113,7 +113,7 @@ const CalendarView = ({
     <div className="relative flex flex-1 overflow-hidden">
       {/* MAIN CALENDAR AREA */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-        <CalendarToolbar
+        <div className="page-section"><CalendarToolbar
           activeView={activeView}
           setActiveView={setActiveView}
           currentMonth={currentMonth}
@@ -128,19 +128,19 @@ const CalendarView = ({
           setPanelOpen={setPanelOpen}
           t={t}
           VIEWS={VIEWS}
-        />
+        /></div>
 
-        <CalendarFilterChips
+        <div className="page-section"><CalendarFilterChips
           SUBJECTS={SUBJECTS}
           currentSubjects={currentSubjects}
           selectedSubjects={selectedSubjects}
           handleSubjectToggle={handleSubjectToggle}
           getSubjectStyle={getSubjectStyle}
           t={t}
-        />
+        /></div>
 
         {/* Calendar grid / views */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 md:px-6 md:pb-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 md:px-6 md:pb-6 page-section">
           <CalendarGrid
             activeView={activeView}
             gridDays={gridDays}

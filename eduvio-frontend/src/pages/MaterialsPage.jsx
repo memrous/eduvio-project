@@ -1,3 +1,4 @@
+import { MaterialsSkeleton } from '../components/common/Skeleton'
 import { useSubjects } from '../hooks/useSubjects'
 import { useTranslation } from 'react-i18next'
 import { useResources } from '../hooks/useResources'
@@ -14,7 +15,7 @@ const MaterialsPage = () => {
   const isLoading = subjectsLoading || resourcesLoading || eventsLoading
 
   if (isLoading) {
-    return <PageState variant="loading" title={t('loading')} />
+    return <MaterialsSkeleton />
   }
 
   return (

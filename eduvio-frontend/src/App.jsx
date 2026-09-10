@@ -6,9 +6,8 @@ import { ToastProvider } from './context/ToastContext'
 import { useAuth } from './context/AuthContext'
 import AppLayout from './layouts/AppLayout'
 import ProtectedRoute from './routes/ProtectedRoute'
-import { Loader2 } from 'lucide-react'
 import NotFoundPage from './pages/NotFoundPage'
- 
+
 // ── Lazy-loaded page components ────────────────────────────────
 const DashboardPage     = lazy(() => import('./pages/DashboardPage'))
 const SubjectsPage      = lazy(() => import('./pages/SubjectsPage'))
@@ -18,17 +17,16 @@ const MaterialsPage     = lazy(() => import('./pages/MaterialsPage'))
 const ProfilePage       = lazy(() => import('./pages/ProfilePage'))
 const LoginPage         = lazy(() => import('./pages/LoginPage'))
 const RegisterPage      = lazy(() => import('./pages/RegisterPage'))
- 
-// ── Minimal fallback shown while a page chunk loads ────────────
+
+// ── Minimal, subtle progress bar fallback for lazy JS chunk loading ──
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-white font-inter">
-    <div className="flex flex-col items-center gap-3 text-on-surface-variant">
-      <Loader2 className="w-8 h-8 animate-spin text-[#004ac6]" />
-      <span className="text-body-md">Loading…</span>
+  <div className="min-h-screen bg-background relative">
+    <div className="fixed top-0 left-0 right-0 h-0.5 z-50 overflow-hidden bg-primary/20">
+      <div className="h-full bg-primary animate-pulse w-full" />
     </div>
   </div>
 )
- 
+
 /**
  * PublicRoute
  *
@@ -42,13 +40,13 @@ const PublicRoute = ({ children }) => {
   if (isAuthenticated) return <Navigate to="/dashboard" replace />
   return children
 }
- 
+
 const AppRoutes = () => (
   <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* Redirect root to dashboard */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
- 
+
       {/* ── Public routes ── */}
       <Route
         path="/login"
@@ -58,7 +56,7 @@ const AppRoutes = () => (
         path="/register"
         element={<PublicRoute><RegisterPage /></PublicRoute>}
       />
- 
+
       {/* ── Protected routes (require auth) ── */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
@@ -70,13 +68,13 @@ const AppRoutes = () => (
           <Route path="/profile"            element={<ProfilePage />} />
         </Route>
       </Route>
- 
+
       {/* Catch-all: render a dedicated 404 page */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   </Suspense>
 )
- 
+
 const App = () => (
   <ToastProvider>
     <AuthProvider>
@@ -86,6 +84,5 @@ const App = () => (
     </AuthProvider>
   </ToastProvider>
 )
- 
-export default App
 
+export default App

@@ -9,6 +9,8 @@ use Illuminate\Support\Carbon;
 
 class StagConnectController extends Controller
 {
+    // DEPRECATED: nahrazeno StagAuthController::redirect/callback (ticket-based login).
+    // Ponecháno pro zpětnou kompatibilitu, lze odstranit po ověření, že se nikde nevolá.
     public function connect(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -44,6 +46,9 @@ class StagConnectController extends Controller
             'stag_student_id'           => null,
             'stag_username'             => null,
             'stag_password'             => null,
+            'stag_ticket'               => null,
+            'stag_ticket_expires_at'    => null,
+            'stag_user_name'            => null,
             'stag_sync_status'          => null,
             'stag_sync_error'           => null,
             'stag_synced_at'            => null,

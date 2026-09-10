@@ -33,6 +33,15 @@ class StagSyncJob implements ShouldQueue
      */
     public function handle(): void
     {
+        if (empty($this->user->stag_ticket) || ($this->user->stag_ticket_expires_at && $this->user->stag_ticket_expires_at->isPast())) {
+            $this->user->update([
+                'stag_sync_status' => 'failed',
+                'stag_sync_error'  => 'STAG ticket expired or missing, please reconnect.',
+            ]);
+
+            return;
+        }
+
         // Step 1 — Set status to pending
         $this->user->update([
             'stag_sync_status' => 'pending',
@@ -52,9 +61,10 @@ class StagSyncJob implements ShouldQueue
                 env: [
                     'LARAVEL_API_URL'  => env('STAG_CALLBACK_URL', config('app.url')) . '/api',
                     'BEARER_TOKEN'     => $plainToken,
-                    'STAG_USERNAME'    => $this->user->stag_username,
-                    'STAG_PASSWORD'    => $this->user->stag_password,
+                    'STAG_TICKET'      => $this->user->stag_ticket,
+                    'STAG_USER'        => $this->user->stag_user_name,
                     'STAG_STUDENT_ID'  => $this->user->stag_student_id,
+                    'STAG_WS_BASE_URL' => config('stag.ws_base_url'),
                 ],
                 timeout: 60,
             );

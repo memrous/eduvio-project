@@ -1,3 +1,4 @@
+import { SubjectsSkeleton } from '../components/common/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSubjects } from '../hooks/useSubjects'
@@ -10,7 +11,7 @@ const SubjectsPage = () => {
   const { data: subjects, addSubject: handleAddSubject, deleteSubject: handleDeleteSubject, isLoading, error, refetch: reloadData } = useSubjects()
 
   if (isLoading) {
-    return <PageState variant="loading" title={t('loading')} />
+    return <SubjectsSkeleton />
   }
 
   if (error) {

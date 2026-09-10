@@ -7,6 +7,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\StagController;
 use App\Http\Controllers\StagConnectController;
+use App\Http\Controllers\StagAuthController;
 use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\DashboardController;
@@ -61,10 +62,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // STAG Synchronizace
     Route::post('/stag/sync-schedule', [StagController::class, 'syncSchedule']);
+    Route::post('/stag/sync-subjects', [StagController::class, 'syncSubjects']);
+    // DEPRECATED - viz StagAuthController
     Route::post('/user/stag',          [StagConnectController::class, 'connect']);
     Route::delete('/user/stag',        [StagConnectController::class, 'disconnect']);
     Route::get('/user/stag/status',    [StagConnectController::class, 'status']);
     Route::post('/user/stag/resync',   [StagConnectController::class, 'resync']);
+    Route::get('/user/stag/redirect',  [StagAuthController::class, 'redirect']);
 
     // Moodle Synchronizace
     Route::post('/moodle/sync-requirements', [MoodleController::class, 'syncRequirements']);

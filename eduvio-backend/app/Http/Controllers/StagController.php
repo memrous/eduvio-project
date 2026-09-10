@@ -91,4 +91,53 @@ class StagController extends Controller
             'message' => "Sync successful. {$importedCount} new schedule events were created.",
         ], 200);
     }
+
+    /**
+     * POST /api/stag/sync-subjects
+     * Přijme pole předmětů a synchronizuje je (updateOrCreate).
+     */
+    public function syncSubjects(Request $request)
+    {
+        $request->validate([
+            '*.code'           => 'required|string|max:255',
+            '*.name'           => 'required|string|max:255',
+            '*.credits'        => 'required|integer',
+            '*.semester'       => 'required|string|max:255',
+            '*.completionType' => 'nullable|string|max:255',
+            '*.isMandatory'    => 'nullable|boolean',
+            '*.lecturer'       => 'nullable|string|max:255',
+        ]);
+
+        $user = $request->user();
+        $processedCount = 0;
+
+        DB::transaction(function () use ($request, $user, &$processedCount) {
+            foreach ($request->all() as $item) {
+                $subject = Subject::firstOrNew(
+                    [
+                        'user_id' => $user->id,
+                        'code'    => $item['code'],
+                    ],
+                    [
+                        'description' => 'Imported from IS/STAG',
+                    ]
+                );
+
+                $subject->name            = $item['name'];
+                $subject->credits         = $item['credits'];
+                $subject->semester        = $item['semester'];
+                $subject->completion_type = $item['completionType'] ?? 'Credit';
+                $subject->is_mandatory    = $item['isMandatory'] ?? true;
+                $subject->lecturer        = $item['lecturer'] ?? 'Nespecifikováno';
+
+                $subject->save();
+                $processedCount++;
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => "Sync successful. {$processedCount} subjects processed.",
+        ], 200);
+    }
 }

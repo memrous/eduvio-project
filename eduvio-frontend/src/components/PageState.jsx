@@ -35,7 +35,7 @@ const PageState = ({ variant = 'loading', title, description, actionLabel, onAct
           <button
             type="button"
             onClick={onAction}
-            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary text-on-primary text-label-md font-semibold hover:bg-primary-container transition-colors"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary text-on-primary text-label-md font-semibold hover:bg-primary-container transition-colors cursor-pointer"
           >
             {actionLabel}
           </button>

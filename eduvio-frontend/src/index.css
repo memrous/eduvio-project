@@ -268,3 +268,9 @@
     transform: scale(1);
   }
 }
+
+html, body, #root {
+  background-color: var(--color-background);
+  color: var(--color-on-background);
+  min-height: 100%;
+}

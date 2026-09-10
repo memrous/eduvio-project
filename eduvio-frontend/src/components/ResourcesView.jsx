@@ -6,22 +6,22 @@ import {
   Download,
   ExternalLink,
   Eye,
-  ChevronDown,
   Search,
   Plus,
   X,
-  Check,
   Pin,
   Users,
   GraduationCap,
   CalendarDays,
   File,
+  SlidersHorizontal,
 } from "lucide-react"
 import pdfIcon from '../assets/icons/pdf.png'
 import bookIcon from '../assets/icons/book.png'
 import imageIcon from '../assets/icons/image.png'
 import fileIcon from '../assets/icons/file.png'
 import folderIcon from '../assets/icons/folder.png'
+import Dropdown from './common/Dropdown'
 import CustomIcon from './CustomIcon'
 import { getSubjectColor } from '../utils/subjectColors'
 import { getLocaleFromLanguage } from '../utils/locale'
@@ -628,45 +628,6 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
   )
 }
 
-const Dropdown = ({ label, icon: Icon, options, value, onChange }) => {
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
-  useEffect(() => {
-    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [])
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 px-3.5 py-2 bg-surface border border-outline-variant rounded-xl text-sm font-medium text-on-surface hover:border-primary/40 transition-colors cursor-pointer"
-      >
-        {Icon && <Icon className="w-3.5 h-3.5 text-on-surface-variant" />}
-        {label}
-        <ChevronDown className={`w-3.5 h-3.5 text-on-surface-variant transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-      {open && (
-        <div className="absolute right-0 top-[calc(100%+6px)] z-30 bg-surface border border-outline-variant rounded-xl shadow-lg min-w-[160px] py-1 overflow-hidden">
-          {options.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => { onChange(opt.value); setOpen(false) }}
-              className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer flex items-center justify-between gap-2 ${
-                value === opt.value ? 'text-primary bg-primary/10' : 'text-on-surface hover:bg-surface-container-low'
-              }`}
-            >
-              {opt.label}
-              {value === opt.value && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ─── Main ResourcesView Component ────────────────────────────
 const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
   const { t, i18n } = useTranslation(['resources', 'dashboard'])
@@ -809,7 +770,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
     <>
       <div className="w-full flex flex-col gap-8 font-inter pb-16">
         {/* Page Header */}
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-4 page-section">
           <div className="min-w-0">
             <h1 className="text-3xl font-bold tracking-tight text-on-surface">{t('resources:library.title')}</h1>
             <p className="mt-1.5 text-sm text-on-surface-variant">{t('resources:library.subtitle')}</p>
@@ -829,7 +790,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
         </div>
 
         {/* Filters Row */}
-        <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface p-3 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface p-3 sm:flex-row sm:items-center page-section">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant" />
             <input
@@ -840,8 +801,8 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
               className="w-full rounded-xl border border-outline-variant bg-surface-container-low py-2.5 pl-10 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant/70 outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
             />
           </div>
-          <Dropdown label={subjectLabel} icon={null} options={SUBJECT_OPTIONS} value={subjectFilter} onChange={setSubjectFilter} />
-          <Dropdown label={typeLabel}    icon={null} options={TYPE_OPTIONS}    value={typeFilter}    onChange={setTypeFilter} />
+          <Dropdown label={subjectLabel} icon={SlidersHorizontal} options={SUBJECT_OPTIONS} value={subjectFilter} onChange={setSubjectFilter} />
+          <Dropdown label={typeLabel}    icon={SlidersHorizontal} options={TYPE_OPTIONS}    value={typeFilter}    onChange={setTypeFilter} />
         </div>
 
         {/* Two Columns Grid */}
@@ -993,7 +954,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
           {/* RIGHT COLUMN: Pinned Semestrální materiály */}
           <aside
             aria-label={t('resources:library.semesterMaterials')}
-            className="rounded-2xl border border-primary/25 bg-primary/[0.06] p-5 lg:sticky lg:top-8"
+            className="rounded-2xl border border-primary/25 bg-primary/[0.06] p-5 lg:sticky lg:top-8 page-section"
           >
             <div className="mb-3 flex items-center gap-2">
               <Pin className="size-4 text-primary" />

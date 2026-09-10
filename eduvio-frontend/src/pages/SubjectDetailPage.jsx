@@ -1,3 +1,4 @@
+import { SubjectDetailSkeleton } from '../components/common/Skeleton'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSubjectDetail } from '../hooks/useSubjectDetail'
@@ -26,7 +27,7 @@ const SubjectDetailPage = () => {
   const isLoading = subjectLoading || requirementsLoading || resourcesLoading
 
   if (isLoading) {
-    return <PageState variant="loading" title={t('loading')} />
+    return <SubjectDetailSkeleton />
   }
 
   // If the subject ID is invalid, redirect back to subjects list

@@ -145,7 +145,7 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
             <button
               type="button"
               onClick={() => onOpenMaterials?.(nextClass)}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 cursor-pointer"
             >
               <FileText className="size-4" aria-hidden="true" />
               {t('nextUp.openMaterials')}
@@ -153,7 +153,7 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
             <button
               type="button"
               onClick={() => onAddToCalendar?.(nextClass)}
-              className="inline-flex items-center gap-2 rounded-xl border border-midnight-foreground/20 px-4 py-2.5 text-sm font-medium text-midnight-foreground/90 transition-colors hover:bg-midnight-foreground/10"
+              className="inline-flex items-center gap-2 rounded-xl border border-midnight-foreground/20 px-4 py-2.5 text-sm font-medium text-midnight-foreground/90 transition-colors hover:bg-midnight-foreground/10 cursor-pointer"
             >
               <CalendarPlus className="size-4" aria-hidden="true" />
               {t('nextUp.addToCalendar')}

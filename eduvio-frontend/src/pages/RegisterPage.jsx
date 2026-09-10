@@ -26,6 +26,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useAuth } from '../context/AuthContext'
 import httpClient from '../services/httpClient'
 import { checkAvailability } from '../services/api'
+import logoImg from '../assets/images/logo.png'
 
 
 const FEATURES = [
@@ -371,9 +372,11 @@ const RegisterPage = () => {
           style={{ background: 'radial-gradient(circle, #a78bfa, transparent 70%)' }} />
 
         <div className="flex items-center gap-3 relative z-10">
-          <div className="w-10 h-10 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl flex items-center justify-center">
-            <GraduationCap className="w-5 h-5 text-white" />
-          </div>
+          <img
+            src={logoImg}
+            alt="Eduvio"
+            className="w-10 h-10 object-contain"
+          />
           <span className="font-geist font-bold text-xl text-white tracking-tight">Eduvio</span>
         </div>
 
@@ -409,9 +412,11 @@ const RegisterPage = () => {
         <div className="w-full max-w-[400px] flex flex-col gap-7">
           {/* Mobile logo */}
           <div className="flex lg:hidden items-center gap-3">
-            <div className="w-9 h-9 bg-[#004ac6] rounded-xl flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </div>
+            <img
+              src={logoImg}
+              alt="Eduvio"
+              className="w-9 h-9 object-contain"
+            />
             <span className="font-geist font-bold text-xl text-gray-900 tracking-tight">Eduvio</span>
           </div>
 

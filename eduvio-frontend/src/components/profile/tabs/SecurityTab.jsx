@@ -8,7 +8,7 @@ const SecurityTab = () => {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 hidden">
       <div className="rounded-2xl border border-outline-variant bg-surface p-6 space-y-6 shadow-ambient">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">

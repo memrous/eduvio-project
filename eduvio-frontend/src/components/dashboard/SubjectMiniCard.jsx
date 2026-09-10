@@ -31,7 +31,7 @@ const SubjectMiniCard = ({ subject, onSelect }) => {
     <button
       type="button"
       onClick={() => onSelect?.(subject)}
-      className="group flex flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-3 text-left shadow-ambient transition-colors hover:border-primary/40 hover:bg-surface-container/40"
+      className="group flex flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-3 text-left shadow-ambient transition-colors hover:border-primary/40 hover:bg-surface-container/40 cursor-pointer"
     >
       {/* Top row: code pill + score badge */}
       <div className="flex items-center justify-between gap-2">

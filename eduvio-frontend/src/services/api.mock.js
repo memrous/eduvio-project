@@ -197,6 +197,18 @@ export const getUser = async (token) => {
   return success({ user: sanitizeUser(found) })
 }
 
+export const getStagRedirectUrl = async () => {
+  await delay(300)
+  const currentUser = getCurrentMockUser()
+  if (!currentUser) {
+    return failure('unauthorized')
+  }
+
+  return success({
+    redirect_url: 'https://stag-ws.upol.cz/ws/login?mock=true',
+  })
+}
+
 export const connectStag = async (payload) => {
   await delay(400)
 

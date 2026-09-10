@@ -1,7 +1,7 @@
 {
   "dashboardPage": {
     "greeting": "Good morning, {{name}}!",
-    "todayDeadlines": "You have <strong>{{count}} deadlines</strong> today. Time to dive in!",
+    "todayDeadlines": "You have <strong>{{count}} events</strong> today. Time to dive in!",
     "todayDeadlinesMobile": "You have {{count}} deadlines approaching today.",
     "mySubjects": "My Enrolled Subjects",
     "viewAll": "View All",
@@ -14,7 +14,13 @@
     "noData": "No data",
     "noDataDescription": "No subjects, events, or resources are available yet.",
     "errorDescription": "Please try reloading the page.",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "greetingMorning": "Good morning, {{name}}!",
+    "greetingAfternoon": "Good afternoon, {{name}}!",
+    "greetingEvening": "Good evening, {{name}}!",
+    "todayDeadlines_zero": "You have no events today.",
+    "todayDeadlines_one": "You have <strong>{{count}} event</strong> today. Time to dive in!",
+    "todayDeadlines_other": "You have <strong>{{count}} events</strong> today. Time to dive in!"
   },
   "stats": {
     "activeSubjects": "Active Subjects",

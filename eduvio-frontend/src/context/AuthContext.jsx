@@ -32,11 +32,27 @@ const getAuthErrorMessage = (error) => {
   }
 }
 
+const getInitialSession = () => {
+  try {
+    const authDataStr = localStorage.getItem(LS_AUTH)
+    if (!authDataStr) return { user: null, token: null }
+    const { token, user: cachedUser } = JSON.parse(authDataStr)
+    if (token) {
+      setAuthToken(token)
+      return { user: cachedUser || null, token }
+    }
+  } catch {
+    // ignore
+  }
+  return { user: null, token: null }
+}
+
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate()
 
-  const [user, setUser] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [initialSession] = useState(getInitialSession)
+  const [user, setUser] = useState(initialSession.user)
+  const [isLoading, setIsLoading] = useState(false)
 
   const clearSession = useCallback(() => {
     localStorage.removeItem(LS_AUTH)

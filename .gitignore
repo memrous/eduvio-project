@@ -20,3 +20,6 @@ studyhub-backend/bootstrap/cache/*
 Thumbs.db
 .vscode/
 *.code-workspace
+# Python cache
+__pycache__/
+*.py[cod]

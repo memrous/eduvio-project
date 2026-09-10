@@ -14,7 +14,14 @@
     "noData": "Žádná data",
     "noDataDescription": "Zatím nejsou k dispozici žádné předměty, události ani materiály.",
     "errorDescription": "Zkuste stránku znovu načíst.",
-    "tryAgain": "Zkusit znovu"
+    "tryAgain": "Zkusit znovu",
+    "greetingMorning": "Dobré ráno, {{name}}!",
+    "greetingAfternoon": "Dobré odpoledne, {{name}}!",
+    "greetingEvening": "Dobrý večer, {{name}}!",
+    "todayDeadlines_zero": "Dnes nemáte žádné termíny.",
+    "todayDeadlines_one": "Na dnešek máte <strong>{{count}} termín</strong>. Jdeme na to!",
+    "todayDeadlines_few": "Na dnešek máte <strong>{{count}} termíny</strong>. Jdeme na to!",
+    "todayDeadlines_other": "Na dnešek máte <strong>{{count}} termínů</strong>. Jdeme na to!"
   },
   "stats": {
     "activeSubjects": "Aktivní předměty",
@@ -113,7 +120,7 @@
     "viewDetail": "Zobrazit detail",
     "noAlerts": "Vše je v pořádku, nic nevyžaduje pozornost.",
     "allDone": "Vše hotovo!"
-},
+  },
   "nextUp": {
     "title": "Právě přichází",
     "startsIn": "Začíná za {{minutes}} minut",

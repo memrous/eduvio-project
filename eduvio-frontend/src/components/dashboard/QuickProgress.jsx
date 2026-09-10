@@ -1,3 +1,4 @@
+import ProgressBar from '../common/ProgressBar'
 import { GraduationCap, TrendingUp } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -38,23 +39,20 @@ const QuickProgress = ({ progress }) => {
         </span>
       </div>
 
-      <div
+      <ProgressBar
+        value={creditPercentage}
         className="mt-2 h-4 w-full overflow-hidden rounded-full bg-surface-container"
+        barClassName="flex h-full items-center justify-end rounded-full bg-primary pr-2"
         role="progressbar"
         aria-valuenow={creditsGained}
         aria-valuemin={0}
         aria-valuemax={creditsTotal}
         aria-label={t('quickProgress.creditsThisSemester')}
       >
-        <div
-          className="flex h-full items-center justify-end rounded-full bg-primary pr-2 transition-all duration-500 ease-out"
-          style={{ width: `${creditPercentage}%` }}
-        >
-          {creditPercentage > 0 && (
-            <span className="text-[10px] font-bold text-primary-foreground">{creditPercentage}%</span>
-          )}
-        </div>
-      </div>
+        {creditPercentage > 0 && (
+          <span className="text-[10px] font-bold text-primary-foreground">{creditPercentage}%</span>
+        )}
+      </ProgressBar>
 
       {/* Stats Boxes */}
       <div className="mt-5 grid grid-cols-2 gap-3">

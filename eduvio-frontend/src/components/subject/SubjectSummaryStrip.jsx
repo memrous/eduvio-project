@@ -1,3 +1,4 @@
+import ProgressBar from '../common/ProgressBar'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Percent, Award, CheckCircle2, AlertCircle } from 'lucide-react'
@@ -172,12 +173,11 @@ const SubjectSummaryStrip = ({ subject, requirements = [] }) => {
 
         {/* Dynamic Mini Progress Bar */}
         {hasPoints && (
-          <div className="mt-3.5 h-2 w-full overflow-hidden rounded-full bg-surface-container">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${tier.barClass}`}
-              style={{ width: `${Math.min(100, Math.max(0, percentage))}%` }}
-            />
-          </div>
+          <ProgressBar
+            value={percentage}
+            className="mt-3.5 h-2 w-full overflow-hidden rounded-full bg-surface-container"
+            barClassName={`h-full rounded-full ${tier.barClass}`}
+          />
         )}
       </div>
 

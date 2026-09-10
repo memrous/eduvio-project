@@ -1,3 +1,4 @@
+import ProgressBar from '../common/ProgressBar'
 ﻿// MOCK: vizuální placeholder, zatím bez API napojení
 
 const ProfileProgressCard = () => {
@@ -15,9 +16,11 @@ const ProfileProgressCard = () => {
           <span>Celkový postup</span>
           <span>62 %</span>
         </div>
-        <div className="w-full bg-surface rounded-full h-2.5 overflow-hidden border border-outline-variant/30">
-          <div className="bg-primary h-2.5 rounded-full transition-all duration-300" style={{ width: '62%' }} />
-        </div>
+        <ProgressBar
+          value={62}
+          className="w-full bg-surface rounded-full h-2.5 overflow-hidden border border-outline-variant/30"
+          barClassName="bg-primary h-2.5 rounded-full"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3 pt-2 border-t border-outline-variant">

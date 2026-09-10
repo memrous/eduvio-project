@@ -1,3 +1,5 @@
+import ProgressBar from './common/ProgressBar'
+import { ProfileSkeleton } from './common/Skeleton'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -33,7 +35,10 @@ const Profile = ({ user: initialUser }) => {
   const toast = useToast()
   const [user, setUser] = useState(initialUser ?? null)
   const [isFetching] = useState(!initialUser)
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('stag') ? 'account' : 'overview'
+  })
   const [copied, setCopied] = useState(false)
 
   // Mock switches for overview tab
@@ -61,6 +66,28 @@ const Profile = ({ user: initialUser }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const stag = params.get('stag')
+    const reason = params.get('reason')
+
+    if (!stag) return
+
+    if (stag === 'connected') {
+      toast.success(t('stag.syncing.background'))
+    } else if (stag === 'error') {
+      const errorMessages = {
+        state_invalid: 'Platnost přihlašovací relace vypršela. Zkuste to prosím znovu.',
+        cancelled: 'Přihlášení ke STAGu bylo zrušeno.',
+        no_student_role: 'K tomuto STAG účtu nebyla nalezena role studenta.',
+        unexpected: t('toast.connectFailed'),
+      }
+      toast.error(errorMessages[reason] || t('toast.connectFailed'))
+    }
+
+    navigate('/profile', { replace: true })
+  }, [navigate, t, toast])
+
   const effectiveUser = user ?? initialUser
   const isStagConnected = Boolean(effectiveUser?.stag_student_id)
   const isMoodleConnected = Boolean(effectiveUser?.moodle_username)
@@ -73,7 +100,7 @@ const Profile = ({ user: initialUser }) => {
   }
 
   if (isFetching && !effectiveUser) {
-    return <div className="p-12 text-center text-on-surface-variant font-semibold">{t('loading')}</div>
+    return <ProfileSkeleton />
   }
 
   if (!effectiveUser) {
@@ -101,7 +128,7 @@ const Profile = ({ user: initialUser }) => {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 lg:gap-8 items-start">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 lg:gap-8 items-start">
         {/* ================= LEFT SIDEBAR (Side Cards) ================= */}
         <aside className="flex flex-col gap-5 w-full">
           {/* Card 1: Identity Card */}
@@ -201,9 +228,11 @@ const Profile = ({ user: initialUser }) => {
               <strong className="text-sm font-bold text-success">62 %</strong>
             </div>
 
-            <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-              <div className="h-full bg-success rounded-full w-[62%]" />
-            </div>
+            <ProgressBar
+              value={62}
+              className="w-full h-2 bg-surface-container rounded-full overflow-hidden"
+              barClassName="h-full bg-success rounded-full"
+            />
 
             <div className="flex justify-between text-xs text-on-surface-variant">
               <span>{t('progress.creditsFoot', { current: 74, total: 120, defaultValue: '74 z 120 kreditů' })}</span>
@@ -221,22 +250,13 @@ const Profile = ({ user: initialUser }) => {
               </div>
             </div>
           </section>
-
-          {/* Logout button */}
-          <button
-            type="button"
-            onClick={logout}
-            className="cursor-pointer inline-flex items-center gap-2 text-on-surface-variant hover:text-error text-sm font-medium px-2 py-1 transition-colors self-start"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>{t('sidebar.logout', 'Odhlásit se')}</span>
-          </button>
+    
         </aside>
 
         {/* ================= RIGHT CONTENT COLUMN ================= */}
         <section className="flex flex-col gap-6 w-full min-w-0">
           {/* Header Intro */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-outline-variant/60 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-outline-variant/60 pb-4 page-section">
             <div>
               <span className="block text-xs font-bold tracking-wider text-primary uppercase mb-1">
                 {t('intro.badge', 'NASTAVENÍ ÚČTU')}
@@ -253,7 +273,7 @@ const Profile = ({ user: initialUser }) => {
           </div>
 
           {/* Tabs Navigation Bar */}
-          <nav className="flex items-center gap-2 border-b border-outline-variant/60 pb-3 overflow-x-auto no-scrollbar">
+          <nav className="flex items-center gap-2 border-b border-outline-variant/60 pb-3 overflow-x-auto no-scrollbar page-section">
             {tabs.map((tabItem) => {
               const Icon = tabItem.icon
               const isActive = activeTab === tabItem.id
@@ -345,7 +365,7 @@ const Profile = ({ user: initialUser }) => {
               </section>
 
               {/* Panel 2: Bezpečnost účtu */}
-              <section className="bg-surface border border-outline-variant rounded-2xl p-6 space-y-4 shadow-ambient">
+              {/* <section className="bg-surface border border-outline-variant rounded-2xl p-6 space-y-4 shadow-ambient">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -400,10 +420,10 @@ const Profile = ({ user: initialUser }) => {
                     </button>
                   </div>
                 </div>
-              </section>
+              </section> */}
 
               {/* Panel 3: Univerzitní integrace */}
-              <section className="bg-surface border border-outline-variant rounded-2xl p-6 space-y-4 shadow-ambient">
+              {/* <section className="bg-surface border border-outline-variant rounded-2xl p-6 space-y-4 shadow-ambient">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                     <RefreshCw className="w-4 h-4" />
@@ -474,13 +494,13 @@ const Profile = ({ user: initialUser }) => {
                     </div>
                   </div>
                 </div>
-              </section>
+              </section> */}
             </div>
           )}
 
           {/* TAB 2: ACCOUNT (Osobní údaje + STAG/Moodle cards) */}
           {activeTab === 'account' && (
-            <div className="space-y-6">
+            <div className="space-y-6 page-section">
               <AccountTab effectiveUser={effectiveUser} />
 
               <div className="grid gap-4 lg:grid-cols-2 pt-2">
@@ -506,16 +526,16 @@ const Profile = ({ user: initialUser }) => {
 
           {/* TAB 3: SECURITY */}
           {activeTab === 'security' && (
-            <SecurityTab />
-          )}
+            <div className="page-section"><SecurityTab /></div>
+         )}
 
           {/* TAB 4: NOTIFICATIONS */}
           {activeTab === 'notifications' && (
-            <NotificationsTab />
-          )}
+            <div className="page-section"><NotificationsTab /></div>
+         )}
 
           {/* Bottom Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          {/* <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               type="button"
               className="cursor-pointer inline-flex items-center gap-2 bg-surface-container-low border border-outline-variant text-on-surface hover:bg-surface-container text-xs font-semibold px-4 py-2.5 rounded-xl transition-all"
@@ -530,7 +550,7 @@ const Profile = ({ user: initialUser }) => {
               <CalendarDays className="w-4 h-4" />
               <span>{t('actions.addToCalendar', 'Přidat do kalendáře')}</span>
             </button>
-          </div>
+          </div> */}
 
           <p className="text-center text-xs text-on-surface-variant pt-2">
             {t('footer.help', 'Potřebujete pomoc?')} <button type="button" className="text-primary hover:underline">{t('footer.contactSupport', 'Kontaktujte podporu')}</button> · {t('footer.version', 'Verze 2.4.1')}

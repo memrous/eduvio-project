@@ -1,3 +1,4 @@
+import ProgressBar from './common/ProgressBar'
 import { useMemo } from 'react'
 import { User, BookOpen, AlertTriangle, CheckCircle2, ArrowRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -93,12 +94,11 @@ const SubjectOverviewCard = ({ subject, onSelect }) => {
               {gained} / {max} <span className="text-on-surface-variant">{t('dashboard:subjectOverviewCard.pts')}</span>
             </span>
           </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-container">
-            <div
-              className={`h-full rounded-full transition-all duration-300 ${progressColor}`}
-              style={{ width: `${Math.min(100, Math.max(0, percentage))}%` }}
-            />
-          </div>
+          <ProgressBar
+            value={percentage}
+            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-container"
+            barClassName={`h-full rounded-full ${progressColor}`}
+          />
         </div>
       )}
 

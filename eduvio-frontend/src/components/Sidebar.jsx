@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom'
-import { GraduationCap, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import CustomIcon from './CustomIcon'
+import logoImg from '../assets/images/logo.png'
 
 const NAV_ITEMS = [
   { to: '/dashboard', customIcon: 'dashboard', labelKey: 'sidebar.dashboard' },
@@ -29,9 +30,11 @@ const Sidebar = () => {
       <div className="flex flex-col gap-8">
         {/* Logo & Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-primary-container text-on-primary-container flex items-center justify-center rounded-md">
-            <GraduationCap className="w-5 h-5 text-current" />
-          </div>
+          <img
+            src={logoImg}
+            alt="Eduvio"
+            className="w-9 h-9 object-contain"
+          />
           <span className="font-geist font-bold text-xl tracking-tight text-on-surface">Eduvio</span>
         </div>
 

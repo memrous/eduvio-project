@@ -19,6 +19,13 @@ const getDayDiff = (dateStr) => {
   return Math.round((target - today) / (1000 * 60 * 60 * 24))
 }
 
+const getRequirementDotColor = (isCompleted, diff) => {
+  if (isCompleted) return 'bg-success'
+  if (diff !== null && diff <= 3) return 'bg-error'
+  if (diff !== null && diff > 3 && diff <= 14) return 'bg-warning'
+  return 'bg-outline-variant'
+}
+
 const getItemBadgeStyle = (gained, max, grade) => {
   if (max !== undefined && max !== null && max > 0 && gained !== undefined && gained !== null) {
     const pct = (gained / max) * 100
@@ -70,7 +77,12 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
       </div>
 
       {/* ACTIVITIES LIST */}
-      <div className="flex flex-col gap-3">
+      <div className="relative flex flex-col gap-3 pl-6 sm:pl-8">
+        {/* Timeline vertical line */}
+        <div
+          className="absolute left-[11px] sm:left-[15px] top-5 bottom-5 w-px bg-outline-variant"
+          aria-hidden="true"
+        />
         {requirements.map((req) => {
           const isCompleted = req.isCompleted || req.completed
           const gained = req.gainedPoints ?? req.gained_points
@@ -79,6 +91,7 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
           const hasGrade = !!req.grade
 
           const diff = getDayDiff(req.date || req.due_date)
+          const dotColor = getRequirementDotColor(isCompleted, diff)
 
           let statusEl = null
           if (isCompleted) {
@@ -123,34 +136,39 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
           // CASE 1: CHECKLIST ROW (No points and no grade)
           if (!hasPoints && !hasGrade) {
             return (
-              <div
-                key={req.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-3.5 transition-colors hover:bg-surface-container/30"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="shrink-0 text-primary">
-                    {isCompleted ? (
-                      <CheckSquare className="size-5 text-success" />
-                    ) : (
-                      <Square className="size-5 text-on-surface-variant/60" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="rounded bg-surface-container px-1.5 py-0.5 text-[10px] font-bold uppercase text-on-surface-variant">
-                        {reqTypeName}
-                      </span>
-                      <h4
-                        className={`truncate text-sm font-medium ${
-                          isCompleted ? 'line-through text-on-surface-variant' : 'text-foreground'
-                        }`}
-                      >
-                        {req.title}
-                      </h4>
+              <div key={req.id} className="relative">
+                <div
+                  className={`absolute -left-6 sm:-left-8 top-4 size-2.5 rounded-full ring-2 ring-surface ${dotColor}`}
+                  aria-hidden="true"
+                />
+                <div
+                  className="flex items-center justify-between gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-3.5 transition-colors hover:bg-surface-container/30"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="shrink-0 text-primary">
+                      {isCompleted ? (
+                        <CheckSquare className="size-5 text-success" />
+                      ) : (
+                        <Square className="size-5 text-on-surface-variant/60" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded bg-surface-container px-1.5 py-0.5 text-[10px] font-bold uppercase text-on-surface-variant">
+                          {reqTypeName}
+                        </span>
+                        <h4
+                          className={`truncate text-sm font-medium ${
+                            isCompleted ? 'line-through text-on-surface-variant' : 'text-foreground'
+                          }`}
+                        >
+                          {req.title}
+                        </h4>
+                      </div>
                     </div>
                   </div>
+                  <div className="shrink-0">{statusEl}</div>
                 </div>
-                <div className="shrink-0">{statusEl}</div>
               </div>
             )
           }
@@ -159,64 +177,69 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
           const badgeStyle = getItemBadgeStyle(gained, max, req.grade)
 
           return (
-            <div
-              key={req.id}
-              className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 transition-all hover:border-primary/30"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="rounded-md bg-surface-container px-2 py-0.5 text-[11px] font-bold uppercase text-on-surface-variant">
-                    {reqTypeName}
-                  </span>
-                  {req.weight !== undefined && req.weight !== null && (
-                    <span className="text-[11px] font-semibold text-on-surface-variant">
-                      {t('academic:subjectDetail.requirements.weight', { weight: req.weight })}
+            <div key={req.id} className="relative">
+              <div
+                className={`absolute -left-6 sm:-left-8 top-5 size-2.5 rounded-full ring-2 ring-surface ${dotColor}`}
+                aria-hidden="true"
+              />
+              <div
+                className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 transition-all hover:border-primary/30"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="rounded-md bg-surface-container px-2 py-0.5 text-[11px] font-bold uppercase text-on-surface-variant">
+                      {reqTypeName}
                     </span>
-                  )}
+                    {req.weight !== undefined && req.weight !== null && (
+                      <span className="text-[11px] font-semibold text-on-surface-variant">
+                        {t('academic:subjectDetail.requirements.weight', { weight: req.weight })}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    {hasPoints ? (
+                      <span className={`inline-flex font-mono text-xs ${badgeStyle}`}>
+                        {gained !== null && gained !== undefined
+                          ? gained
+                          : t('academic:subjectDetail.requirements.noPts')}{' '}
+                        / {max} PTS
+                      </span>
+                    ) : hasGrade ? (
+                      <span className={`inline-flex font-mono text-xs ${badgeStyle}`}>
+                        {t('academic:subjectDetail.moodleSection.gradeLabel', { grade: formatAcademicGrade(req.grade) })}
+                      </span>
+                    ) : null}
+                    {statusEl && <div className="mt-1 flex justify-end">{statusEl}</div>}
+                  </div>
                 </div>
 
-                <div className="text-right shrink-0">
-                  {hasPoints ? (
-                    <span className={`inline-flex font-mono text-xs ${badgeStyle}`}>
-                      {gained !== null && gained !== undefined
-                        ? gained
-                        : t('academic:subjectDetail.requirements.noPts')}{' '}
-                      / {max} PTS
-                    </span>
-                  ) : hasGrade ? (
-                    <span className={`inline-flex font-mono text-xs ${badgeStyle}`}>
-                      {t('academic:subjectDetail.moodleSection.gradeLabel', { grade: formatAcademicGrade(req.grade) })}
-                    </span>
-                  ) : null}
-                  {statusEl && <div className="mt-1 flex justify-end">{statusEl}</div>}
-                </div>
+                <h4 className="text-sm font-semibold leading-snug text-foreground">{req.title}</h4>
+
+                {req.description && (
+                  <p className="text-xs text-on-surface-variant leading-relaxed">{req.description}</p>
+                )}
+
+                {linkedMaterials.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-outline-variant">
+                    {linkedMaterials.map((mat) => {
+                      const isLink = mat.type === 'LINK' || mat.url?.startsWith('http')
+                      return (
+                        <a
+                          key={mat.id}
+                          href={mat.url || '#'}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-outline-variant px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant transition-colors hover:bg-surface-container"
+                        >
+                          {isLink ? <LinkIcon className="size-3" /> : <Download className="size-3" />}
+                          {mat.title}
+                        </a>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
-
-              <h4 className="text-sm font-semibold leading-snug text-foreground">{req.title}</h4>
-
-              {req.description && (
-                <p className="text-xs text-on-surface-variant leading-relaxed">{req.description}</p>
-              )}
-
-              {linkedMaterials.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-2 border-t border-outline-variant">
-                  {linkedMaterials.map((mat) => {
-                    const isLink = mat.type === 'LINK' || mat.url?.startsWith('http')
-                    return (
-                      <a
-                        key={mat.id}
-                        href={mat.url || '#'}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-md border border-outline-variant px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant transition-colors hover:bg-surface-container"
-                      >
-                        {isLink ? <LinkIcon className="size-3" /> : <Download className="size-3" />}
-                        {mat.title}
-                      </a>
-                    )
-                  })}
-                </div>
-              )}
             </div>
           )
         })}

@@ -105,6 +105,10 @@ export const getUser = async () => {
   return request(() => httpClient.get('/user').then((res) => res.data))
 }
 
+export const getStagRedirectUrl = async () => {
+  return request(() => httpClient.get('/user/stag/redirect').then((res) => res.data))
+}
+
 export const connectStag = async (payload) => {
   return request(() => httpClient.post('/user/stag', payload).then((res) => res.data))
 }

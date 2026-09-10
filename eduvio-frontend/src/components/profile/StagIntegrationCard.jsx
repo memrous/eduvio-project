@@ -6,17 +6,10 @@ import {
   ShieldCheck,
   Unlink2,
   Link2,
-  KeyRound,
   LayoutGrid,
   RefreshCw,
 } from 'lucide-react'
 import * as api from '../../services/api'
-
-const emptyStagForm = {
-  stagStudentId: '',
-  stagUsername: '',
-  stagPassword: '',
-}
 
 const StagIntegrationCard = ({
   effectiveUser,
@@ -27,10 +20,7 @@ const StagIntegrationCard = ({
   onUserUpdate,
 }) => {
   const { t } = useTranslation('profile')
-  const [showStagForm, setShowStagForm] = useState(false)
-  const [stagForm, setStagForm] = useState(emptyStagForm)
-  const [stagErrors, setStagErrors] = useState({})
-  const [stagSubmitting, setStagSubmitting] = useState(false)
+  const [stagRedirecting, setStagRedirecting] = useState(false)
   const [disconnecting, setDisconnecting] = useState(false)
   const [resyncLoading, setResyncLoading] = useState(false)
   const [syncStatus, setSyncStatus] = useState(effectiveUser?.stag_sync_status ?? null)
@@ -130,30 +120,6 @@ const StagIntegrationCard = ({
     return () => clearInterval(interval)
   }, [nextAllowedAt])
 
-  const handleStagInput = (field) => (event) => {
-    const { value } = event.target
-    setStagForm((prev) => ({ ...prev, [field]: value }))
-    setStagErrors((prev) => ({ ...prev, [field]: '' }))
-  }
-
-  const validateStagForm = () => {
-    const errors = {}
-
-    if (!stagForm.stagStudentId.trim()) {
-      errors.stagStudentId = t('validation.studentIdRequired')
-    }
-
-    if (!stagForm.stagUsername.trim()) {
-      errors.stagUsername = t('validation.usernameRequired')
-    }
-
-    if (!stagForm.stagPassword.trim()) {
-      errors.stagPassword = t('validation.passwordRequired')
-    }
-
-    return errors
-  }
-
   const syncUser = async () => {
     const refreshedUser = await refreshUser()
     if (refreshedUser) {
@@ -163,41 +129,19 @@ const StagIntegrationCard = ({
     return refreshedUser
   }
 
-  const handleStagSubmit = async (event) => {
-    event.preventDefault()
-
-    const errors = validateStagForm()
-    if (Object.keys(errors).length) {
-      setStagErrors(errors)
-      return
-    }
-
-    setStagSubmitting(true)
+  const handleStagConnect = async () => {
+    setStagRedirecting(true)
     try {
-      const response = await api.connectStag({
-        stag_student_id: stagForm.stagStudentId.trim(),
-        stag_username: stagForm.stagUsername.trim(),
-        stag_password: stagForm.stagPassword,
-      })
-
-      if (response.status === 'error') {
+      const response = await api.getStagRedirectUrl()
+      if (response.status === 'error' || !response.data?.redirect_url) {
         toast.error(t('toast.connectFailed'))
+        setStagRedirecting(false)
         return
       }
-
-      const updatedUser = response.data?.user || (await syncUser())
-      if (updatedUser && onUserUpdate) {
-        onUserUpdate(updatedUser)
-      }
-      setShowStagForm(false)
-      setStagForm(emptyStagForm)
-      setStagErrors({})
-      setSyncStatus('pending')
-      toast.success(t('stag.syncing.background'))
+      window.location.href = response.data.redirect_url
     } catch {
       toast.error(t('toast.connectFailed'))
-    } finally {
-      setStagSubmitting(false)
+      setStagRedirecting(false)
     }
   }
 
@@ -215,9 +159,6 @@ const StagIntegrationCard = ({
       if (updatedUser && onUserUpdate) {
         onUserUpdate(updatedUser)
       }
-      setShowStagForm(false)
-      setStagForm(emptyStagForm)
-      setStagErrors({})
       setSyncStatus(null)
       setNextAllowedAt(null)
       toast.success(t('toast.disconnectSuccess'))
@@ -319,93 +260,15 @@ const StagIntegrationCard = ({
               {t('stag.card.helper')}
             </p>
 
-            {!showStagForm ? (
-              <button
-                type="button"
-                onClick={() => setShowStagForm(true)}
-                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container"
-              >
-                <Link2 className="h-4 w-4" />
-                {t('stag.actions.connect')}
-              </button>
-            ) : (
-              <form onSubmit={handleStagSubmit} className="space-y-4 rounded-xl border border-outline-variant bg-surface p-4 shadow-sm">
-                <div className="grid gap-3">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-semibold text-on-surface" htmlFor="profile-stag-student-id">
-                      {t('stag.labels.studentId')}
-                    </label>
-                    <input
-                      id="profile-stag-student-id"
-                      type="text"
-                      value={stagForm.stagStudentId}
-                      onChange={handleStagInput('stagStudentId')}
-                      className={`w-full rounded-lg border px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 ${stagErrors.stagStudentId ? 'border-error bg-error-container' : 'border-outline-variant bg-surface'}`}
-                    />
-                    {stagErrors.stagStudentId && (
-                      <p className="text-xs text-error">{stagErrors.stagStudentId}</p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-semibold text-on-surface" htmlFor="profile-stag-username">
-                      {t('stag.labels.username')}
-                    </label>
-                    <input
-                      id="profile-stag-username"
-                      type="text"
-                      value={stagForm.stagUsername}
-                      onChange={handleStagInput('stagUsername')}
-                      className={`w-full rounded-lg border px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 ${stagErrors.stagUsername ? 'border-error bg-error-container' : 'border-outline-variant bg-surface'}`}
-                    />
-                    {stagErrors.stagUsername && (
-                      <p className="text-xs text-error">{stagErrors.stagUsername}</p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-semibold text-on-surface" htmlFor="profile-stag-password">
-                      {t('stag.labels.password')}
-                    </label>
-                    <div className="relative">
-                      <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
-                      <input
-                        id="profile-stag-password"
-                        type="password"
-                        value={stagForm.stagPassword}
-                        onChange={handleStagInput('stagPassword')}
-                        className={`w-full rounded-lg border px-4 py-2.5 pl-10 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 ${stagErrors.stagPassword ? 'border-error bg-error-container' : 'border-outline-variant bg-surface'}`}
-                      />
-                    </div>
-                    {stagErrors.stagPassword && (
-                      <p className="text-xs text-error">{stagErrors.stagPassword}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="submit"
-                    disabled={stagSubmitting}
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {stagSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
-                    {t('stag.actions.connect')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowStagForm(false)
-                      setStagForm(emptyStagForm)
-                      setStagErrors({})
-                    }}
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant px-4 py-2.5 text-sm font-semibold text-on-surface hover:bg-surface-container-low"
-                  >
-                    {t('profile:stag.actions.cancel')}
-                  </button>
-                </div>
-              </form>
-            )}
+            <button
+              type="button"
+              onClick={handleStagConnect}
+              disabled={stagRedirecting}
+              className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {stagRedirecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+              {t('stag.actions.connect')}
+            </button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -416,11 +279,7 @@ const StagIntegrationCard = ({
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-success">{t('stag.labels.username')}</p>
-                <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_username || 'N/A'}</p>
-              </div>
-              <div className="sm:col-span-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-success">{t('stag.labels.password')}</p>
-                <p className="mt-1 text-sm font-semibold tracking-[0.25em] text-on-surface">••••••••</p>
+                <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_user_name || effectiveUser.stag_username || 'N/A'}</p>
               </div>
             </div>
 
