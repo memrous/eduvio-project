@@ -50,7 +50,7 @@ class MoodleSyncJob implements ShouldQueue
             $process = new Process(
                 command: ['python3', $scriptPath],
                 env: [
-                    'LARAVEL_API_URL' => env('MOODLE_CALLBACK_URL', env('STAG_CALLBACK_URL', config('app.url'))) . '/api',
+                    'LARAVEL_API_URL' => env('LARAVEL_INTERNAL_URL', 'http://laravel.test') . '/api',
                     'BEARER_TOKEN'    => $plainToken,
                     'MOODLE_URL'      => config('moodle.base_url'),
                     'MOODLE_USERNAME' => $this->user->moodle_username,

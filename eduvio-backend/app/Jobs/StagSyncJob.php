@@ -59,7 +59,7 @@ class StagSyncJob implements ShouldQueue
             $process = new Process(
                 command: ['python3', $scriptPath],
                 env: [
-                    'LARAVEL_API_URL'  => env('STAG_CALLBACK_URL', config('app.url')) . '/api',
+                    'LARAVEL_API_URL'  => env('LARAVEL_INTERNAL_URL', 'http://laravel.test') . '/api',
                     'BEARER_TOKEN'     => $plainToken,
                     'STAG_TICKET'      => $this->user->stag_ticket,
                     'STAG_USER'        => $this->user->stag_user_name,
