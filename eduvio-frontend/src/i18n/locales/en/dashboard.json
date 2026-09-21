@@ -39,6 +39,7 @@
     "next": "Next →",
     "openSubjectHub": "Open Subject Hub",
     "room": "Room {{room}}",
+    "roomLabel": "Room",
     "fallbacks": {
       "subjectCode": "GEN 101",
       "room201": "Room 201",
@@ -105,7 +106,10 @@
     "semester": {
       "winter": "Winter Semester",
       "summer": "Summer Semester"
-    }
+    },
+    "statutA": "Mandatory",
+    "statutB": "Compulsory Elective",
+    "statutC": "Elective"
   },
   "needsAttention": {
     "title": "Needs Attention",

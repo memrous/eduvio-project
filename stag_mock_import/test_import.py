@@ -59,8 +59,10 @@ def transformuj_predmety_pro_laravel(surova_data: list, semestr: str) -> list:
             "code": item["zkratka"],
             "name": item["nazev"],
             "credits": item.get("kredity", 0),
+            "department": item.get("katedra"),
             "semester": f"{semestr} {item.get('rok', '')}".strip(),
             "completionType": "Credit",
+            "statut": item.get("statut"),
             "isMandatory": item.get("statut") == "A",
             "lecturer": "Nespecifikováno"
         })
@@ -184,9 +186,11 @@ def transformuj_rozvrh_pro_laravel(surova_data: list, subjects_by_code: dict, se
                     "code": kod,
                     "name": nazev,
                     "credits": subjects_by_code.get(kod, 0),
+                    "department": akce.get("katedra"),
                     "lecturer": teacher or "Nespecifikováno",
                     "semester": semestr_str,
                     "completionType": "Credit",
+                    "statut": akce.get("statut"),
                     "isMandatory": akce.get("statut") == "A"
                 },
                 "event": {

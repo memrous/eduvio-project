@@ -39,7 +39,10 @@
     "filters": {
       "allSubjects": "Všechny předměty",
       "mandatoryOnly": "Pouze povinné",
-      "electiveOnly": "Pouze povin. volitelné"
+      "electiveOnly": "Pouze povin. volitelné",
+      "statutA": "Pouze povinné (A)",
+      "statutB": "Pouze povinně volitelné (B)",
+      "statutC": "Pouze volitelné (C)"
     },
     "sorts": {
       "defaultOrder": "Výchozí pořadí",
@@ -65,6 +68,27 @@
     "actions": {
       "cancel": "Zrušit",
       "saveSubject": "Uložit předmět"
+    },
+    "semesters": {
+      "winter": "Zimní semestr",
+      "summer": "Letní semestr",
+      "activeBadge": "Aktuální",
+      "subjectsCount_one": "{{count}} předmět",
+      "subjectsCount_few": "{{count}} předměty",
+      "subjectsCount_other": "{{count}} předmětů",
+      "creditsCount_one": "{{count}} kredit",
+      "creditsCount_few": "{{count}} kredity",
+      "creditsCount_other": "{{count}} kreditů",
+      "emptyWinter": "V zimním semestru nemáte žádné předměty.",
+      "emptySummer": "V letním semestru zatím nemáte žádné zapsané předměty.",
+      "emptyFilter": "Žádné předměty v tomto semestru neodpovídají vybranému filtru.",
+      "collapse": "Sbalit sekci",
+      "expand": "Rozbalit sekci"
+    },
+    "statutSections": {
+      "mandatory": "Povinné předměty",
+      "semiElective": "Povinně volitelné předměty",
+      "elective": "Volitelné předměty"
     }
   },
   "subjectDetail": {
@@ -77,6 +101,7 @@
     "creditsEcts": "{{count}} ECTS",
     "lecturerLabel": "Vyučující:",
     "guarantorLabel": "Garant",
+    "departmentLabel": "Katedra",
     "typeLabel": "Typ",
     "completionLabel": "Zakončení",
     "courseDescription": "Popis předmětu",
@@ -93,7 +118,12 @@
     "assignmentsTracked": "{{count}} úkolů sleduje se",
     "noAssignments": "Pro tento předmět nejsou uvedeny žádné úkoly.",
     "deadline": "Termín:",
-    "status": "Stav:",
+    "status": {
+      "inProgress": "V průběhu",
+      "completed": "Splněno",
+      "closed": "Ukončeno",
+      "failed": "Nesplněno"
+    },
     "statusOptions": {
       "notStarted": "Nezahájeno",
       "inProgress": "V průběhu",
@@ -158,19 +188,15 @@
     "infoDialog": {
       "title": "Popis předmětu",
       "close": "Zavřít",
-      "importedFromStag": "Importováno z IS/STAG · Vyučující: {{teacher}}"
+      "importedFromStag": "Importováno z IS/STAG · Vyučující: {{teacher}}",
+      "importedFromStagWithDept": "Importováno z IS/STAG · Katedra: {{department}} · Vyučující: {{teacher}}",
+      "importedFromStagDeptOnly": "Importováno z IS/STAG · Katedra: {{department}}"
     },
     "sections": {
       "moodleHeader": "Průběžné hodnocení",
       "moodleBadge": "Moodle / Průběh",
       "stagHeader": "Výsledek předmětu",
       "stagBadge": "IS/STAG Oficiální"
-    },
-    "status": {
-      "inProgress": "V průběhu",
-      "completed": "Splněno",
-      "closed": "Ukončeno",
-      "failed": "Nesplněno"
     },
     "metrics": {
       "successRate": "Procentuální úspěšnost",

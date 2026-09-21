@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Calendar, Flame, Zap, GraduationCap, BookOpen } from 'lucide-react'
+import { Calendar, Flame, Zap, GraduationCap, BookOpen, MapPin } from 'lucide-react'
+import { formatRoom } from '../../utils/room'
 import { getSubjectStyle } from './useCalendarState'
 
 const getDeadlineIcon = (type) => {
@@ -98,6 +99,12 @@ const QuickOverviewPanel = ({
                     <p className="truncate text-xs text-on-surface-variant">
                       {event.title}
                     </p>
+                    {(event.room || event.location) && (
+                      <p className="flex items-center gap-1 text-[11px] text-on-surface-variant/80 truncate mt-0.5">
+                        <MapPin className="size-3 shrink-0" />
+                        <span className="truncate">{formatRoom(event.room || event.location, { language: 'cs' })}</span>
+                      </p>
+                    )}
                   </div>
                 </div>
               )

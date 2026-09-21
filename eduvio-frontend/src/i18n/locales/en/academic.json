@@ -38,7 +38,10 @@
     "filters": {
       "allSubjects": "All Subjects",
       "mandatoryOnly": "Mandatory Only",
-      "electiveOnly": "Elective Only"
+      "electiveOnly": "Elective Only",
+      "statutA": "Mandatory Only (A)",
+      "statutB": "Compulsory Elective Only (B)",
+      "statutC": "Elective Only (C)"
     },
     "sorts": {
       "defaultOrder": "Default Order",
@@ -64,6 +67,25 @@
     "actions": {
       "cancel": "Cancel",
       "saveSubject": "Save Subject"
+    },
+    "semesters": {
+      "winter": "Winter Semester",
+      "summer": "Summer Semester",
+      "activeBadge": "Current",
+      "subjectsCount_one": "{{count}} subject",
+      "subjectsCount_other": "{{count}} subjects",
+      "creditsCount_one": "{{count}} credit",
+      "creditsCount_other": "{{count}} credits",
+      "emptyWinter": "No subjects in winter semester.",
+      "emptySummer": "No subjects currently enrolled in summer semester.",
+      "emptyFilter": "No subjects in this semester match the selected filter.",
+      "collapse": "Collapse section",
+      "expand": "Expand section"
+    },
+    "statutSections": {
+      "mandatory": "Mandatory Subjects",
+      "semiElective": "Compulsory Elective Subjects",
+      "elective": "Elective Subjects"
     }
   },
   "subjectDetail": {
@@ -75,6 +97,7 @@
     "creditsEcts": "{{count}} ECTS",
     "lecturerLabel": "Lecturer:",
     "guarantorLabel": "Guarantor",
+    "departmentLabel": "Department",
     "typeLabel": "Type",
     "completionLabel": "Completion",
     "courseDescription": "Course Description",
@@ -91,7 +114,12 @@
     "assignmentsTracked": "{{count}} assignments tracked",
     "noAssignments": "No assignments listed for this subject.",
     "deadline": "Deadline:",
-    "status": "Status:",
+    "status": {
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "closed": "Closed",
+      "failed": "Failed"
+    },
     "statusOptions": {
       "notStarted": "Not Started",
       "inProgress": "In Progress",
@@ -103,7 +131,9 @@
     "infoDialog": {
       "title": "Subject description",
       "close": "Close",
-      "importedFromStag": "Imported from IS/STAG · Lecturer: {{teacher}}"
+      "importedFromStag": "Imported from IS/STAG · Lecturer: {{teacher}}",
+      "importedFromStagWithDept": "Imported from IS/STAG · Department: {{department}} · Lecturer: {{teacher}}",
+      "importedFromStagDeptOnly": "Imported from IS/STAG · Department: {{department}}"
     },
     "testsExamsTracked": "{{count}} tests and exams listed",
     "noTestsExams": "No tests or exams scheduled.",
@@ -155,12 +185,6 @@
       "moodleBadge": "Moodle / Progress",
       "stagHeader": "Course Result",
       "stagBadge": "IS/STAG Official"
-    },
-    "status": {
-      "inProgress": "In Progress",
-      "completed": "Completed",
-      "closed": "Closed",
-      "failed": "Failed"
     },
     "metrics": {
       "successRate": "Success Rate",

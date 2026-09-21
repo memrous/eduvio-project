@@ -1,4 +1,6 @@
 import { Paperclip, MapPin, Clock } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { formatRoom } from '../../utils/room'
 
 const AgendaView = ({
   currentWeekDays,
@@ -11,6 +13,7 @@ const AgendaView = ({
   getDeadlineIcon,
   getSubjectStyle,
 }) => {
+  const { i18n } = useTranslation()
   return (
     <div className="w-full flex flex-col gap-4">
       {currentWeekDays.map(day => {
@@ -88,10 +91,15 @@ const AgendaView = ({
                         </div>
 
                         {/* Right: room + time range — desktop only */}
-                        <span className="hidden sm:flex shrink-0 items-center gap-1 text-xs text-on-surface-variant">
-                          <MapPin className="size-3" />
-                          {item.location || '—'}
-                        </span>
+                        {(item.room || item.location) ? (
+                          <span
+                            className="hidden sm:flex shrink-0 items-center gap-1 text-xs text-on-surface-variant"
+                            title={formatRoom(item.room || item.location, { language: i18n.language })}
+                          >
+                            <MapPin className="size-3 shrink-0" />
+                            <span className="truncate max-w-[180px]">{formatRoom(item.room || item.location, { language: i18n.language })}</span>
+                          </span>
+                        ) : null}
                         <span className="hidden sm:flex shrink-0 items-center gap-1 text-xs text-on-surface-variant">
                           <Clock className="size-3" />
                           {timeRange}

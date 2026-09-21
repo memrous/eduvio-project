@@ -48,6 +48,7 @@ class StagSyncSubjectsTest extends TestCase
                 'name' => 'Programování',
                 'credits' => 5,
                 'semester' => 'ZS',
+                'department' => 'KIV',
                 // completionType, isMandatory, lecturer omitted -> should use fallbacks
             ],
             [
@@ -78,6 +79,7 @@ class StagSyncSubjectsTest extends TestCase
             'completion_type' => 'Credit',
             'is_mandatory'    => true,
             'lecturer'        => 'Nespecifikováno',
+            'department'      => 'KIV',
             'description'     => 'Imported from IS/STAG',
         ]);
 
@@ -109,6 +111,7 @@ class StagSyncSubjectsTest extends TestCase
             'completion_type' => 'Credit',
             'is_mandatory'    => true,
             'lecturer'        => 'Původní Vyučující',
+            'department'      => 'STARA',
             'description'     => 'Moje osobní poznámka k předmětu',
         ]);
 
@@ -121,6 +124,7 @@ class StagSyncSubjectsTest extends TestCase
                 'completionType' => 'Exam',
                 'isMandatory'    => true,
                 'lecturer'       => 'Nový Přednášející',
+                'department'     => 'KIV',
             ],
         ];
 
@@ -138,11 +142,65 @@ class StagSyncSubjectsTest extends TestCase
         $this->assertEquals(5, $subject->credits);
         $this->assertEquals('Exam', $subject->completion_type);
         $this->assertEquals('Nový Přednášející', $subject->lecturer);
+        $this->assertEquals('KIV', $subject->department);
 
         // Verify description was NOT overwritten
         $this->assertEquals('Moje osobní poznámka k předmětu', $subject->description);
 
         // Ensure no duplicate subject was created
         $this->assertEquals(1, Subject::where('user_id', $user->id)->where('code', 'KIV/PRO')->count());
+    }
+    public function test_sync_subjects_saves_statut_and_derives_is_mandatory(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $payload = [
+            [
+                'code' => 'KMI/A1',
+                'name' => 'Povinný Předmět',
+                'credits' => 5,
+                'semester' => 'ZS',
+                'statut' => 'A',
+            ],
+            [
+                'code' => 'KMI/B1',
+                'name' => 'Povinně Volitelný Předmět',
+                'credits' => 4,
+                'semester' => 'ZS',
+                'statut' => 'B',
+            ],
+            [
+                'code' => 'KMI/C1',
+                'name' => 'Výběrový Předmět',
+                'credits' => 2,
+                'semester' => 'ZS',
+                'statut' => 'C',
+            ],
+        ];
+
+        $response = $this->postJson('/api/stag/sync-subjects', $payload);
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('subjects', [
+            'user_id' => $user->id,
+            'code' => 'KMI/A1',
+            'statut' => 'A',
+            'is_mandatory' => true,
+        ]);
+
+        $this->assertDatabaseHas('subjects', [
+            'user_id' => $user->id,
+            'code' => 'KMI/B1',
+            'statut' => 'B',
+            'is_mandatory' => false,
+        ]);
+
+        $this->assertDatabaseHas('subjects', [
+            'user_id' => $user->id,
+            'code' => 'KMI/C1',
+            'statut' => 'C',
+            'is_mandatory' => false,
+        ]);
     }
 }

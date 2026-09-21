@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { MapPin, Clock, FileText, CalendarPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { formatRoom } from '../../utils/room'
 
 const parseLocalDateTime = (dateInput, timeStr) => {
   if (!dateInput || !timeStr) return null
@@ -15,7 +16,7 @@ const parseLocalDateTime = (dateInput, timeStr) => {
 }
 
 const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
-  const { t } = useTranslation('dashboard')
+  const { t, i18n } = useTranslation('dashboard')
   const [minutesLeft, setMinutesLeft] = useState(null)
   const [isOngoing, setIsOngoing] = useState(false)
 
@@ -127,7 +128,7 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-midnight-foreground/70">
             <span className="inline-flex items-center gap-1.5">
               <MapPin className="size-4" aria-hidden="true" />
-              {nextClass.room || 'Učebna CP-312'}
+              {formatRoom(nextClass.room || 'CP-312', { language: i18n?.language })}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Clock className="size-4" aria-hidden="true" />

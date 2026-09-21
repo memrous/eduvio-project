@@ -14,6 +14,7 @@ import {
   Info,
   X,
   ListChecks,
+  Building2,
 } from 'lucide-react'
 
 import SubjectSummaryStrip from './subject/SubjectSummaryStrip'
@@ -133,7 +134,7 @@ const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
       </div>
 
       {/* META STRIP */}
-      <div className="mt-5 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className={`mt-5 grid gap-2.5 sm:grid-cols-2 ${subject.department ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
         <MetaItem
           icon={GraduationCap}
           label={t('academic:subjectDetail.creditsLabel')}
@@ -149,6 +150,13 @@ const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
           label={t('academic:subjectDetail.guarantorLabel')}
           value={guarantor}
         />
+        {subject.department && (
+          <MetaItem
+            icon={Building2}
+            label={t('academic:subjectDetail.departmentLabel', 'Katedra')}
+            value={subject.department}
+          />
+        )}
         <MetaItem
           icon={Layers}
           label={t('academic:subjectDetail.typeLabel')}
@@ -392,9 +400,20 @@ const SubjectDetailView = ({
               </button>
             </div>
             <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">{subject.description}</p>
-            {subject.lecturer && (
+            {(subject.lecturer || subject.department) && (
               <p className="mt-4 text-xs text-on-surface-variant">
-                {t('academic:subjectDetail.infoDialog.importedFromStag', { teacher: subject.lecturer })}
+                {subject.department && subject.lecturer
+                  ? t('academic:subjectDetail.infoDialog.importedFromStagWithDept', {
+                      department: subject.department,
+                      teacher: subject.lecturer,
+                    })
+                  : subject.department
+                    ? t('academic:subjectDetail.infoDialog.importedFromStagDeptOnly', {
+                        department: subject.department,
+                      })
+                    : t('academic:subjectDetail.infoDialog.importedFromStag', {
+                        teacher: subject.lecturer,
+                      })}
               </p>
             )}
           </div>

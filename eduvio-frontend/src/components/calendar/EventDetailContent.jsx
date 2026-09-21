@@ -1,8 +1,9 @@
-import { X } from 'lucide-react'
+import { X, MapPin } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getEventStyle } from './useCalendarState'
 import CustomIcon from '../CustomIcon'
 import { getLocaleFromLanguage } from '../../utils/locale'
+import { formatRoom } from '../../utils/room'
 
 const EventDetailContent = ({
   selectedDetailEvent,
@@ -82,6 +83,17 @@ const EventDetailContent = ({
             </span>
           </div>
         </div>
+        {(selectedDetailEvent.room || selectedDetailEvent.location) && (
+          <div className="flex items-start gap-3">
+            <MapPin className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
+            <div className="min-w-0">
+              <span className="block text-xs text-on-surface-variant font-medium">{t('dashboard:timetable.roomLabel', 'Místnost')}</span>
+              <span className="font-semibold text-on-surface">
+                {formatRoom(selectedDetailEvent.room || selectedDetailEvent.location, { language: i18n.language })}
+              </span>
+            </div>
+          </div>
+        )}
         {targetSubject && (
           <>
             <div className="flex items-start gap-3">

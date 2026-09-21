@@ -1,0 +1,2129 @@
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+    <title>IS/STAG - Webové služby</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <META http-equiv="Cache-Control" content="no-cache">
+    <META http-equiv="Pragma" content="no-cache">
+    <META http-equiv="Expires" content="-1">
+    
+
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-32x32.png"
+          sizes="32x32">
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/android-chrome-192x192.png"
+          sizes="192x192">
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-96x96.png"
+          sizes="96x96">
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-16x16.png"
+          sizes="16x16">
+    <link rel="shortcut icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-32x32.png"
+          sizes="32x32">
+
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/bootstrap/dist/css/bootstrap.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/bootstrap/dist/css/bootstrap-theme.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/portal_resources/common/portal/css/portal.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/portal_resources/common/portal/css/mobile.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/portal_resources/upol/upol_color.css">
+    <link rel="StyleSheet" href="/zdroje/css/xgui/XGui.css" type="text/css" media="screen">
+    <link rel="StyleSheet" href="/zdroje/css/mgui/MGui.css" type="text/css" media="screen">
+
+    
+
+    <script type="text/javascript" src="/zdroje/js/COMBINED.js?foox"></script>
+    <script type="text/javascript" src="/zdroje/bootstrap/dist/js/bootstrap.js"></script>
+    <script type="text/javascript">
+        $.fn.bootstrapBtn = $.fn.button.noConflict();
+    </script>
+
+    <script type="text/javascript" charset="UTF-8" src="/zdroje/js/l10n/l10n-cs.js"></script>
+    <script type="text/javascript" src="/zdroje/js/jscalendar/lang/calendar-cs.js"></script>
+</head>
+<body>
+<div class="app_container app_container-modif_lang-cs ">
+
+    <div class="app_header">
+
+        <div class="app_header_left">
+            <a href="http://www.upol.cz" title=""
+               target="_blank">
+                <img src="/zdroje/portal_resources/upol/portal/img/app_spacer.gif"
+                     class="spacer" alt="">
+            </a>
+        </div>
+
+        <div class="app_header_center" style="background: transparent; border: 0px; vertical-align: middle;">
+            <div style="font-size: 16pt; font-weight: normal; padding: 0 20pt 0 20pt; float: none; text-align: left; white-space: nowrap;"
+                 class="app_header_right">
+                <a style="height:auto;">IS/STAG - Webové služby</a>
+            </div>
+        </div>
+
+        
+        <div class="app_header_right">
+            
+
+
+
+
+
+<div class="upper">
+    
+        
+        
+            <a class="falseLink" href="/ws/login?originalURL=https%3A%2F%2Fstag-ws.upol.cz%2Fws%2Fweb%3Fpp_reqType%3Drender%26pp_page%3DserviceList%26selectedTyp%3DREST%26addr%3D%2Fservices%2Frest2%2Fciselniky"
+               title="Přihlásit uživatele">Nepřihlášený uživatel </a>
+            <a href="/ws/login?originalURL=https%3A%2F%2Fstag-ws.upol.cz%2Fws%2Fweb%3Fpp_reqType%3Drender%26pp_page%3DserviceList%26selectedTyp%3DREST%26addr%3D%2Fservices%2Frest2%2Fciselniky"
+               title="Přihlásit uživatele">Přihlásit</a>
+        
+    
+</div>
+
+
+
+
+        </div>
+        
+
+        <div class="clear"></div>
+    </div>
+
+
+
+
+
+<div class="app_menu">
+    <ul class="app_menubar level_1">
+        <li class="">
+            <a href="/ws/web?pp_locale=cs&pp_reqType=render&pp_page=title">Vítejte</a>
+        </li>
+        <li class="selected">
+            <a href="/ws/web?pp_locale=cs&pp_reqType=render&pp_page=serviceList">Aktuální seznam služeb</a>
+        </li>
+        <li class="">
+            <a href="/ws/web?pp_locale=cs&pp_reqType=render&pp_page=webaccess">Spouštění služeb</a>
+        </li>
+
+    </ul>
+</div>
+
+
+
+
+<div class="app_menu">
+    <ul class="app_menubar level_1">
+        <li class="selected">
+            <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList">REST</a>
+        </li>
+        <li class="">
+            <a href="/ws/web?pp_locale=cs&selectedTyp=SOAP&pp_reqType=render&pp_page=serviceList">SOAP</a>
+        </li>
+    </ul>
+</div>
+
+<div class="app_content">
+
+    
+        
+        
+
+            <div class="app_page_multi">
+                <div class="app_page_menu">
+                    <ul>
+                            
+                        <li>
+                            <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList">Přehled</a>
+                        </li>
+                        <li>
+                            <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=all">Všechny
+                                najednou</a>
+                        </li>
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Faktivity">aktivity</a>
+                                </li>
+                            
+                        
+                            
+                                <li class="selected">
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fciselniky">ciselniky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fcro_studenti">cro_studenti</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fcro_ucitele">cro_ucitele</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fects">ects</a>
+                                </li>
+                            
+                        
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fhelp">help</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FhkResults">hkResults</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fkalendar">kalendar</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fkvalifikacniprace">kvalifikacniprace</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fmistnost">mistnost</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_mobility">ng_mobility</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_predmety">ng_predmety</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_prijimacky">ng_prijimacky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_programy">ng_programy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_qram">ng_qram</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_redop">ng_redop</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_schvalovani">ng_schvalovani</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_studenti">ng_studenti</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_terminy">ng_terminy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_users">ng_users</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Foznameni">oznameni</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fplagiaty">plagiaty</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fplatby">platby</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FpodporaVyuky">podporaVyuky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fpredmety">predmety</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fprijimacky">prijimacky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fprogramy">programy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Frozvrhy">rozvrhy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fschvalovani">schvalovani</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FschvalovaniMozneHodnoty">schvalovaniMozneHodnoty</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FschvalovaniProKoho">schvalovaniProKoho</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FschvalovaniTyp">schvalovaniTyp</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fsoubory">soubory</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fstudent">student</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fterminy">terminy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fucitel">ucitel</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fusers">users</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fvsp">vsp</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fznamky">znamky</a>
+                                </li>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                    </ul>
+                </div>
+
+                <div class="app_page_content">
+                    <div style="margin: 5pt 5pt 5pt 0; padding: 5pt;">
+                        
+                            
+                            
+                                
+                                    
+                                
+                                    
+                                        
+
+
+
+
+
+
+
+
+
+
+
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+    <tr>
+        <th class="head" colspan="2">ciselniky</th>
+    </tr>
+    
+        <tr>
+            <th>Popis</th>
+            <td>Číselníky STAGu</td>
+        </tr>
+    
+    <tr>
+        <th>Typ</th>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <th>Adresa</th>
+        <td>/ws/services/rest2/ciselniky</td>
+    </tr>
+    <tr>
+        <th>Specifikace</th>
+        <td>
+            
+            
+            
+            
+            
+        </td>
+    </tr>
+    
+        <tr>
+            <th>Název</th>
+            <td>ciselniky</td>
+        </tr>
+    
+</table>
+
+
+<h4>Operace</h4>
+
+
+
+    
+<a name="deletePracoviste"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">deletePracoviste</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Smaže existující pracoviště z číselníku.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/deletePracoviste</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#deletePracovisteroot').toggle()">root</a><div style="display:none" id="deletePracovisteroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>přihlášení, ověření dle uživatelské role</td>
+</tr>
+
+    <tr>
+        <th>Povolené role</th>
+        <td>
+            
+                
+                
+                    
+                        AD
+                         (Administrátor)
+                        <br>
+                    
+                
+            
+        </td>
+    </tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td><strong>stagUser</strong></td>
+                    <td>String</td>
+                    <td></td>
+                </tr>
+            
+                
+                <tr>
+                    <td><strong>pracovisteForDelete</strong></td>
+                    <td>String</td>
+                    <td>Zkratka pracoviště, které smazat.</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="getCasovaRada"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getCasovaRada</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí časovou řadu podle jejího kódu - tj. seznam položek časové řady.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/getCasovaRada</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getCasovaRadaroot').toggle()">root</a><div style="display:none" id="getCasovaRadaroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>pravděpodobně bez nutnosti přihlášení (služba ovšem na základě konfigurace konkrétní instalace IS/STAG může vyžadovat přihlášení či specifickou roli uživatele) </td>
+</tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td><strong>kod</strong></td>
+                    <td>String</td>
+                    <td>Kód (=název) časové řady. Seznam časových řad školy lze najít dotazem na číselník s názvem &#039;CASOVA_RADA&#039; (služba &#039;getCiselnik&#039;).</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="getCiselnik"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getCiselnik</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí obsah číselníku zadaného doménou.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/getCiselnik</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getCiselnikroot').toggle()">root</a><div style="display:none" id="getCiselnikroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>pravděpodobně bez nutnosti přihlášení (služba ovšem na základě konfigurace konkrétní instalace IS/STAG může vyžadovat přihlášení či specifickou roli uživatele) </td>
+</tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td><strong>domena</strong></td>
+                    <td>String</td>
+                    <td>Název domény číselníku. Seznam domén lze zjistit službou &#039;getSeznamDomen&#039;.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>lang</td>
+                    <td>String</td>
+                    <td></td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="getCiselnikNewDomains"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getCiselnikNewDomains</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí seznam nazvu domen ciselniku</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/getCiselnikNewDomains</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getCiselnikNewDomainsroot').toggle()">root</a><div style="display:none" id="getCiselnikNewDomainsroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>pravděpodobně bez nutnosti přihlášení (služba ovšem na základě konfigurace konkrétní instalace IS/STAG může vyžadovat přihlášení či specifickou roli uživatele) </td>
+</tr>
+
+</table>
+
+
+    
+
+    
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="getCiselnikNewItems"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getCiselnikNewItems</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí položky číselníku dle zadaného dotazu</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/getCiselnikNewItems</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td><span title="[getCiselnikNewItemsResponse, ciselnikNew, item] / attributes">application/xml, text/xml, application/json, text/yaml</span></td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getCiselnikNewItemsroot').toggle()">root</a><div style="display:none" id="getCiselnikNewItemsroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>pravděpodobně bez nutnosti přihlášení (služba ovšem na základě konfigurace konkrétní instalace IS/STAG může vyžadovat přihlášení či specifickou roli uživatele) </td>
+</tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td><strong>domena</strong></td>
+                    <td>String</td>
+                    <td>Doména. Seznam domen lze zjistit metodou &#039;getCiselnikNewDomains&#039;</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>key</td>
+                    <td>String</td>
+                    <td>Klíč - tj. interní reprezentace hodnoty tohoto číselníku. Vyplňte v případě, že chcete vrátit pouze položku s tímto jedním konkrétním klíčem.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>resultsStartAt</td>
+                    <td>Integer</td>
+                    <td>Je-li vyplněno, udává, od jaké pozice v seznamu vracet výsledky, určeno např. pro stránkování. První pozice má index 0.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>resultsEndAt</td>
+                    <td>Integer</td>
+                    <td>Je-li vyplněno, udává, do jaké pozice v seznamu vracet výsledky, určeno např. pro stránkování. První pozice má index 0.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>onlyValidItems</td>
+                    <td>Boolean</td>
+                    <td>Určuje, zda vracet pouze platné položky. Není-li vyplněno, vrací se pouze platné položky.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>sortItems</td>
+                    <td>Boolean</td>
+                    <td>Určuje, zda budou výsledné položky seřazené. Není-li vyplněno, položky nebudou seřazené (resp. není garantováno jejich pořadí).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>lang</td>
+                    <td>String</td>
+                    <td>Jazyk. Využívá se pokud je požadavek na seřazení položek. Výchozí hodnota je &#039;cs&#039;</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="getHierarchiePracovist"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getHierarchiePracovist</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí seznam všech pracovišť, hierarchicky uspořádaný.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/getHierarchiePracovist</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getHierarchiePracovistroot').toggle()">root</a><div style="display:none" id="getHierarchiePracovistroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>pravděpodobně bez nutnosti přihlášení (služba ovšem na základě konfigurace konkrétní instalace IS/STAG může vyžadovat přihlášení či specifickou roli uživatele) </td>
+</tr>
+
+</table>
+
+
+    
+
+    
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="getSeznamDomen"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getSeznamDomen</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí seznam nazvu vsech domen, ktere jsou v ciselniku.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/getSeznamDomen</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getSeznamDomenroot').toggle()">root</a><div style="display:none" id="getSeznamDomenroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>pravděpodobně bez nutnosti přihlášení (služba ovšem na základě konfigurace konkrétní instalace IS/STAG může vyžadovat přihlášení či specifickou roli uživatele) </td>
+</tr>
+
+</table>
+
+
+    
+
+    
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="getSeznamPracovist"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getSeznamPracovist</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí seznam pracovišť. Nejsou-li uvedený žádné parametry, vrací všechna pracoviště. Jinak se filtruje podle parametrů.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/getSeznamPracovist</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getSeznamPracovistroot').toggle()">root</a><div style="display:none" id="getSeznamPracovistroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>pravděpodobně bez nutnosti přihlášení (služba ovšem na základě konfigurace konkrétní instalace IS/STAG může vyžadovat přihlášení či specifickou roli uživatele) </td>
+</tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td><strong>zkratka</strong></td>
+                    <td>String</td>
+                    <td>Zkratka pracoviště, není-li uvedeno, nezáleží na tomto parametru.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>nadrazenePracoviste</td>
+                    <td>String</td>
+                    <td>Zkratka nadřazeného pracoviště, není-li uvedeno, nezáleží na tomto parametru.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>typPracoviste</td>
+                    <td>String</td>
+                    <td>Typ pracoviště, není-li uvedeno, nezáleží na tomto parametru.</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="insertPracoviste"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">insertPracoviste</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vloží do číselniku nové pracovište. Vrací zpět informace o tomto záznamu.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>POST</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/insertPracoviste</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>*/*</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#insertPracovisteroot').toggle()">root</a><div style="display:none" id="insertPracovisteroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>přihlášení, ověření dle uživatelské role</td>
+</tr>
+
+    <tr>
+        <th>Povolené role</th>
+        <td>
+            
+                
+                
+                    
+                        AD
+                         (Administrátor)
+                        <br>
+                    
+                
+            
+        </td>
+    </tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td><strong>stagUser</strong></td>
+                    <td>String</td>
+                    <td></td>
+                </tr>
+            
+                
+                <tr>
+                    <td><strong>pracoviste</strong></td>
+                    <td>WSPracovisteForEdit</td>
+                    <td>Pracoviště, které vložit do systému. Povinné položky jsou: zkratka, cisloPracoviste, nadrazenePracoviste (zkratka nadřazeného pracoviště. Nejvyšší pracoviště je vždy REK), nazev, typPracoviste (klíč položky z číselníku TYP_PRACOVISTE)</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="insertTitul"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">insertTitul</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vlozi do ciselniku novy titul pred nebo titul za (jako domena musi byt uvedeno &#039;TITUL_PRED&#039; nebo &#039;TITUL_ZA&#039;, nic jineho neni podporovano). Automaticky vygeneruje klic noveho zaznamu. Vraci zpet informace o tomto zaznamu.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>POST</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/insertTitul</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>*/*</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#insertTitulroot').toggle()">root</a><div style="display:none" id="insertTitulroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>přihlášení, ověření dle uživatelské role</td>
+</tr>
+
+    <tr>
+        <th>Povolené role</th>
+        <td>
+            
+                
+                
+                    
+                        AD
+                         (Administrátor)
+                        <br>
+                    
+                
+            
+        </td>
+    </tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td><strong>stagUser</strong></td>
+                    <td>String</td>
+                    <td></td>
+                </tr>
+            
+                
+                <tr>
+                    <td><strong>ciselnikItem</strong></td>
+                    <td>WSCiselnikItemForEdit</td>
+                    <td>Položka k vložení. Povinné údaje jsou: domena, valueCs. Další nepovinné jsou: zkratka, valueEn.</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="updatePracoviste"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">updatePracoviste</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Upraví existující pracoviště v číselníku. Upraví pouze ty položky, které byly předány.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>POST</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/updatePracoviste</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>*/*</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#updatePracovisteroot').toggle()">root</a><div style="display:none" id="updatePracovisteroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>přihlášení, ověření dle uživatelské role</td>
+</tr>
+
+    <tr>
+        <th>Povolené role</th>
+        <td>
+            
+                
+                
+                    
+                        AD
+                         (Administrátor)
+                        <br>
+                    
+                
+            
+        </td>
+    </tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td><strong>stagUser</strong></td>
+                    <td>String</td>
+                    <td></td>
+                </tr>
+            
+                
+                <tr>
+                    <td><strong>pracoviste</strong></td>
+                    <td>WSPracovisteForEdit</td>
+                    <td>Pracoviště, které upravit. Povinná položka je pouze &#039;zkratka&#039;, ostatní položky jsou upraveny, jsou-li vyplněny.</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="updateTitul"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">updateTitul</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Upraví existující titul v číselníku.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>POST</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/ciselniky/updateTitul</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>*/*</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#updateTitulroot').toggle()">root</a><div style="display:none" id="updateTitulroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>přihlášení, ověření dle uživatelské role</td>
+</tr>
+
+    <tr>
+        <th>Povolené role</th>
+        <td>
+            
+                
+                
+                    
+                        AD
+                         (Administrátor)
+                        <br>
+                    
+                
+            
+        </td>
+    </tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td><strong>stagUser</strong></td>
+                    <td>String</td>
+                    <td></td>
+                </tr>
+            
+                
+                <tr>
+                    <td><strong>ciselnikItem</strong></td>
+                    <td>WSCiselnikItemForEdit</td>
+                    <td>Titul k úpravě. Povinná položka je &#039;key&#039; (klíč položky), upraveny pak mohou být položky: valueCs, valueEn, zkratka</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+
+
+
+
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                            
+                        
+                    </div>
+
+                </div>
+
+            </div>
+
+        
+    
+
+</div>
+
+</body>
+</html>

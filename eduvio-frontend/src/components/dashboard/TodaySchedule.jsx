@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Clock, Coffee, PartyPopper } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { formatRoom } from '../../utils/room'
 
 const TodaySchedule = ({ schedule }) => {
-  const { t } = useTranslation('dashboard')
+  const { t, i18n } = useTranslation('dashboard')
 
   const [nowMinutes, setNowMinutes] = useState(() => {
     const d = new Date()
@@ -144,7 +145,7 @@ const TodaySchedule = ({ schedule }) => {
               </div>
               {item.data.room && (
                 <p className="text-xs text-on-surface-variant">
-                  {t('timetable.room', { room: item.data.room })}
+                  {formatRoom(item.data.room, { language: i18n?.language })}
                 </p>
               )}
             </li>

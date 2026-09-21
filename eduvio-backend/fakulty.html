@@ -1,0 +1,636 @@
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+    <title>IS/STAG - Webové služby</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <META http-equiv="Cache-Control" content="no-cache">
+    <META http-equiv="Pragma" content="no-cache">
+    <META http-equiv="Expires" content="-1">
+    
+
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-32x32.png"
+          sizes="32x32">
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/android-chrome-192x192.png"
+          sizes="192x192">
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-96x96.png"
+          sizes="96x96">
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-16x16.png"
+          sizes="16x16">
+    <link rel="shortcut icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-32x32.png"
+          sizes="32x32">
+
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/bootstrap/dist/css/bootstrap.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/bootstrap/dist/css/bootstrap-theme.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/portal_resources/common/portal/css/portal.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/portal_resources/common/portal/css/mobile.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/portal_resources/upol/upol_color.css">
+    <link rel="StyleSheet" href="/zdroje/css/xgui/XGui.css" type="text/css" media="screen">
+    <link rel="StyleSheet" href="/zdroje/css/mgui/MGui.css" type="text/css" media="screen">
+
+    
+
+    <script type="text/javascript" src="/zdroje/js/COMBINED.js?foox"></script>
+    <script type="text/javascript" src="/zdroje/bootstrap/dist/js/bootstrap.js"></script>
+    <script type="text/javascript">
+        $.fn.bootstrapBtn = $.fn.button.noConflict();
+    </script>
+
+    <script type="text/javascript" charset="UTF-8" src="/zdroje/js/l10n/l10n-cs.js"></script>
+    <script type="text/javascript" src="/zdroje/js/jscalendar/lang/calendar-cs.js"></script>
+</head>
+<body>
+<div class="app_container app_container-modif_lang-cs ">
+
+    <div class="app_header">
+
+        <div class="app_header_left">
+            <a href="http://www.upol.cz" title=""
+               target="_blank">
+                <img src="/zdroje/portal_resources/upol/portal/img/app_spacer.gif"
+                     class="spacer" alt="">
+            </a>
+        </div>
+
+        <div class="app_header_center" style="background: transparent; border: 0px; vertical-align: middle;">
+            <div style="font-size: 16pt; font-weight: normal; padding: 0 20pt 0 20pt; float: none; text-align: left; white-space: nowrap;"
+                 class="app_header_right">
+                <a style="height:auto;">IS/STAG - Webové služby</a>
+            </div>
+        </div>
+
+        
+        <div class="app_header_right">
+            
+
+
+
+
+
+<div class="upper">
+    
+        
+        
+            <a class="falseLink" href="/ws/login?originalURL=https%3A%2F%2Fstag-ws.upol.cz%2Fws%2Fweb%3Fpp_reqType%3Drender%26pp_page%3DserviceList%26selectedTyp%3DREST%26addr%3D%2Fservices%2Frest2%2Ffakulty"
+               title="Přihlásit uživatele">Nepřihlášený uživatel </a>
+            <a href="/ws/login?originalURL=https%3A%2F%2Fstag-ws.upol.cz%2Fws%2Fweb%3Fpp_reqType%3Drender%26pp_page%3DserviceList%26selectedTyp%3DREST%26addr%3D%2Fservices%2Frest2%2Ffakulty"
+               title="Přihlásit uživatele">Přihlásit</a>
+        
+    
+</div>
+
+
+
+
+        </div>
+        
+
+        <div class="clear"></div>
+    </div>
+
+
+
+
+
+<div class="app_menu">
+    <ul class="app_menubar level_1">
+        <li class="">
+            <a href="/ws/web?pp_locale=cs&pp_reqType=render&pp_page=title">Vítejte</a>
+        </li>
+        <li class="selected">
+            <a href="/ws/web?pp_locale=cs&pp_reqType=render&pp_page=serviceList">Aktuální seznam služeb</a>
+        </li>
+        <li class="">
+            <a href="/ws/web?pp_locale=cs&pp_reqType=render&pp_page=webaccess">Spouštění služeb</a>
+        </li>
+
+    </ul>
+</div>
+
+
+
+
+<div class="app_menu">
+    <ul class="app_menubar level_1">
+        <li class="selected">
+            <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList">REST</a>
+        </li>
+        <li class="">
+            <a href="/ws/web?pp_locale=cs&selectedTyp=SOAP&pp_reqType=render&pp_page=serviceList">SOAP</a>
+        </li>
+    </ul>
+</div>
+
+<div class="app_content">
+
+    
+        
+        
+
+            <div class="app_page_multi">
+                <div class="app_page_menu">
+                    <ul>
+                            
+                        <li>
+                            <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList">Přehled</a>
+                        </li>
+                        <li>
+                            <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=all">Všechny
+                                najednou</a>
+                        </li>
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Faktivity">aktivity</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fciselniky">ciselniky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fcro_studenti">cro_studenti</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fcro_ucitele">cro_ucitele</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fects">ects</a>
+                                </li>
+                            
+                        
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fhelp">help</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FhkResults">hkResults</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fkalendar">kalendar</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fkvalifikacniprace">kvalifikacniprace</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fmistnost">mistnost</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_mobility">ng_mobility</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_predmety">ng_predmety</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_prijimacky">ng_prijimacky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_programy">ng_programy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_qram">ng_qram</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_redop">ng_redop</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_schvalovani">ng_schvalovani</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_studenti">ng_studenti</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_terminy">ng_terminy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_users">ng_users</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Foznameni">oznameni</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fplagiaty">plagiaty</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fplatby">platby</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FpodporaVyuky">podporaVyuky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fpredmety">predmety</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fprijimacky">prijimacky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fprogramy">programy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Frozvrhy">rozvrhy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fschvalovani">schvalovani</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FschvalovaniMozneHodnoty">schvalovaniMozneHodnoty</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FschvalovaniProKoho">schvalovaniProKoho</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FschvalovaniTyp">schvalovaniTyp</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fsoubory">soubory</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fstudent">student</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fterminy">terminy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fucitel">ucitel</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fusers">users</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fvsp">vsp</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fznamky">znamky</a>
+                                </li>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                    </ul>
+                </div>
+
+                <div class="app_page_content">
+                    <div style="margin: 5pt 5pt 5pt 0; padding: 5pt;">
+                        
+                            
+                            
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                            
+                        
+                    </div>
+
+                </div>
+
+            </div>
+
+        
+    
+
+</div>
+
+</body>
+</html>

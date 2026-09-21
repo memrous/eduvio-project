@@ -40,6 +40,7 @@
     "next": "Další →",
     "openSubjectHub": "Otevřít předmět",
     "room": "Učebna {{room}}",
+    "roomLabel": "Místnost",
     "fallbacks": {
       "subjectCode": "GEN 101",
       "room201": "Místnost 201",
@@ -107,7 +108,10 @@
     "semester": {
       "winter": "Zimní semestr",
       "summer": "Letní semestr"
-    }
+    },
+    "statutA": "Povinný",
+    "statutB": "Povinně volitelný",
+    "statutC": "Volitelný"
   },
   "needsAttention": {
     "title": "Vyžaduje pozornost",

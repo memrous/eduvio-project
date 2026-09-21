@@ -1,0 +1,1400 @@
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+    <title>IS/STAG - Webové služby</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <META http-equiv="Cache-Control" content="no-cache">
+    <META http-equiv="Pragma" content="no-cache">
+    <META http-equiv="Expires" content="-1">
+    
+
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-32x32.png"
+          sizes="32x32">
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/android-chrome-192x192.png"
+          sizes="192x192">
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-96x96.png"
+          sizes="96x96">
+    <link rel="icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-16x16.png"
+          sizes="16x16">
+    <link rel="shortcut icon" type="image/png"
+          href="/zdroje/portal_resources/upol/portal/img/favicon/favicon-32x32.png"
+          sizes="32x32">
+
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/bootstrap/dist/css/bootstrap.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/bootstrap/dist/css/bootstrap-theme.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/portal_resources/common/portal/css/portal.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/portal_resources/common/portal/css/mobile.css">
+    <link rel="StyleSheet" media="screen" type="text/css" href="/zdroje/portal_resources/upol/upol_color.css">
+    <link rel="StyleSheet" href="/zdroje/css/xgui/XGui.css" type="text/css" media="screen">
+    <link rel="StyleSheet" href="/zdroje/css/mgui/MGui.css" type="text/css" media="screen">
+
+    
+
+    <script type="text/javascript" src="/zdroje/js/COMBINED.js?foox"></script>
+    <script type="text/javascript" src="/zdroje/bootstrap/dist/js/bootstrap.js"></script>
+    <script type="text/javascript">
+        $.fn.bootstrapBtn = $.fn.button.noConflict();
+    </script>
+
+    <script type="text/javascript" charset="UTF-8" src="/zdroje/js/l10n/l10n-cs.js"></script>
+    <script type="text/javascript" src="/zdroje/js/jscalendar/lang/calendar-cs.js"></script>
+</head>
+<body>
+<div class="app_container app_container-modif_lang-cs ">
+
+    <div class="app_header">
+
+        <div class="app_header_left">
+            <a href="http://www.upol.cz" title=""
+               target="_blank">
+                <img src="/zdroje/portal_resources/upol/portal/img/app_spacer.gif"
+                     class="spacer" alt="">
+            </a>
+        </div>
+
+        <div class="app_header_center" style="background: transparent; border: 0px; vertical-align: middle;">
+            <div style="font-size: 16pt; font-weight: normal; padding: 0 20pt 0 20pt; float: none; text-align: left; white-space: nowrap;"
+                 class="app_header_right">
+                <a style="height:auto;">IS/STAG - Webové služby</a>
+            </div>
+        </div>
+
+        
+        <div class="app_header_right">
+            
+
+
+
+
+
+<div class="upper">
+    
+        
+        
+            <a class="falseLink" href="/ws/login?originalURL=https%3A%2F%2Fstag-ws.upol.cz%2Fws%2Fweb%3Fpp_reqType%3Drender%26pp_page%3DserviceList%26selectedTyp%3DREST%26addr%3D%2Fservices%2Frest2%2Fmistnost"
+               title="Přihlásit uživatele">Nepřihlášený uživatel </a>
+            <a href="/ws/login?originalURL=https%3A%2F%2Fstag-ws.upol.cz%2Fws%2Fweb%3Fpp_reqType%3Drender%26pp_page%3DserviceList%26selectedTyp%3DREST%26addr%3D%2Fservices%2Frest2%2Fmistnost"
+               title="Přihlásit uživatele">Přihlásit</a>
+        
+    
+</div>
+
+
+
+
+        </div>
+        
+
+        <div class="clear"></div>
+    </div>
+
+
+
+
+
+<div class="app_menu">
+    <ul class="app_menubar level_1">
+        <li class="">
+            <a href="/ws/web?pp_locale=cs&pp_reqType=render&pp_page=title">Vítejte</a>
+        </li>
+        <li class="selected">
+            <a href="/ws/web?pp_locale=cs&pp_reqType=render&pp_page=serviceList">Aktuální seznam služeb</a>
+        </li>
+        <li class="">
+            <a href="/ws/web?pp_locale=cs&pp_reqType=render&pp_page=webaccess">Spouštění služeb</a>
+        </li>
+
+    </ul>
+</div>
+
+
+
+
+<div class="app_menu">
+    <ul class="app_menubar level_1">
+        <li class="selected">
+            <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList">REST</a>
+        </li>
+        <li class="">
+            <a href="/ws/web?pp_locale=cs&selectedTyp=SOAP&pp_reqType=render&pp_page=serviceList">SOAP</a>
+        </li>
+    </ul>
+</div>
+
+<div class="app_content">
+
+    
+        
+        
+
+            <div class="app_page_multi">
+                <div class="app_page_menu">
+                    <ul>
+                            
+                        <li>
+                            <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList">Přehled</a>
+                        </li>
+                        <li>
+                            <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=all">Všechny
+                                najednou</a>
+                        </li>
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Faktivity">aktivity</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fciselniky">ciselniky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fcro_studenti">cro_studenti</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fcro_ucitele">cro_ucitele</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fects">ects</a>
+                                </li>
+                            
+                        
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fhelp">help</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FhkResults">hkResults</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fkalendar">kalendar</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fkvalifikacniprace">kvalifikacniprace</a>
+                                </li>
+                            
+                        
+                            
+                                <li class="selected">
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fmistnost">mistnost</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_mobility">ng_mobility</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_predmety">ng_predmety</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_prijimacky">ng_prijimacky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_programy">ng_programy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_qram">ng_qram</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_redop">ng_redop</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_schvalovani">ng_schvalovani</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_studenti">ng_studenti</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_terminy">ng_terminy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fng_users">ng_users</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Foznameni">oznameni</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fplagiaty">plagiaty</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fplatby">platby</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FpodporaVyuky">podporaVyuky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fpredmety">predmety</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fprijimacky">prijimacky</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fprogramy">programy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Frozvrhy">rozvrhy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fschvalovani">schvalovani</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FschvalovaniMozneHodnoty">schvalovaniMozneHodnoty</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FschvalovaniProKoho">schvalovaniProKoho</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2FschvalovaniTyp">schvalovaniTyp</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fsoubory">soubory</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fstudent">student</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fterminy">terminy</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fucitel">ucitel</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fusers">users</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fvsp">vsp</a>
+                                </li>
+                            
+                        
+                            
+                                <li>
+                                    <a href="/ws/web?pp_locale=cs&selectedTyp=REST&pp_reqType=render&pp_page=serviceList&addr=%2Fservices%2Frest2%2Fznamky">znamky</a>
+                                </li>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                    </ul>
+                </div>
+
+                <div class="app_page_content">
+                    <div style="margin: 5pt 5pt 5pt 0; padding: 5pt;">
+                        
+                            
+                            
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                        
+
+
+
+
+
+
+
+
+
+
+
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+    <tr>
+        <th class="head" colspan="2">mistnost</th>
+    </tr>
+    
+        <tr>
+            <th>Popis</th>
+            <td>Místnosti</td>
+        </tr>
+    
+    <tr>
+        <th>Typ</th>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <th>Adresa</th>
+        <td>/ws/services/rest2/mistnost</td>
+    </tr>
+    <tr>
+        <th>Specifikace</th>
+        <td>
+            
+            
+            
+            
+            
+        </td>
+    </tr>
+    
+        <tr>
+            <th>Název</th>
+            <td>mistnost</td>
+        </tr>
+    
+</table>
+
+
+<h4>Operace</h4>
+
+
+
+    
+<a name="getBudovy"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getBudovy</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí seznam všech budov.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/mistnost/getBudovy</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getBudovyroot').toggle()">root</a><div style="display:none" id="getBudovyroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>pravděpodobně bez nutnosti přihlášení (služba ovšem na základě konfigurace konkrétní instalace IS/STAG může vyžadovat přihlášení či specifickou roli uživatele) </td>
+</tr>
+
+</table>
+
+
+    
+
+    
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="getMistnostiInfo"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getMistnostiInfo</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí seznam místností vyhovujících parametrům s kompletními informacemi.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/mistnost/getMistnostiInfo</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getMistnostiInforoot').toggle()">root</a><div style="display:none" id="getMistnostiInforoot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>pravděpodobně bez nutnosti přihlášení (služba ovšem na základě konfigurace konkrétní instalace IS/STAG může vyžadovat přihlášení či specifickou roli uživatele) </td>
+</tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td>zkrBudovy</td>
+                    <td>String</td>
+                    <td>Zkratka budovy (např. UL).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>cisloMistnosti</td>
+                    <td>String</td>
+                    <td>Číslo místnosti (např. 409).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>pracoviste</td>
+                    <td>String</td>
+                    <td>Pracoviště.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>kapacitaOd</td>
+                    <td>Integer</td>
+                    <td>Kapacita Od.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>kapacitaDo</td>
+                    <td>Integer</td>
+                    <td>Kapacita Do.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>typ</td>
+                    <td>String</td>
+                    <td>Typ místnosti</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>spolFond</td>
+                    <td>Boolean</td>
+                    <td>Zda je místnost ve společném fondu</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>jenPlatne</td>
+                    <td>Boolean</td>
+                    <td>Zda vybírat jen aktuálně platné místnosti. Není-li uvedeno, vybírá jen platné.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>identifikator</td>
+                    <td>String</td>
+                    <td>Vyhledá místnost dle zadaného identifikátoru. Tabulka MISTNOSTI.IDENTIFIKATOR</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>lang</td>
+                    <td>String</td>
+                    <td></td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="getVytizeniMistnostiFakultami"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getVytizeniMistnostiFakultami</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí vytížení místností fakultami dle zadaných parametrů. Tato služba jde pouze do úrovně fakult. V položce fakulta_cp vrací číslo pracoviště z číselníku pracovišť a v případě, že není u jednorázových akcí pracoviště vyplněno, vrací položku &#039;středisko&#039; od jednorázové akce.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/mistnost/getVytizeniMistnostiFakultami</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getVytizeniMistnostiFakultamiroot').toggle()">root</a><div style="display:none" id="getVytizeniMistnostiFakultamiroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>přihlášení, ověření dle uživatelské role</td>
+</tr>
+
+    <tr>
+        <th>Povolené role</th>
+        <td>
+            
+                
+                
+                    
+                        ALL
+                        
+                        <br>
+                    
+                
+            
+        </td>
+    </tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td>stagUser</td>
+                    <td>String</td>
+                    <td></td>
+                </tr>
+            
+                
+                <tr>
+                    <td>zkrBudovy</td>
+                    <td>String</td>
+                    <td>Zkratka budovy (např. UL).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>cisloMistnosti</td>
+                    <td>String</td>
+                    <td>Číslo místnosti (např. 409).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td><strong>datumOd</strong></td>
+                    <td>Date</td>
+                    <td>Datum od kdy počítat (včetně).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td><strong>datumDo</strong></td>
+                    <td>Date</td>
+                    <td>Datum do kdy počítat (včetně).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>fakulta</td>
+                    <td>String</td>
+                    <td>Omezit pouze pro jedinou fakultu? % - pro všechny fakulty</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>jenPracovniDny</td>
+                    <td>Boolean</td>
+                    <td>Omezit pouze na pracovní dny (Po-Pá)?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>jenSoboty</td>
+                    <td>Boolean</td>
+                    <td>Omezit pouze na soboty?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>zapocitatNevyuzitouDobu</td>
+                    <td>Boolean</td>
+                    <td>Započítat nevyužitou dobu v místnosti vlastníkovi místnosti (fakultě)?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>pocitatPrezKomb</td>
+                    <td>Boolean</td>
+                    <td>Přidat položky se součtem prezenční a kombinované formy?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>dobuPocitatTydne</td>
+                    <td>Boolean</td>
+                    <td>Je-li false, doba se počítá absolutně za celé zadané období. Je-li true, počítá se doba průměrná &#039;za týden&#039;, tj. celková spočtená doba se vydělí počtem zadaných týdnů (celkový počet dnů období / 7).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>rozepsatOstatni</td>
+                    <td>Boolean</td>
+                    <td>Je-li true, pak rozepíše všechny jendotlivé akce zařazené do kolonky &#039;Ostatní&#039;. Bude pak použit i výsledný sloupec &#039;nazev&#039;, kde bude uvedeno o jakou akci jde.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>provozOd</td>
+                    <td>Double</td>
+                    <td>Pokud se započítává nevyužitá doba, pak zde je uveden čas provozu místností OD v hodinách během dne (např. hodnota 7.5 znamená 7:30 ráno)?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>provozDo</td>
+                    <td>Double</td>
+                    <td>Pokud se započítává nevyužitá doba, pak zde je uveden čas provozu místností DO v hodinách během dne (např. hodnota 18.33 znamená 18:20)?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>typyUdalosti</td>
+                    <td>String</td>
+                    <td>Jaké typy časoprostorových událostí započítávat? (prázdné nebo % = všechny, jinak zadat za sebou jednotlivá písmenka: R-Rozvrhová akce, B-blokace, Z-zkouška, P-přijímací řízení, J-jednorázová akce)</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+    <hr>
+
+
+
+
+
+    
+<a name="getVytizeniMistnostiPracovisti"></a>
+<table cellpadding="0" cellspacing="0" border="0" class="ng_form_tab">
+<tr>
+    <th class="head" colspan="2">getVytizeniMistnostiPracovisti</th>
+</tr>
+    <tr>
+        <th>Garance</th>
+        <td>
+            
+            
+                <span style="color:darkgreen">Garantováno</span> minimálně do 11.9.2027
+            
+            
+        </td>
+    </tr>
+
+    <tr>
+        <th>Komentář</th>
+        <td>Vrátí vytížení místností pracovišti dle zadaných parametrů. Tato služba jde až do úrovně jednotlivých pracovišť u těch typů událostí, kde je to možné. V položce pracoviste_cp vrací číslo pracoviště z číselníku pracovišť a v případě, že není u jednorázových akcí pracoviště vyplněno, vrací položku &#039;středisko&#039; od jednorázové akce.</td>
+    </tr>
+
+
+    
+        <tr>
+            <th>HTTP metoda</th>
+            <td>GET</td>
+        </tr>
+    
+    
+        <tr>
+            <th>Adresa</th>
+            <td>/ws/services/rest2/mistnost/getVytizeniMistnostiPracovisti</td>
+        </tr>
+    
+    
+    
+        <tr>
+            <th>Možné výstupní MIME typy</th>
+            <td>application/xml, text/xml, application/json, text/yaml, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+        </tr>
+    
+
+<tr>
+    <th>Oblasti</th>
+    <td>
+        <a href="javascript:void(0)" onclick="jQuery('#getVytizeniMistnostiPracovistiroot').toggle()">root</a><div style="display:none" id="getVytizeniMistnostiPracovistiroot">
+            
+        <table cellpadding="0" cellspacing="2" class="xg_pane">
+            <tr>
+                <th>Oblast</th>
+                <td>root</td>
+            </tr>
+            <tr>
+                <th>Maximální počet současných volání</th>
+                <td>16
+                </td>
+            </tr>
+            <tr>
+                <th>Maximální doba čekání na 'uvolnění' [ms]</th>
+                <td>2000
+                </td>
+            </tr>
+            
+        </table>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th>Je nutné ověřování</th>
+    <td>přihlášení, ověření dle uživatelské role</td>
+</tr>
+
+    <tr>
+        <th>Povolené role</th>
+        <td>
+            
+                
+                
+                    
+                        ALL
+                        
+                        <br>
+                    
+                
+            
+        </td>
+    </tr>
+
+</table>
+
+
+    
+    
+        <div style="padding-left: 5pt; padding-top: 2pt;">
+        <table class="ng_tab ng_bordered_top">
+            <thead>
+            <tr>
+                <th colspan="5">Parametry</th>
+            </tr>
+            <tr>
+                <th>Název</th>
+                <th>Typ (Java)</th>
+                <th>Komentář</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+                
+                <tr>
+                    <td>stagUser</td>
+                    <td>String</td>
+                    <td></td>
+                </tr>
+            
+                
+                <tr>
+                    <td>zkrBudovy</td>
+                    <td>String</td>
+                    <td>Zkratka budovy (např. UL).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>cisloMistnosti</td>
+                    <td>String</td>
+                    <td>Číslo místnosti (např. 409).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td><strong>datumOd</strong></td>
+                    <td>Date</td>
+                    <td>Datum od kdy počítat (včetně).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td><strong>datumDo</strong></td>
+                    <td>Date</td>
+                    <td>Datum do kdy počítat (včetně).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>pracoviste</td>
+                    <td>String</td>
+                    <td>Omezit pouze pro jedine pracoviste? % - pro všechny pracoviste</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>jenPracovniDny</td>
+                    <td>Boolean</td>
+                    <td>Omezit pouze na pracovní dny (Po-Pá)?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>jenSoboty</td>
+                    <td>Boolean</td>
+                    <td>Omezit pouze na soboty?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>zapocitatNevyuzitouDobu</td>
+                    <td>Boolean</td>
+                    <td>Započítat nevyužitou dobu v místnosti vlastníkovi místnosti (fakultě)?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>pocitatPrezKomb</td>
+                    <td>Boolean</td>
+                    <td>Přidat položky se součtem prezenční a kombinované formy?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>dobuPocitatTydne</td>
+                    <td>Boolean</td>
+                    <td>Je-li false, doba se počítá absolutně za celé zadané období. Je-li true, počítá se doba průměrná &#039;za týden&#039;, tj. celková spočtená doba se vydělí počtem zadaných týdnů (celkový počet dnů období / 7).</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>rozepsatOstatni</td>
+                    <td>Boolean</td>
+                    <td>Je-li true, pak rozepíše všechny jendotlivé akce zařazené do kolonky &#039;Ostatní&#039;. Bude pak použit i výsledný sloupec &#039;nazev&#039;, kde bude uvedeno o jakou akci jde.</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>provozOd</td>
+                    <td>Double</td>
+                    <td>Pokud se započítává nevyužitá doba, pak zde je uveden čas provozu místností OD v hodinách během dne (např. hodnota 7.5 znamená 7:30 ráno)?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>provozDo</td>
+                    <td>Double</td>
+                    <td>Pokud se započítává nevyužitá doba, pak zde je uveden čas provozu místností DO v hodinách během dne (např. hodnota 18.33 znamená 18:20)?</td>
+                </tr>
+            
+                
+                <tr>
+                    <td>typyUdalosti</td>
+                    <td>String</td>
+                    <td>Jaké typy časoprostorových událostí započítávat? (prázdné nebo % = všechny, jinak zadat za sebou jednotlivá písmenka: R-Rozvrhová akce, B-blokace, Z-zkouška, P-přijímací řízení, J-jednorázová akce)</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        </div>
+    
+
+
+
+
+
+
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                            
+                        
+                    </div>
+
+                </div>
+
+            </div>
+
+        
+    
+
+</div>
+
+</body>
+</html>

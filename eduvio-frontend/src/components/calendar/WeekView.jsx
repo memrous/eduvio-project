@@ -1,4 +1,6 @@
 import { ChevronLeft, ChevronRight, Paperclip, MapPin } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { formatRoom } from '../../utils/room'
 
 const WEEKDAYS_LONG = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
@@ -16,6 +18,7 @@ const WeekView = ({
   formatDateKey,
   t,
 }) => {
+  const { i18n } = useTranslation()
   const selectedDateKey = formatDateKey(selectedDate)
   const mobileWeekDay = currentWeekDays.find(d => d.dateKey === selectedDateKey) || currentWeekDays[0]
 
@@ -143,9 +146,15 @@ const WeekView = ({
                           {event.requirementId && <Paperclip className="ml-auto size-2.5 shrink-0 opacity-80" />}
                         </div>
                         {heightPx > 36 && <span className="text-[10px] truncate leading-tight opacity-90">{event.title}</span>}
-                        {heightPx > 50 && event.startTime && (
+                        {heightPx > 50 && (event.room || event.location) ? (
+                          <span className="mt-auto flex items-center gap-0.5 truncate text-[9px] font-medium opacity-90" title={formatRoom(event.room || event.location, { language: i18n.language })}>
+                            <MapPin className="size-2 shrink-0" />
+                            <span className="truncate">{formatRoom(event.room || event.location, { short: true, language: i18n.language })}</span>
+                            <span className="ml-auto shrink-0 tabular-nums opacity-70">{event.startTime}</span>
+                          </span>
+                        ) : heightPx > 50 && event.startTime ? (
                           <span className="mt-auto text-[9px] opacity-70 tabular-nums">{event.startTime}</span>
-                        )}
+                        ) : null}
                       </div>
                     )
                   }
@@ -301,10 +310,15 @@ const WeekView = ({
                           {event.title}
                         </span>
                       )}
-                      {heightPx > 50 && event.location && (
-                        <span className="mt-auto flex items-center gap-0.5 truncate text-[9px] font-medium opacity-90">
+                      {heightPx > 50 && (event.room || event.location) && (
+                        <span
+                          className="mt-auto flex items-center gap-0.5 truncate text-[9px] font-medium opacity-90"
+                          title={formatRoom(event.room || event.location, { language: i18n.language })}
+                        >
                           <MapPin className="size-2.5 shrink-0" />
-                          <span className="truncate">{event.location}</span>
+                          <span className="truncate">
+                            {formatRoom(event.room || event.location, { short: true, language: i18n.language })}
+                          </span>
                           <span className="ml-auto shrink-0 tabular-nums opacity-70">
                             {event.startTime}
                           </span>

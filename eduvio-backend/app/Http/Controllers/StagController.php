@@ -21,9 +21,11 @@ class StagController extends Controller
             '*.subject.name' => 'required|string|max:255',
             '*.subject.credits' => 'required|integer',
             '*.subject.lecturer' => 'required|string|max:255',
+            '*.subject.department' => 'nullable|string|max:255',
             '*.subject.semester' => 'required|string|max:255',
             '*.subject.completionType' => 'nullable|string|max:255',
             '*.subject.isMandatory' => 'nullable|boolean',
+            '*.subject.statut' => 'nullable|string|in:A,B,C,a,b,c',
             '*.event.title' => 'required|string|max:255',
             '*.event.date' => 'required|date_format:Y-m-d',
             '*.event.startTime' => 'required|string',
@@ -54,12 +56,34 @@ class StagController extends Controller
                         'name' => $subjectData['name'],
                         'credits' => $subjectData['credits'],
                         'lecturer' => $subjectData['lecturer'],
+                        'department' => $subjectData['department'] ?? null,
                         'semester' => $subjectData['semester'],
                         'completion_type' => $subjectData['completionType'] ?? 'Credit',
-                        'is_mandatory' => $subjectData['isMandatory'] ?? true,
+                        'statut' => !empty($subjectData['statut']) ? strtoupper($subjectData['statut']) : null,
+                        'is_mandatory' => !empty($subjectData['statut'])
+                            ? (strtoupper($subjectData['statut']) === 'A')
+                            : ($subjectData['isMandatory'] ?? true),
                         'description' => 'Imported from IS/STAG'
                     ]
                 );
+
+                if (!empty($subjectData['lecturer']) && $subjectData['lecturer'] !== 'Nespecifikováno') {
+                    $subject->lecturer = $subjectData['lecturer'];
+                }
+
+                if (!empty($subjectData['department'])) {
+                    $subject->department = $subjectData['department'];
+                }
+
+                if (!empty($subjectData['statut'])) {
+                    $newStatut = strtoupper($subjectData['statut']);
+                    $subject->statut = $newStatut;
+                    $subject->is_mandatory = ($newStatut === 'A');
+                }
+
+                if ($subject->isDirty()) {
+                    $subject->save();
+                }
 
                 // 3. Kontrola duplicity rozvrhové akce (Event)
                 // Nechceme stejný rozvrh naimportovat dvakrát při opakovaném spuštění
@@ -105,7 +129,9 @@ class StagController extends Controller
             '*.semester'       => 'required|string|max:255',
             '*.completionType' => 'nullable|string|max:255',
             '*.isMandatory'    => 'nullable|boolean',
+            '*.statut'         => 'nullable|string|in:A,B,C,a,b,c',
             '*.lecturer'       => 'nullable|string|max:255',
+            '*.department'     => 'nullable|string|max:255',
         ]);
 
         $user = $request->user();
@@ -127,8 +153,13 @@ class StagController extends Controller
                 $subject->credits         = $item['credits'];
                 $subject->semester        = $item['semester'];
                 $subject->completion_type = $item['completionType'] ?? 'Credit';
-                $subject->is_mandatory    = $item['isMandatory'] ?? true;
+                $statutVal = !empty($item['statut']) ? strtoupper($item['statut']) : null;
+                $subject->statut          = $statutVal;
+                $subject->is_mandatory    = $statutVal !== null
+                    ? ($statutVal === 'A')
+                    : ($item['isMandatory'] ?? true);
                 $subject->lecturer        = $item['lecturer'] ?? 'Nespecifikováno';
+                $subject->department      = $item['department'] ?? null;
 
                 $subject->save();
                 $processedCount++;

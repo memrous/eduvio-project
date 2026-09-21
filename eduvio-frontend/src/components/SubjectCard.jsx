@@ -1,4 +1,4 @@
-import { User, Trash2 } from 'lucide-react'
+import { User, Trash2, Building2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import CustomIcon from './CustomIcon'
 
@@ -73,14 +73,25 @@ const SubjectCard = ({ subject, onSelect, onDelete }) => {
       </div>
 
       {/* Course Info details */}
-      <div className="grid grid-cols-2 gap-2 text-body-md text-on-surface-variant mt-1">
-        <div className="flex items-center gap-1.5">
-          <User className="w-3.5 h-3.5 shrink-0 text-on-surface-variant" />
-          <span className="truncate text-[13px] font-medium" title={subject.lecturer}>
-            {subject.lecturer}
-          </span>
+      <div className="flex items-center justify-between gap-2 text-body-md text-on-surface-variant mt-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <User className="w-3.5 h-3.5 shrink-0 text-on-surface-variant" />
+            <span className="truncate text-[13px] font-medium" title={subject.lecturer}>
+              {subject.lecturer}
+            </span>
+          </div>
+          {subject.department && (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-on-surface-variant/80 bg-surface-container-low px-1.5 py-0.5 rounded-sm shrink-0"
+              title={subject.department}
+            >
+              <Building2 className="w-3 h-3 shrink-0" />
+              {subject.department}
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-1.5 justify-end">
+        <div className="flex items-center gap-1.5 justify-end shrink-0">
           <span className="text-[13px] font-semibold bg-surface-container-low text-on-surface-variant px-2 py-0.5 rounded-sm">
             {subject.completionType}
           </span>
