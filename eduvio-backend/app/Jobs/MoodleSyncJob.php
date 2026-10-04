@@ -3,13 +3,15 @@
 namespace App\Jobs;
 
 use App\Models\User;
+use App\Services\Moodle\MoodleApiException;
+use App\Services\Moodle\MoodleClient;
+use App\Services\Moodle\MoodleRequirementSync;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\Process\Process;
 
 class MoodleSyncJob implements ShouldQueue
 {
@@ -33,6 +35,14 @@ class MoodleSyncJob implements ShouldQueue
      */
     public function handle(): void
     {
+        if (empty($this->user->moodle_wstoken)) {
+            $this->user->update([
+                'moodle_sync_status' => 'failed',
+                'moodle_sync_error'  => 'Moodle token missing, please reconnect.',
+            ]);
+            return;
+        }
+
         // Step 1 — Set status to pending
         $this->user->update([
             'moodle_sync_status' => 'pending',
@@ -40,59 +50,48 @@ class MoodleSyncJob implements ShouldQueue
         ]);
 
         try {
-            // Step 2 — Generate a short-lived Sanctum token
-            $plainToken = $this->user->createToken('moodle-sync')->plainTextToken;
+            // Step 2 — Fetch assignments from Moodle Web Services and upsert requirements
+            $client = new MoodleClient((string) config('moodle.base_url'), $this->user->moodle_wstoken);
+            $processed = app(MoodleRequirementSync::class)->sync($this->user, $client);
 
-            // Step 3 — Resolve the Python script path
-            $scriptPath = base_path('../moodle_mock_import/test_import.py');
-
-            // Step 4 — Build and run the Process
-            $process = new Process(
-                command: ['python3', $scriptPath],
-                env: [
-                    'LARAVEL_API_URL' => env('LARAVEL_INTERNAL_URL', 'http://laravel.test') . '/api',
-                    'BEARER_TOKEN'    => $plainToken,
-                    'MOODLE_URL'      => config('moodle.base_url'),
-                    'MOODLE_USERNAME' => $this->user->moodle_username,
-                    'MOODLE_PASSWORD' => $this->user->moodle_password,
-                ],
-                timeout: 60,
-            );
-
-            $process->run();
-
-            // Step 5 — Handle success / failure
-            // Always revoke the short-lived token after the script finishes
-            $this->user->tokens()->where('name', 'moodle-sync')->delete();
-
-            if ($process->isSuccessful()) {
-                $this->user->update([
-                    'moodle_sync_status' => 'success',
-                    'moodle_sync_error'  => null,
-                    'moodle_synced_at'   => now(),
-                ]);
-                Log::info("Moodle sync success for user {$this->user->id}");
-            } else {
-                // Capture stderr but strip any token/password fragments before logging
-                $rawError = $process->getErrorOutput() ?: $process->getOutput();
-                $safeError = mb_substr($rawError, 0, 500); // truncate, never log full output
-
-                $this->user->update([
-                    'moodle_sync_status' => 'failed',
-                    'moodle_sync_error'  => $safeError,
-                ]);
-                Log::error("Moodle sync failed for user {$this->user->id}: {$safeError}");
-            }
-        } catch (\Throwable $e) {
-            // Revoke the token even if an exception is thrown
-            $this->user->tokens()->where('name', 'moodle-sync')->delete();
+            // Step 3 — Mark success
+            $this->user->update([
+                'moodle_sync_status' => 'success',
+                'moodle_sync_error'  => null,
+                'moodle_synced_at'   => now(),
+            ]);
+            Log::info("Moodle sync success for user {$this->user->id} ({$processed} assignments)");
+        } catch (MoodleApiException $e) {
+            $error = $e->errorcode === 'invalidtoken'
+                ? 'Moodle token expired or revoked, please reconnect.'
+                : $this->safeError($e->getMessage());
 
             $this->user->update([
                 'moodle_sync_status' => 'failed',
-                'moodle_sync_error'  => mb_substr($e->getMessage(), 0, 500),
+                'moodle_sync_error'  => $error,
             ]);
+            Log::error("Moodle sync failed for user {$this->user->id} [{$e->errorcode}]: {$error}");
+        } catch (\Throwable $e) {
+            $error = $this->safeError($e->getMessage());
 
-            Log::error("MoodleSyncJob exception for user {$this->user->id}: " . $e->getMessage());
+            $this->user->update([
+                'moodle_sync_status' => 'failed',
+                'moodle_sync_error'  => $error,
+            ]);
+            Log::error("MoodleSyncJob exception for user {$this->user->id}: {$error}");
         }
+    }
+
+    /**
+     * Truncate an error message and make sure the wstoken never leaks into it.
+     */
+    private function safeError(string $message): string
+    {
+        $token = (string) $this->user->moodle_wstoken;
+        if ($token !== '') {
+            $message = str_replace($token, '***', $message);
+        }
+
+        return mb_substr($message, 0, 500);
     }
 }

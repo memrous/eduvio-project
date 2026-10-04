@@ -11,6 +11,7 @@ class Requirement extends Model
 
     protected $fillable = [
         'subject_id',
+        'moodle_assignment_id',
         'type',
         'title',
         'context',
