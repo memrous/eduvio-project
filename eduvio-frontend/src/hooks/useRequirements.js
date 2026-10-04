@@ -9,10 +9,12 @@ const extractRequirements = (result) => {
   return result.data || []
 }
 
+export const REQUIREMENTS_KEY = 'requirements'
+
 export const useRequirements = (subjectId) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const queryKey = subjectId ? ['requirements', subjectId] : ['requirements', 'all']
+  const queryKey = subjectId ? [REQUIREMENTS_KEY, subjectId] : [REQUIREMENTS_KEY, 'all']
 
   const query = useQuery({
     queryKey,

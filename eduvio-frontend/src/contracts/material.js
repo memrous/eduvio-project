@@ -19,7 +19,8 @@
 /**
  * @typedef {Object} Material
  * @property {number}       id          - Unique identifier
- * @property {number}       subjectId   - FK → Subject.id
+ * @property {number|null}  subjectId   - FK → Subject.id; null = no subject ("Jiné")
+ * @property {number|null}  [moodle_cmid] - Moodle course module id when imported from Moodle
  * @property {string}       title       - Display name of the resource
  * @property {MaterialType} type        - File or resource category
  * @property {string}       [url]       - External URL or file path

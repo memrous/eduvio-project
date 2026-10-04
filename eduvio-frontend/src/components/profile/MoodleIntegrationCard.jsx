@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   AlertCircle,
   ExternalLink,
@@ -11,6 +12,8 @@ import {
 } from 'lucide-react'
 import * as api from '../../services/api'
 import { extractMoodleToken } from '../../utils/moodleToken'
+import { RESOURCES_KEY } from '../../hooks/useResources'
+import { REQUIREMENTS_KEY } from '../../hooks/useRequirements'
 
 const MoodleIntegrationCard = ({
   effectiveUser,
@@ -20,6 +23,7 @@ const MoodleIntegrationCard = ({
   onUserUpdate,
 }) => {
   const { t } = useTranslation('profile')
+  const queryClient = useQueryClient()
   const [manualToken, setManualToken] = useState('')
   const [manualError, setManualError] = useState('')
   const [manualSubmitting, setManualSubmitting] = useState(false)
@@ -84,6 +88,11 @@ const MoodleIntegrationCard = ({
         if (newStatus !== 'pending') {
           clearInterval(interval)
           setMoodleSyncPolling(false)
+          if (newStatus === 'success') {
+            // Prefix match covers every user / subject variant of both queries.
+            queryClient.invalidateQueries({ queryKey: [RESOURCES_KEY] })
+            queryClient.invalidateQueries({ queryKey: [REQUIREMENTS_KEY] })
+          }
           const refreshed = await refreshUser()
           if (refreshed && onUserUpdate) onUserUpdate(refreshed)
         }
@@ -94,7 +103,7 @@ const MoodleIntegrationCard = ({
       clearInterval(interval)
       setMoodleSyncPolling(false)
     }
-  }, [moodleSyncStatus, refreshUser, effectiveUser, onUserUpdate])
+  }, [moodleSyncStatus, refreshUser, effectiveUser, onUserUpdate, queryClient])
 
   // Handle countdown timer based on moodleNextAllowedAt
   useEffect(() => {

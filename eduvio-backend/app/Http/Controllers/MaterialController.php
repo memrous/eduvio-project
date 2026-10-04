@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Material;
 use App\Models\Subject;
+use App\Support\FileSize;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -63,7 +64,7 @@ class MaterialController extends Controller
             $file = $request->file('file');
             $path = $file->store('materials', 'public');
             $material->url = Storage::disk('public')->url($path);
-            $material->size = $this->formatBytes($file->getSize());
+            $material->size = FileSize::format($file->getSize());
             $material->file_name = $file->getClientOriginalName();
         } else {
             $material->url = $validated['url'] ?? null;
@@ -74,21 +75,6 @@ class MaterialController extends Controller
         $material->save();
 
         return response()->json($material, 201);
-    }
-
-    private function formatBytes(int $bytes): string
-    {
-        if ($bytes < 1024) {
-            return $bytes . ' B';
-        }
-        $units = ['KB', 'MB', 'GB'];
-        $size = $bytes / 1024;
-        $unitIndex = 0;
-        while ($size >= 1024 && $unitIndex < count($units) - 1) {
-            $size /= 1024;
-            $unitIndex++;
-        }
-        return round($size, 1) . ' ' . $units[$unitIndex];
     }
 
     public function destroy(Request $request, $id)

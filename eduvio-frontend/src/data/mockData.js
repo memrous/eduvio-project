@@ -301,5 +301,41 @@ export const INITIAL_RESOURCES = [
     url: '#',
     uploadedAt: getRelativeDate(-15),
     size: '0.8 MB'
+  },
+  // Materials without a subject ("Jiné"), e.g. Moodle courses outside the study plan.
+  {
+    id: 7,
+    subjectId: null,
+    moodle_cmid: 7001,
+    category: 'file',
+    title: 'Zásady kybernetické bezpečnosti',
+    type: 'PDF',
+    description: 'Moodle: Kybernetická bezpečnost – Úvod',
+    url: 'https://moodle.example.com/mod/resource/view.php?id=7001',
+    uploadedAt: getRelativeDate(-1),
+    size: '1.2 MB'
+  },
+  {
+    id: 8,
+    subjectId: null,
+    moodle_cmid: 7002,
+    category: 'file',
+    title: 'Závěrečný test – řešení',
+    type: 'LINK',
+    description: 'Moodle: Školení BOZP – Závěr\nZamčeno: Not available unless: It is on or after 1 December 2026',
+    url: 'https://moodle.example.com/mod/page/view.php?id=7002',
+    uploadedAt: getRelativeDate(-3),
+    size: 'External Link'
+  },
+  {
+    id: 9,
+    subjectId: null,
+    category: 'file',
+    title: 'Návod k VPN',
+    type: 'LINK',
+    description: 'Ručně přidaný odkaz bez předmětu.',
+    url: 'https://example.com/vpn',
+    uploadedAt: getRelativeDate(-6),
+    size: 'External Link'
   }
 ];

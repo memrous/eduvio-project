@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\User;
 use App\Services\Moodle\MoodleApiException;
 use App\Services\Moodle\MoodleClient;
+use App\Services\Moodle\MoodleMaterialSync;
 use App\Services\Moodle\MoodleRequirementSync;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,6 +13,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class MoodleSyncJob implements ShouldQueue
 {
@@ -50,17 +52,27 @@ class MoodleSyncJob implements ShouldQueue
         ]);
 
         try {
-            // Step 2 — Fetch assignments from Moodle Web Services and upsert requirements
-            $client = new MoodleClient((string) config('moodle.base_url'), $this->user->moodle_wstoken);
-            $processed = app(MoodleRequirementSync::class)->sync($this->user, $client);
+            if (empty($this->user->moodle_user_id)) {
+                throw new RuntimeException('Moodle user id missing, please reconnect.');
+            }
 
-            // Step 3 — Mark success
+            // Step 2 — Fetch the enrolled courses once and share them between both syncs
+            $client = new MoodleClient((string) config('moodle.base_url'), $this->user->moodle_wstoken);
+            $courses = $client->call('core_enrol_get_users_courses', [
+                'userid' => $this->user->moodle_user_id,
+            ]);
+
+            // Step 3 — Upsert assignments as requirements, then course contents as materials
+            $assignments = app(MoodleRequirementSync::class)->sync($this->user, $client, $courses);
+            $materials = app(MoodleMaterialSync::class)->sync($this->user, $client, $courses);
+
+            // Step 4 — Mark success
             $this->user->update([
                 'moodle_sync_status' => 'success',
                 'moodle_sync_error'  => null,
                 'moodle_synced_at'   => now(),
             ]);
-            Log::info("Moodle sync success for user {$this->user->id} ({$processed} assignments)");
+            Log::info("Moodle sync success for user {$this->user->id} ({$assignments} assignments, {$materials} materials)");
         } catch (MoodleApiException $e) {
             $error = $e->errorcode === 'invalidtoken'
                 ? 'Moodle token expired or revoked, please reconnect.'

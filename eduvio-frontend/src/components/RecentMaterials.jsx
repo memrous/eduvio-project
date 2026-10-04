@@ -60,7 +60,7 @@ const RecentMaterials = ({ resources, subjects }) => {
           ) : (
             recentListMobile.map(res => {
               const subject = (subjects || []).find(s => s.id === res.subjectId);
-              const subCode = subject ? subject.code : '';
+              const subCode = subject ? subject.code : (res.subjectId == null ? t('resources:otherSubject') : '');
               const styles = getResourceTypeStyles(res.type, t);
               const isExternal = res.type === 'LINK';
 
@@ -78,7 +78,7 @@ const RecentMaterials = ({ resources, subjects }) => {
                         {res.title}
                       </h4>
                       <span className="text-label-sm text-on-surface-variant block mt-0.5 truncate">
-                        {subCode} • {styles.label}
+                        {subCode ? `${subCode} • ` : ''}{styles.label}
                       </span>
                     </div>
                   </div>
@@ -111,7 +111,7 @@ const RecentMaterials = ({ resources, subjects }) => {
           ) : (
             recentListDesktop.map(res => {
               const subject = (subjects || []).find(s => s.id === res.subjectId);
-              const subName = subject ? subject.name : '';
+              const subName = subject ? subject.name : (res.subjectId == null ? t('resources:otherSubject') : '');
               const styles = getResourceTypeStyles(res.type, t);
               const isExternal = res.type === 'LINK';
 

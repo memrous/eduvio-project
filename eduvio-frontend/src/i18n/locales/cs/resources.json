@@ -34,6 +34,8 @@
     "DOC": "Dok."
   },
   "subjectFallback": "Obecné",
+  "otherSubject": "Jiné",
+  "moodleBadge": "Moodle",
   "modal": {
     "title": "Nahrát studijní materiál",
     "fields": {

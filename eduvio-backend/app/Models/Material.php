@@ -22,6 +22,10 @@ class Material extends Model
         'event_id',
         'requirement_id',
         'category',
+        'user_id',
+        'moodle_cmid',
+        'moodle_course_id',
+        'moodle_section_id',
     ];
 
     protected $casts = [

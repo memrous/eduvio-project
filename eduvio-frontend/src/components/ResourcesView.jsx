@@ -28,6 +28,11 @@ import { getLocaleFromLanguage } from '../utils/locale'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:80/api"
 
+// Select/filter value for materials without a subject ("Jiné").
+const OTHER_SUBJECT = 'none'
+
+const hasNoSubject = (resource) => resource.subjectId == null && resource.subject_id == null
+
 const MATERIAL_ICONS = {
   PDF: pdfIcon,
   NOTES: bookIcon,
@@ -187,6 +192,7 @@ const ResourceCard = ({ resource, subjectName, onPreview, t }) => {
           <Icon className="w-4.5 h-4.5" />
         </span>
         <div className="flex flex-wrap gap-1.5 justify-end">
+          {resource.moodle_cmid != null && <TagChip label={t('resources:moodleBadge')} />}
           <TagChip label={t(`resources:typeShort.${resource.type}`, resource.type)} />
           {subCode(subjectName) && <TagChip label={subCode(subjectName)} />}
         </div>
@@ -228,6 +234,7 @@ const ResourceCard = ({ resource, subjectName, onPreview, t }) => {
 }
 
 const subCode = (subjName) => {
+  if (!subjName) return '';
   if (subjName.includes('Database')) return 'DBS';
   if (subjName.includes('Web')) return 'WA';
   if (subjName.includes('Programming')) return 'PROG';
@@ -242,7 +249,7 @@ const UploadModal = ({ onClose, onSave, subjects, presetEventId, presetSubjectId
   const { t } = useTranslation('resources')
   const [form, setForm] = useState({
     title: '',
-    subjectId: presetSubjectId ? String(presetSubjectId) : (subjects[0]?.id || ''),
+    subjectId: presetSubjectId ? String(presetSubjectId) : String(subjects[0]?.id ?? OTHER_SUBJECT),
     type: 'PDF',
     description: ''
   })
@@ -256,12 +263,11 @@ const UploadModal = ({ onClose, onSave, subjects, presetEventId, presetSubjectId
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.subjectId) return;
     const title = form.title.trim() || (file?.name ?? '')
     if (!title) return;
 
     const payload = {
-      subjectId: Number(form.subjectId),
+      subjectId: form.subjectId === OTHER_SUBJECT ? null : Number(form.subjectId),
       title,
       type: sourceType === 'local' ? getTypeFromFileName(file.name) : form.type,
       description: form.description || (sourceType === 'local' ? t('resources:defaults.localDescription') : t('resources:defaults.urlDescription')),
@@ -321,6 +327,7 @@ const UploadModal = ({ onClose, onSave, subjects, presetEventId, presetSubjectId
               <label className={labelCls}>{t('resources:modal.fields.subject')}</label>
               <select value={form.subjectId} onChange={set('subjectId')} disabled={isSubmitting} className={inputCls}>
                 {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                <option value={OTHER_SUBJECT}>{t('resources:otherSubject')}</option>
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
@@ -643,6 +650,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
   const SUBJECT_OPTIONS = useMemo(() => [
     { value: 'all', label: t('resources:filters.allSubjects') },
     ...subjects.map(s => ({ value: String(s.id), label: s.name })),
+    { value: OTHER_SUBJECT, label: t('resources:otherSubject') },
   ], [subjects, t])
 
   const TYPE_OPTIONS = [
@@ -672,7 +680,9 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
 
   const filteredResources = useMemo(() => {
     let list = [...(resources || [])]
-    if (subjectFilter !== 'all') {
+    if (subjectFilter === OTHER_SUBJECT) {
+      list = list.filter(hasNoSubject)
+    } else if (subjectFilter !== 'all') {
       list = list.filter(r => String(r.subjectId) === subjectFilter)
     }
     if (typeFilter !== 'all') {
@@ -740,12 +750,13 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
 
   const generalGrouped = useMemo(() => {
     const generalResources = filteredResources.filter(r => !r.eventId && !r.event_id && r.category !== 'platform')
-    return subjects
-      .map(subject => ({
-        subject,
-        items: generalResources.filter(r => r.subjectId === subject.id),
-      }))
-      .filter(g => g.items.length > 0)
+    const groups = subjects.map(subject => ({
+      subject,
+      items: generalResources.filter(r => r.subjectId === subject.id),
+    }))
+    // Materials without a subject (e.g. Moodle courses outside the study plan) go to "Jiné".
+    groups.push({ subject: null, items: generalResources.filter(hasNoSubject) })
+    return groups.filter(g => g.items.length > 0)
   }, [filteredResources, subjects])
 
   const platformResources = useMemo(() => {
@@ -927,17 +938,19 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
                       {t('resources:library.otherMaterials')}
                     </h2>
                     {generalGrouped.map(({ subject, items }) => (
-                      <div key={subject.id} className="flex flex-col gap-4">
+                      <div key={subject?.id ?? OTHER_SUBJECT} className="flex flex-col gap-4">
                         <h3 className="text-sm font-semibold text-on-surface flex items-center gap-2">
                           <CustomIcon name="folder" className="w-4 h-4" />
-                          {subject.name} <span className="text-xs text-on-surface-variant font-medium">({subject.code})</span>
+                          {subject ? (
+                            <>{subject.name} <span className="text-xs text-on-surface-variant font-medium">({subject.code})</span></>
+                          ) : t('resources:otherSubject')}
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {items.map(r => (
                             <ResourceCard
                               key={r.id}
                               resource={r}
-                              subjectName={subject.name}
+                              subjectName={subject?.name ?? t('resources:otherSubject')}
                               t={t}
                               onPreview={(res) => setPreviewResource(res)}
                             />
