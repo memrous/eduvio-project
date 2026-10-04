@@ -125,8 +125,8 @@ export const resyncStag = async () => {
   return request(() => httpClient.post('/user/stag/resync').then((res) => res.data))
 }
 
-export const connectMoodle = async (payload) => {
-  return request(() => httpClient.post('/user/moodle', payload).then((res) => res.data))
+export const connectMoodleToken = async (token) => {
+  return request(() => httpClient.post('/user/moodle/token', { token }).then((res) => res.data))
 }
 
 export const disconnectMoodle = async () => {

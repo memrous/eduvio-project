@@ -257,7 +257,7 @@ export const resyncStag = async () => {
   })
 }
 
-export const connectMoodle = async (payload) => {
+export const connectMoodleToken = async (token) => {
   await delay(400)
 
   const currentUser = getCurrentMockUser()
@@ -265,8 +265,9 @@ export const connectMoodle = async (payload) => {
     return failure('unauthorized')
   }
 
-  currentUser.moodle_username = payload.moodle_username ?? payload.moodleUsername ?? null
-  currentUser.moodle_password = payload.moodle_password ?? payload.moodlePassword ?? null
+  currentUser.moodle_wstoken = token
+  currentUser.moodle_username = currentUser.moodle_username || 'moodle_user'
+  currentUser.moodle_sync_status = 'pending'
 
   return success({ user: sanitizeUser(currentUser) })
 }
@@ -281,6 +282,8 @@ export const disconnectMoodle = async () => {
 
   currentUser.moodle_username = null
   currentUser.moodle_password = null
+  currentUser.moodle_wstoken = null
+  currentUser.moodle_sync_status = null
 
   return success({ user: sanitizeUser(currentUser) })
 }
@@ -294,7 +297,7 @@ export const resyncMoodle = async () => {
   await delay(400)
   const currentUser = getCurrentMockUser()
   if (!currentUser) return failure('unauthorized')
-  if (!currentUser.moodle_username) return { data: null, error: 'Moodle is not connected.', status: 'error' }
+  if (!currentUser.moodle_username && !currentUser.moodle_wstoken) return { data: null, error: 'Moodle is not connected.', status: 'error' }
   const nextAllowedAt = new Date(Date.now() + 30 * 60 * 1000).toISOString()
   return success({
     message: 'Resync started in background.',

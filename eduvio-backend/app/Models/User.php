@@ -43,6 +43,9 @@ class User extends Authenticatable
         'moodle_sync_error',
         'moodle_synced_at',
         'moodle_last_sync_attempt_at',
+        'moodle_wstoken',
+        'moodle_display_name',
+        'moodle_user_id',
     ];
 
     /**
@@ -58,6 +61,7 @@ class User extends Authenticatable
         'stag_sync_error',
         'moodle_password',
         'moodle_sync_error',
+        'moodle_wstoken',
     ];
 
     /**
@@ -76,6 +80,7 @@ class User extends Authenticatable
             'stag_synced_at'             => 'datetime',
             'stag_last_sync_attempt_at'  => 'datetime',
             'moodle_password'            => 'encrypted',
+            'moodle_wstoken'             => 'encrypted',
             'moodle_synced_at'           => 'datetime',
             'moodle_last_sync_attempt_at'=> 'datetime',
         ];

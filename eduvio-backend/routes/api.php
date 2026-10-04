@@ -72,7 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Moodle Synchronizace
     Route::post('/moodle/sync-requirements', [MoodleController::class, 'syncRequirements']);
-    Route::post('/user/moodle',          [MoodleConnectController::class, 'connect']);
+    Route::post('/user/moodle/token',    [MoodleConnectController::class, 'connectToken']);
     Route::delete('/user/moodle',        [MoodleConnectController::class, 'disconnect']);
     Route::get('/user/moodle/status',    [MoodleConnectController::class, 'status']);
     Route::post('/user/moodle/resync',   [MoodleConnectController::class, 'resync']);

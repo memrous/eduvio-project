@@ -2,19 +2,15 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   AlertCircle,
+  ExternalLink,
   Loader2,
   ShieldCheck,
   Unlink2,
   Link2,
-  KeyRound,
   RefreshCw,
 } from 'lucide-react'
 import * as api from '../../services/api'
-
-const emptyMoodleForm = {
-  moodleUsername: '',
-  moodlePassword: '',
-}
+import { extractMoodleToken } from '../../utils/moodleToken'
 
 const MoodleIntegrationCard = ({
   effectiveUser,
@@ -24,10 +20,9 @@ const MoodleIntegrationCard = ({
   onUserUpdate,
 }) => {
   const { t } = useTranslation('profile')
-  const [showMoodleForm, setShowMoodleForm] = useState(false)
-  const [moodleForm, setMoodleForm] = useState(emptyMoodleForm)
-  const [moodleErrors, setMoodleErrors] = useState({})
-  const [moodleSubmitting, setMoodleSubmitting] = useState(false)
+  const [manualToken, setManualToken] = useState('')
+  const [manualError, setManualError] = useState('')
+  const [manualSubmitting, setManualSubmitting] = useState(false)
   const [moodleDisconnecting, setMoodleDisconnecting] = useState(false)
   const [moodleResyncLoading, setMoodleResyncLoading] = useState(false)
   const [moodleSyncStatus, setMoodleSyncStatus] = useState(effectiveUser?.moodle_sync_status ?? null)
@@ -36,6 +31,9 @@ const MoodleIntegrationCard = ({
 
   // eslint-disable-next-line no-unused-vars
   const [moodleSyncPolling, setMoodleSyncPolling] = useState(false)
+
+  const supportsMoodleHandler =
+    typeof navigator !== 'undefined' && 'registerProtocolHandler' in navigator && window.isSecureContext
 
   // Fetch Moodle status on mount
   useEffect(() => {
@@ -126,26 +124,6 @@ const MoodleIntegrationCard = ({
     return () => clearInterval(interval)
   }, [moodleNextAllowedAt])
 
-  const handleMoodleInput = (field) => (event) => {
-    const { value } = event.target
-    setMoodleForm((prev) => ({ ...prev, [field]: value }))
-    setMoodleErrors((prev) => ({ ...prev, [field]: '' }))
-  }
-
-  const validateMoodleForm = () => {
-    const errors = {}
-
-    if (!moodleForm.moodleUsername.trim()) {
-      errors.moodleUsername = t('validation.usernameRequired')
-    }
-
-    if (!moodleForm.moodlePassword.trim()) {
-      errors.moodlePassword = t('validation.passwordRequired')
-    }
-
-    return errors
-  }
-
   const syncUser = async () => {
     const refreshedUser = await refreshUser()
     if (refreshedUser) {
@@ -155,40 +133,52 @@ const MoodleIntegrationCard = ({
     return refreshedUser
   }
 
-  const handleMoodleSubmit = async (event) => {
-    event.preventDefault()
-
-    const errors = validateMoodleForm()
-    if (Object.keys(errors).length) {
-      setMoodleErrors(errors)
-      return
-    }
-
-    setMoodleSubmitting(true)
+  const handleConnectMoodle = () => {
+    const passport = crypto.randomUUID?.() ?? (Math.random().toString(36).slice(2) + Date.now().toString(36))
+    const callbackUrl = `${window.location.origin}/moodle/callback?token=%s`
     try {
-      const response = await api.connectMoodle({
-        moodle_username: moodleForm.moodleUsername.trim(),
-        moodle_password: moodleForm.moodlePassword,
-      })
+      navigator.registerProtocolHandler('web+eduvio', callbackUrl)
+    } catch {
+      // Silently ignore errors (e.g. user already registered or denied)
+    }
+    const moodleBaseUrl = import.meta.env.VITE_MOODLE_BASE_URL ?? 'https://moodle.upol.cz'
+    const launchUrl = `${moodleBaseUrl}/admin/tool/mobile/launch.php?service=moodle_mobile_app&passport=${encodeURIComponent(passport)}&urlscheme=${encodeURIComponent('web+eduvio')}`
+    window.open(launchUrl, '_blank', 'noopener,noreferrer')
+  }
 
-      if (response.status === 'error') {
+  const handleManualSubmit = async (event) => {
+    event.preventDefault()
+    const trimmed = manualToken.trim()
+    if (!trimmed) return
+
+    setManualSubmitting(true)
+    setManualError('')
+
+    try {
+      const decoded = extractMoodleToken(trimmed)
+      if (!decoded) {
+        setManualError(t('moodle.errors.decodeFailed'))
+        toast.error(t('moodle.errors.decodeFailed'))
+        return
+      }
+
+      const response = await api.connectMoodleToken(decoded)
+      if (response?.status === 'error') {
         toast.error(t('toast.moodleConnectFailed'))
         return
       }
 
-      const updatedUser = response.data?.user || (await syncUser())
+      const updatedUser = response?.data?.user || (await syncUser())
       if (updatedUser && onUserUpdate) {
         onUserUpdate(updatedUser)
       }
-      setShowMoodleForm(false)
-      setMoodleForm(emptyMoodleForm)
-      setMoodleErrors({})
+      setManualToken('')
       setMoodleSyncStatus('pending')
       toast.success(t('moodle.syncing.background'))
     } catch {
       toast.error(t('toast.moodleConnectFailed'))
     } finally {
-      setMoodleSubmitting(false)
+      setManualSubmitting(false)
     }
   }
 
@@ -197,18 +187,17 @@ const MoodleIntegrationCard = ({
 
     try {
       const response = await api.disconnectMoodle()
-      if (response.status === 'error') {
+      if (response?.status === 'error') {
         toast.error(t('toast.moodleDisconnectFailed'))
         return
       }
 
-      const updatedUser = response.data?.user || (await syncUser())
+      const updatedUser = response?.data?.user || (await syncUser())
       if (updatedUser && onUserUpdate) {
         onUserUpdate(updatedUser)
       }
-      setShowMoodleForm(false)
-      setMoodleForm(emptyMoodleForm)
-      setMoodleErrors({})
+      setManualToken('')
+      setManualError('')
       setMoodleSyncStatus(null)
       setMoodleNextAllowedAt(null)
       toast.success(t('toast.moodleDisconnectSuccess'))
@@ -225,7 +214,7 @@ const MoodleIntegrationCard = ({
     try {
       const response = await api.resyncMoodle()
 
-      if (response.status === 'error') {
+      if (response?.status === 'error') {
         if (response.error === 'rate_limited') {
           const nextAllowed = response.data?.next_allowed_at
           const retryAfter = response.data?.retry_after_seconds
@@ -240,7 +229,7 @@ const MoodleIntegrationCard = ({
         return
       }
 
-      if (response.data?.next_allowed_at) {
+      if (response?.data?.next_allowed_at) {
         setMoodleNextAllowedAt(response.data.next_allowed_at)
       }
       toast.success(t('moodle.syncing.started'))
@@ -296,80 +285,71 @@ const MoodleIntegrationCard = ({
 
         {!isMoodleConnected ? (
           <div className="space-y-4">
-            <p className="text-sm text-on-surface-variant">
-              {t('moodle.card.helper')}
-            </p>
+            {supportsMoodleHandler ? (
+              <div className="space-y-4">
+                <p className="text-sm text-on-surface-variant">
+                  {t('moodle.card.helper')}
+                </p>
 
-            {!showMoodleForm ? (
-              <button
-                type="button"
-                onClick={() => setShowMoodleForm(true)}
-                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container"
-              >
-                <Link2 className="h-4 w-4" />
-                {t('moodle.actions.connect')}
-              </button>
+                <button
+                  type="button"
+                  onClick={handleConnectMoodle}
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container"
+                >
+                  <Link2 className="h-4 w-4" />
+                  {t('moodle.actions.connect')}
+                </button>
+              </div>
             ) : (
-              <form onSubmit={handleMoodleSubmit} className="space-y-4 rounded-xl border border-outline-variant bg-surface p-4 shadow-sm">
-                <div className="grid gap-3">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-semibold text-on-surface" htmlFor="profile-moodle-username">
-                      {t('moodle.labels.username')}
-                    </label>
-                    <input
-                      id="profile-moodle-username"
-                      type="text"
-                      value={moodleForm.moodleUsername}
-                      onChange={handleMoodleInput('moodleUsername')}
-                      className={`w-full rounded-lg border px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 ${moodleErrors.moodleUsername ? 'border-error bg-error-container' : 'border-outline-variant bg-surface'}`}
-                    />
-                    {moodleErrors.moodleUsername && (
-                      <p className="text-xs text-error">{moodleErrors.moodleUsername}</p>
-                    )}
-                  </div>
+              <div className="space-y-4">
+                <p className="text-sm text-on-surface-variant">
+                  {t('moodle.card.unsupportedBrowser')}
+                </p>
 
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-semibold text-on-surface" htmlFor="profile-moodle-password">
-                      {t('moodle.labels.password')}
-                    </label>
-                    <div className="relative">
-                      <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
-                      <input
-                        id="profile-moodle-password"
-                        type="password"
-                        value={moodleForm.moodlePassword}
-                        onChange={handleMoodleInput('moodlePassword')}
-                        className={`w-full rounded-lg border px-4 py-2.5 pl-10 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 ${moodleErrors.moodlePassword ? 'border-error bg-error-container' : 'border-outline-variant bg-surface'}`}
-                      />
-                    </div>
-                    {moodleErrors.moodlePassword && (
-                      <p className="text-xs text-error">{moodleErrors.moodlePassword}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="submit"
-                    disabled={moodleSubmitting}
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {moodleSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
-                    {t('moodle.actions.connect')}
-                  </button>
+                <div className="flex">
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowMoodleForm(false)
-                      setMoodleForm(emptyMoodleForm)
-                      setMoodleErrors({})
-                    }}
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant px-4 py-2.5 text-sm font-semibold text-on-surface hover:bg-surface-container-low"
+                    onClick={handleConnectMoodle}
+                    className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-3.5 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors"
                   >
-                    {t('moodle.actions.cancel')}
+                    <ExternalLink className="h-4 w-4" />
+                    {t('moodle.actions.openMoodleLogin')}
                   </button>
                 </div>
-              </form>
+
+                <form onSubmit={handleManualSubmit} className="space-y-3 rounded-xl border border-outline-variant bg-surface p-4 shadow-sm">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-on-surface" htmlFor="profile-moodle-manual-token">
+                      {t('moodle.card.manualPasteLabel')}
+                    </label>
+                    <input
+                      id="profile-moodle-manual-token"
+                      type="text"
+                      value={manualToken}
+                      onChange={(e) => {
+                        setManualToken(e.target.value)
+                        if (manualError) setManualError('')
+                      }}
+                      placeholder={t('moodle.card.manualPastePlaceholder')}
+                      className={`w-full rounded-lg border px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+                        manualError ? 'border-error bg-error-container/20' : 'border-outline-variant bg-surface'
+                      }`}
+                    />
+                    {manualError && (
+                      <p className="text-xs text-error">{manualError}</p>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={manualSubmitting || !manualToken.trim()}
+                    className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {manualSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+                    {t('moodle.actions.connectManual')}
+                  </button>
+                </form>
+              </div>
             )}
           </div>
         ) : (

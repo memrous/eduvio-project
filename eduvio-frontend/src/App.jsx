@@ -17,6 +17,7 @@ const MaterialsPage     = lazy(() => import('./pages/MaterialsPage'))
 const ProfilePage       = lazy(() => import('./pages/ProfilePage'))
 const LoginPage         = lazy(() => import('./pages/LoginPage'))
 const RegisterPage      = lazy(() => import('./pages/RegisterPage'))
+const MoodleCallbackPage = lazy(() => import('./pages/MoodleCallbackPage'))
 
 // ── Minimal, subtle progress bar fallback for lazy JS chunk loading ──
 const PageLoader = () => (
@@ -59,6 +60,7 @@ const AppRoutes = () => (
 
       {/* ── Protected routes (require auth) ── */}
       <Route element={<ProtectedRoute />}>
+        <Route path="/moodle/callback" element={<MoodleCallbackPage />} />
         <Route element={<AppLayout />}>
           <Route path="/dashboard"          element={<DashboardPage />} />
           <Route path="/subjects"           element={<SubjectsPage />} />

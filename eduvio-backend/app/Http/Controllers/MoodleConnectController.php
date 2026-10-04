@@ -5,21 +5,64 @@ namespace App\Http\Controllers;
 use App\Jobs\MoodleSyncJob;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Http;
 
 class MoodleConnectController extends Controller
 {
-    public function connect(Request $request): JsonResponse
+    public function connectToken(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'moodle_username' => 'required|string|max:255',
-            'moodle_password' => 'required|string',
+            'token' => 'required|string',
         ]);
+
+        $parts = explode(':::', $validated['token']);
+        if (count($parts) !== 3) {
+            return response()->json([
+                'error'   => 'invalid_token_format',
+                'message' => 'Invalid token format.',
+            ], 422);
+        }
+
+        $wstoken = $parts[1];
+        $baseUrl = rtrim(config('moodle.base_url'), '/');
+
+        try {
+            $response = Http::timeout(15)->get("{$baseUrl}/webservice/rest/server.php", [
+                'wstoken'            => $wstoken,
+                'moodlewsrestformat' => 'json',
+                'wsfunction'         => 'core_webservice_get_site_info',
+            ]);
+
+            if (! $response->successful()) {
+                return response()->json([
+                    'error'   => 'token_validation_failed',
+                    'message' => 'Token validation failed.',
+                ], 422);
+            }
+
+            $data = $response->json();
+            if (! is_array($data) || isset($data['exception']) || isset($data['errorcode'])) {
+                return response()->json([
+                    'error'   => 'token_validation_failed',
+                    'message' => 'Token validation failed.',
+                ], 422);
+            }
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error'   => 'token_validation_failed',
+                'message' => 'Token validation failed.',
+            ], 422);
+        }
+
+        $displayName = $data['fullname'] ?? $data['username'] ?? null;
+        $moodleUserId = $data['userid'] ?? null;
 
         $user = $request->user();
 
         $user->update([
-            'moodle_username'             => $validated['moodle_username'],
-            'moodle_password'             => $validated['moodle_password'],
+            'moodle_wstoken'              => $wstoken,
+            'moodle_display_name'         => $displayName,
+            'moodle_user_id'              => $moodleUserId,
             'moodle_sync_status'          => 'pending',
             'moodle_sync_error'           => null,
             'moodle_synced_at'            => null,

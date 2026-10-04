@@ -37,7 +37,7 @@ const Profile = ({ user: initialUser }) => {
   const [isFetching] = useState(!initialUser)
   const [activeTab, setActiveTab] = useState(() => {
     const params = new URLSearchParams(window.location.search)
-    return params.get('stag') ? 'account' : 'overview'
+    return params.get('stag') || params.get('moodle') ? 'account' : 'overview'
   })
   const [copied, setCopied] = useState(false)
 
@@ -87,6 +87,30 @@ const Profile = ({ user: initialUser }) => {
 
     navigate('/profile', { replace: true })
   }, [navigate, t, toast])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const moodle = params.get('moodle')
+    const reason = params.get('reason')
+
+    if (!moodle) return
+
+    if (moodle === 'connected') {
+      refreshUser().then((refreshed) => {
+        if (refreshed) setUser(refreshed)
+      })
+      toast.success(t('moodle.syncing.background'))
+    } else if (moodle === 'error') {
+      const errorMessages = {
+        missing_token: t('moodle.errors.missingToken', 'Chybí ověřovací token z Moodlu.'),
+        decode_failed: t('moodle.errors.decodeFailed', 'Nepodařilo se zpracovat token z Moodlu.'),
+        token_rejected: t('moodle.errors.tokenRejected', 'Ověřovací token byl systémem Moodle odmítnut.'),
+      }
+      toast.error(errorMessages[reason] || t('toast.moodleConnectFailed'))
+    }
+
+    navigate('/profile', { replace: true })
+  }, [navigate, refreshUser, t, toast])
 
   const effectiveUser = user ?? initialUser
   const isStagConnected = Boolean(effectiveUser?.stag_student_id)

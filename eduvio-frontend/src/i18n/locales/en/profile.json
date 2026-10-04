@@ -195,7 +195,10 @@
     "card": {
       "title": "Moodle",
       "subtitle": "Moodle connection status",
-      "helper": "To connect to Moodle, enter your login credentials. If you want, you can do this later."
+      "helper": "Connect your Moodle account to automatically sync courses and assignment deadlines into Eduvio.",
+      "unsupportedBrowser": "Your browser (e.g. Safari on iOS) does not support automatic protocol handling. Open Moodle login and paste the received token or URL manually below.",
+      "manualPasteLabel": "Authentication token or link",
+      "manualPastePlaceholder": "Paste link or token (web+eduvio://token=...)"
     },
     "labels": {
       "username": "Username",
@@ -207,6 +210,8 @@
     },
     "actions": {
       "connect": "Connect Moodle",
+      "openMoodleLogin": "Open Moodle login",
+      "connectManual": "Connect Moodle",
       "disconnect": "Disconnect Moodle",
       "syncNow": "Sync now",
       "syncNowCountdown": "Sync now ({{time}})",
@@ -217,6 +222,14 @@
       "started": "Sync started — refreshing tasks in the background.",
       "recentlyTriggered": "Sync was already triggered recently — try again in {{minutes}} minutes.",
       "failed": "Failed to trigger sync."
+    },
+    "errors": {
+      "missingToken": "Missing Moodle authentication token.",
+      "decodeFailed": "Failed to decode Moodle authentication token.",
+      "tokenRejected": "Moodle authentication token was rejected."
+    },
+    "callback": {
+      "connecting": "Connecting to Moodle..."
     }
   }
 }

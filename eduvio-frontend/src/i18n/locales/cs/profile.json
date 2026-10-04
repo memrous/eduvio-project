@@ -195,7 +195,10 @@
     "card": {
       "title": "Moodle",
       "subtitle": "Stav připojení k Moodlu",
-      "helper": "Pro připojení k Moodlu zadejte své přihlašovací údaje. Pokud chcete, můžete to udělat později."
+      "helper": "Propojte svůj účet Moodle a synchronizujte kurzy a termíny odevzdání úkolů přímo do Eduvia.",
+      "unsupportedBrowser": "Váš prohlížeč (např. Safari na iOS) nepodporuje automatické zachycení protokolu. Otevřete přihlášení do Moodle a vložte získaný token nebo odkaz ručně níže.",
+      "manualPasteLabel": "Ověřovací token nebo odkaz",
+      "manualPastePlaceholder": "Vložte odkaz nebo token (web+eduvio://token=...)"
     },
     "labels": {
       "username": "Uživatelské jméno",
@@ -207,6 +210,8 @@
     },
     "actions": {
       "connect": "Připojit Moodle",
+      "openMoodleLogin": "Otevřít přihlášení v Moodlu",
+      "connectManual": "Připojit Moodle",
       "disconnect": "Odpojit Moodle",
       "syncNow": "Synchronizovat teď",
       "syncNowCountdown": "Synchronizovat teď ({{time}})",
@@ -217,6 +222,14 @@
       "started": "Synchronizace byla spuštěna a úkoly se na pozadí obnovují.",
       "recentlyTriggered": "Synchronizace už byla nedávno spuštěna. Zkuste to znovu za {{minutes}} minut.",
       "failed": "Synchronizaci se nepodařilo spustit."
+    },
+    "errors": {
+      "missingToken": "Chybí ověřovací token z Moodlu.",
+      "decodeFailed": "Nepodařilo se zpracovat ověřovací token z Moodlu.",
+      "tokenRejected": "Ověřovací token byl systémem Moodle odmítnut."
+    },
+    "callback": {
+      "connecting": "Připojování k Moodlu..."
     }
   }
 }
