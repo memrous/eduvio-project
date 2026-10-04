@@ -7,8 +7,7 @@ import requests
 LARAVEL_API_URL = os.environ.get("LARAVEL_API_URL", "http://localhost/api")
 BEARER_TOKEN    = os.environ.get("BEARER_TOKEN",    "")
 MOODLE_URL      = os.environ.get("MOODLE_URL",      "")
-MOODLE_USERNAME = os.environ.get("MOODLE_USERNAME", "")
-MOODLE_PASSWORD = os.environ.get("MOODLE_PASSWORD", "")
+MOODLE_WSTOKEN  = os.environ.get("MOODLE_WSTOKEN",  "")
 
 def nacti_mock_moodle_data(soubor):
     """Načte JSON soubor s mockovanými daty z Moodle."""
@@ -73,8 +72,8 @@ if __name__ == "__main__":
     if not MOODLE_URL:
         print("❌ Chyba: MOODLE_URL není nastaven.", file=sys.stderr)
         sys.exit(1)
-    if not MOODLE_USERNAME:
-        print("❌ Chyba: MOODLE_USERNAME není nastaven.", file=sys.stderr)
+    if not MOODLE_WSTOKEN:
+        print("❌ Chyba: MOODLE_WSTOKEN není nastaven.", file=sys.stderr)
         sys.exit(1)
 
     script_dir = os.path.dirname(os.path.abspath(__file__))

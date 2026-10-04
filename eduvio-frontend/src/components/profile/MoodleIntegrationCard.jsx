@@ -357,7 +357,7 @@ const MoodleIntegrationCard = ({
             <div className="grid gap-3 rounded-xl border border-success/30 bg-success-container/10 p-4 sm:grid-cols-2">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-success">{t('moodle.labels.username')}</p>
-                <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.moodle_username || 'N/A'}</p>
+                <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.moodle_display_name || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-success">{t('moodle.labels.password')}</p>

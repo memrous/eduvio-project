@@ -34,6 +34,7 @@ const mockRegisteredUsers = [...MOCK_USER_DB]
 const sanitizeUser = (user) => {
   const copy = { ...user }
   delete copy.password
+  delete copy.moodle_wstoken
   return copy
 }
 
@@ -266,8 +267,13 @@ export const connectMoodleToken = async (token) => {
   }
 
   currentUser.moodle_wstoken = token
-  currentUser.moodle_username = currentUser.moodle_username || 'moodle_user'
+  currentUser.moodle_display_name = 'Mock Moodle User'
+  currentUser.moodle_user_id = currentUser.moodle_user_id || 1
+  currentUser.moodle_connected = true
   currentUser.moodle_sync_status = 'pending'
+  currentUser.moodle_sync_error = null
+  currentUser.moodle_synced_at = null
+  currentUser.moodle_last_sync_attempt_at = new Date().toISOString()
 
   return success({ user: sanitizeUser(currentUser) })
 }
@@ -280,10 +286,14 @@ export const disconnectMoodle = async () => {
     return failure('unauthorized')
   }
 
-  currentUser.moodle_username = null
-  currentUser.moodle_password = null
   currentUser.moodle_wstoken = null
+  currentUser.moodle_display_name = null
+  currentUser.moodle_user_id = null
+  currentUser.moodle_connected = false
   currentUser.moodle_sync_status = null
+  currentUser.moodle_sync_error = null
+  currentUser.moodle_synced_at = null
+  currentUser.moodle_last_sync_attempt_at = null
 
   return success({ user: sanitizeUser(currentUser) })
 }
@@ -297,7 +307,7 @@ export const resyncMoodle = async () => {
   await delay(400)
   const currentUser = getCurrentMockUser()
   if (!currentUser) return failure('unauthorized')
-  if (!currentUser.moodle_username && !currentUser.moodle_wstoken) return { data: null, error: 'Moodle is not connected.', status: 'error' }
+  if (!currentUser.moodle_connected) return { data: null, error: 'Moodle is not connected.', status: 'error' }
   const nextAllowedAt = new Date(Date.now() + 30 * 60 * 1000).toISOString()
   return success({
     message: 'Resync started in background.',

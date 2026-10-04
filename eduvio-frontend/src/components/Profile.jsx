@@ -114,7 +114,7 @@ const Profile = ({ user: initialUser }) => {
 
   const effectiveUser = user ?? initialUser
   const isStagConnected = Boolean(effectiveUser?.stag_student_id)
-  const isMoodleConnected = Boolean(effectiveUser?.moodle_username)
+  const isMoodleConnected = Boolean(effectiveUser?.moodle_connected)
 
   const copyId = async () => {
     const studentId = effectiveUser?.stag_student_id || 'UPOL-241087'

@@ -81,8 +81,9 @@ class MoodleConnectController extends Controller
     public function disconnect(Request $request): JsonResponse
     {
         $request->user()->update([
-            'moodle_username'             => null,
-            'moodle_password'             => null,
+            'moodle_wstoken'              => null,
+            'moodle_display_name'         => null,
+            'moodle_user_id'              => null,
             'moodle_sync_status'          => null,
             'moodle_sync_error'           => null,
             'moodle_synced_at'            => null,
@@ -100,6 +101,7 @@ class MoodleConnectController extends Controller
         $user = $request->user();
 
         return response()->json([
+            'moodle_connected'   => $user->moodle_connected,
             'moodle_sync_status' => $user->moodle_sync_status,
             'moodle_synced_at'   => $user->moodle_synced_at,
             'next_allowed_at'  => $this->nextAllowedAt($user),
@@ -111,7 +113,7 @@ class MoodleConnectController extends Controller
         $user = $request->user();
 
         // 422 — Moodle not connected
-        if (! $user->moodle_username) {
+        if (! $user->moodle_wstoken) {
             return response()->json([
                 'message' => 'Moodle is not connected.',
             ], 422);
