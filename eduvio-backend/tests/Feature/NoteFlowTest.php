@@ -16,7 +16,7 @@ class NoteFlowTest extends TestCase
     public function test_user_can_get_note_empty_by_default(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $subject = Subject::create([
             'user_id' => $user->id,
@@ -38,7 +38,7 @@ class NoteFlowTest extends TestCase
     public function test_user_can_create_and_update_note(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $subject = Subject::create([
             'user_id' => $user->id,
@@ -108,7 +108,7 @@ class NoteFlowTest extends TestCase
             'semester' => 'Summer',
         ]);
 
-        Sanctum::actingAs($user1);
+        Sanctum::actingAs($user1, ['*']);
 
         // Try to get
         $getResponse = $this->getJson("/api/subjects/{$subjectOfUser2->id}/note");

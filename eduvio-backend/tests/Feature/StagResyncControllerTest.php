@@ -14,13 +14,14 @@ class StagResyncControllerTest extends TestCase
 
     // ── Helpers ──────────────────────────────────────────────────────
 
-    /** Creates a user with full STAG credentials and a given sync status. */
+    /** Creates a user with a valid STAG ticket and a given sync status. */
     private function stagUser(array $overrides = []): User
     {
         return User::factory()->create(array_merge([
             'stag_student_id'           => 'S12345',
-            'stag_username'             => 'stag_user',
-            'stag_password'             => 'stag_pass',
+            'stag_ticket'               => 'stag-ticket-abc',
+            'stag_ticket_expires_at'    => now()->addDays(30),
+            'stag_user_name'            => 'stag_user',
             'stag_sync_status'          => 'success',
             'stag_synced_at'            => now(),
             'stag_last_sync_attempt_at' => null,
@@ -117,10 +118,27 @@ class StagResyncControllerTest extends TestCase
         Queue::fake();
 
         $user = User::factory()->create([
-            'stag_student_id'  => null,
-            'stag_username'    => null,
-            'stag_password'    => null,
-            'stag_sync_status' => null,
+            'stag_student_id'        => null,
+            'stag_ticket'            => null,
+            'stag_ticket_expires_at' => null,
+            'stag_sync_status'       => null,
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/user/stag/resync');
+
+        $response->assertStatus(422);
+        $response->assertJsonPath('message', 'STAG is not connected.');
+
+        Queue::assertNothingPushed();
+    }
+
+    public function test_resync_returns_422_when_stag_ticket_expired(): void
+    {
+        Queue::fake();
+
+        $user = $this->stagUser([
+            'stag_ticket_expires_at'    => now()->subMinute(),
+            'stag_last_sync_attempt_at' => now()->subMinutes(31),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')->postJson('/api/user/stag/resync');

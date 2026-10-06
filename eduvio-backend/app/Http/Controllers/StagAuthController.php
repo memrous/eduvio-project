@@ -18,6 +18,10 @@ class StagAuthController extends Controller
      */
     public function redirect(Request $request): JsonResponse
     {
+        if ($response = $this->rejectInAgentMode()) {
+            return $response;
+        }
+
         $state = Str::random(40);
         Cache::put("stag_state:{$state}", $request->user()->id, now()->addMinutes(10));
 
@@ -36,8 +40,12 @@ class StagAuthController extends Controller
     /**
      * Veřejný callback endpoint volaný ze STAGu po přihlášení uživatele.
      */
-    public function callback(Request $request): RedirectResponse
+    public function callback(Request $request): RedirectResponse|JsonResponse
     {
+        if ($response = $this->rejectInAgentMode()) {
+            return $response;
+        }
+
         $frontendUrl = rtrim(config('stag.frontend_url', 'http://localhost:5173'), '/');
 
         $state = $request->query('state');
@@ -110,5 +118,20 @@ class StagAuthController extends Controller
 
             return redirect("{$frontendUrl}/profile?stag=error&reason=unexpected");
         }
+    }
+
+    /**
+     * In agent mode the server never talks to STAG, so the ticket login flow is disabled.
+     */
+    private function rejectInAgentMode(): ?JsonResponse
+    {
+        if (config('stag.mode') !== 'agent') {
+            return null;
+        }
+
+        return response()->json([
+            'error'   => 'agent_mode',
+            'message' => 'STAG is connected via the local agent in this deployment.',
+        ], 409);
     }
 }

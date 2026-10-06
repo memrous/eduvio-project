@@ -4,6 +4,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { useDashboardSummary } from '../hooks/useDashboardSummary'
 import { useSubjects } from '../hooks/useSubjects'
+import { useStagStatus } from '../hooks/useStagStatus'
 import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
 import CustomIcon from '../components/CustomIcon'
@@ -36,14 +37,18 @@ const DashboardPage = () => {
 
   const { data: summary, isLoading: summaryLoading, error: summaryError, refetch: refetchSummary } = useDashboardSummary()
   const { data: allSubjects, isLoading: subjectsLoading, error: subjectsError, refetch: refetchSubjects } = useSubjects()
+  // Also refetches on window focus and invalidates synced data when the agent reports a new sync
+  const { status: stagStatus } = useStagStatus()
+  const isAgentMode = stagStatus?.mode === 'agent'
+  const isAwaitingFirstAgentSync = isAgentMode && Boolean(stagStatus?.stag_connected) && !stagStatus?.stag_synced_at
 
   // Derive initial sync status from user object:
   // - Use stag_sync_status if available
-  // - Fall back to 'pending' only if the user has STAG credentials but has never synced
+  // - Fall back to 'pending' only if STAG is connected but has never synced
   const derivedInitialStatus = (() => {
     if (!user) return null
     if (user.stag_sync_status) return user.stag_sync_status
-    if (user.stag_username && !user.stag_synced_at) return 'pending'
+    if (user.stag_connected && !user.stag_synced_at) return 'pending'
     return null
   })()
   const [stagSyncStatus, setStagSyncStatus] = useState(derivedInitialStatus)
@@ -59,7 +64,8 @@ const DashboardPage = () => {
 
   // Poll stag_sync_status while it is 'pending', then invalidate React Query cache
   useEffect(() => {
-    if (stagSyncStatus !== 'pending') return
+    // In agent mode the server never syncs — useStagStatus picks up the agent's reports instead
+    if (stagSyncStatus !== 'pending' || isAgentMode) return
 
     const interval = setInterval(async () => {
       const result = await api.getStagSyncStatus()
@@ -84,7 +90,7 @@ const DashboardPage = () => {
     }, 3000)
 
     return () => clearInterval(interval)
-  }, [stagSyncStatus, queryClient])
+  }, [stagSyncStatus, isAgentMode, queryClient])
 
   const isLoading = summaryLoading || subjectsLoading
   const error = summaryError || subjectsError
@@ -159,8 +165,21 @@ const DashboardPage = () => {
   const isDataEmpty = !summary || (summary.todaySchedule.length === 0 && summary.needsAttention.length === 0 && displaySubjects.length === 0)
 
   if (isDataEmpty) {
+    // Režim agent s tokenem, ale bez jediného syncu — čeká se na spuštění agenta, ne na server
+    if (isAwaitingFirstAgentSync && stagStatus?.stag_sync_status !== 'failed') {
+      return (
+        <PageState
+          variant="empty"
+          title={t('common:awaitingFirstSync')}
+          description={t('common:awaitingFirstSyncDescription')}
+          actionLabel={t('common:goToProfile')}
+          onAction={() => navigate('/profile')}
+        />
+      )
+    }
+
     // Sync stále probíhá — zobraz DashboardSkeleton s elegantním informačním pruhem
-    if (stagSyncStatus === 'pending') {
+    if (stagSyncStatus === 'pending' && !isAgentMode) {
       const syncBanner = (
         <div className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 border border-primary/20 text-on-surface text-body-sm font-medium">
           <div className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />

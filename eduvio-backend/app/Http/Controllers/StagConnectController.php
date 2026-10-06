@@ -7,45 +7,16 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 
+/**
+ * Manages an existing STAG connection. Connecting itself happens via
+ * StagAuthController::redirect/callback (ticket-based login).
+ */
 class StagConnectController extends Controller
 {
-    // DEPRECATED: nahrazeno StagAuthController::redirect/callback (ticket-based login).
-    // Ponecháno pro zpětnou kompatibilitu, lze odstranit po ověření, že se nikde nevolá.
-    public function connect(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'stag_student_id' => 'required|string|max:255',
-            'stag_username'   => 'required|string|max:255',
-            'stag_password'   => 'required|string',
-        ]);
-
-        $user = $request->user();
-
-        $user->update([
-            'stag_student_id'           => $validated['stag_student_id'],
-            'stag_username'             => $validated['stag_username'],
-            'stag_password'             => $validated['stag_password'], // encrypted cast handles this
-            'stag_sync_status'          => 'pending',
-            'stag_sync_error'           => null,
-            'stag_synced_at'            => null,
-            'stag_last_sync_attempt_at' => now(),
-        ]);
-
-        StagSyncJob::dispatch($user);
-
-        return response()->json([
-            'user'           => $user->fresh(),
-            'message'        => 'STAG credentials saved. Sync started in background.',
-            'next_allowed_at' => $this->nextAllowedAt($user->fresh()),
-        ]);
-    }
-
     public function disconnect(Request $request): JsonResponse
     {
         $request->user()->update([
             'stag_student_id'           => null,
-            'stag_username'             => null,
-            'stag_password'             => null,
             'stag_ticket'               => null,
             'stag_ticket_expires_at'    => null,
             'stag_user_name'            => null,
@@ -65,11 +36,22 @@ class StagConnectController extends Controller
     {
         $user = $request->user();
 
+        $agentToken = $user->stagAgentTokens()->latest('id')->first();
+
         return response()->json([
+            'mode'             => config('stag.mode'),
+            'stag_connected'   => $user->stag_connected,
             'stag_sync_status' => $user->stag_sync_status,
             'stag_synced_at'   => $user->stag_synced_at,
+            // Hidden from the user model; exposed here so the owner can see why a sync failed
+            'stag_sync_error'  => $user->stag_sync_error,
             'next_allowed_at'  => $this->nextAllowedAt($user),
-            // stag_sync_error is in $hidden — never returned here
+            // Metadata only — the plain token is returned solely when it is created
+            'agent_token'      => $agentToken ? [
+                'created_at'   => $agentToken->created_at?->toIso8601String(),
+                'expires_at'   => $agentToken->expires_at?->toIso8601String(),
+                'last_used_at' => $agentToken->last_used_at?->toIso8601String(),
+            ] : null,
         ]);
     }
 
@@ -77,8 +59,16 @@ class StagConnectController extends Controller
     {
         $user = $request->user();
 
-        // 422 — STAG not connected
-        if (! $user->stag_student_id) {
+        // 409 — in agent mode the local agent syncs, not the server
+        if (config('stag.mode') === 'agent') {
+            return response()->json([
+                'error'   => 'agent_mode',
+                'message' => 'STAG sync is performed by the local agent.',
+            ], 409);
+        }
+
+        // 422 — STAG not connected (no ticket, or ticket expired)
+        if (! $user->stag_connected) {
             return response()->json([
                 'message' => 'STAG is not connected.',
             ], 422);

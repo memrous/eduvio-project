@@ -15,6 +15,12 @@ import { extractMoodleToken } from '../../utils/moodleToken'
 import { RESOURCES_KEY } from '../../hooks/useResources'
 import { REQUIREMENTS_KEY } from '../../hooks/useRequirements'
 
+// Backend error codes from POST /user/moodle/token that have a dedicated message
+const MOODLE_CONNECT_ERROR_KEYS = {
+  launch_not_started: 'moodle.errors.launchNotStarted',
+  invalid_signature: 'moodle.errors.invalidSignature',
+}
+
 const MoodleIntegrationCard = ({
   effectiveUser,
   isMoodleConnected,
@@ -27,6 +33,7 @@ const MoodleIntegrationCard = ({
   const [manualToken, setManualToken] = useState('')
   const [manualError, setManualError] = useState('')
   const [manualSubmitting, setManualSubmitting] = useState(false)
+  const [launchStarting, setLaunchStarting] = useState(false)
   const [moodleDisconnecting, setMoodleDisconnecting] = useState(false)
   const [moodleResyncLoading, setMoodleResyncLoading] = useState(false)
   const [moodleSyncStatus, setMoodleSyncStatus] = useState(effectiveUser?.moodle_sync_status ?? null)
@@ -142,17 +149,44 @@ const MoodleIntegrationCard = ({
     return refreshedUser
   }
 
-  const handleConnectMoodle = () => {
-    const passport = crypto.randomUUID?.() ?? (Math.random().toString(36).slice(2) + Date.now().toString(36))
-    const callbackUrl = `${window.location.origin}/moodle/callback?token=%s`
-    try {
-      navigator.registerProtocolHandler('web+eduvio', callbackUrl)
-    } catch {
-      // Silently ignore errors (e.g. user already registered or denied)
+  const handleConnectMoodle = async () => {
+    if (supportsMoodleHandler) {
+      const callbackUrl = `${window.location.origin}/moodle/callback?token=%s`
+      try {
+        navigator.registerProtocolHandler('web+eduvio', callbackUrl)
+      } catch {
+        // Silently ignore errors (e.g. user already registered or denied)
+      }
     }
-    const moodleBaseUrl = import.meta.env.VITE_MOODLE_BASE_URL ?? 'https://moodle.upol.cz'
-    const launchUrl = `${moodleBaseUrl}/admin/tool/mobile/launch.php?service=moodle_mobile_app&passport=${encodeURIComponent(passport)}&urlscheme=${encodeURIComponent('web+eduvio')}`
-    window.open(launchUrl, '_blank', 'noopener,noreferrer')
+
+    // Open the window synchronously inside the click handler so it isn't treated as a popup,
+    // then point it at the launch URL once the backend has issued the passport.
+    // 'noopener' can't be used here (window.open would return null), so the opener is cut manually.
+    const launchWindow = window.open('about:blank', '_blank')
+    if (launchWindow) launchWindow.opener = null
+
+    setLaunchStarting(true)
+    try {
+      const response = await api.startMoodleLaunch()
+      const launchUrl = response?.data?.launch_url
+      if (response?.status === 'error' || !launchUrl) {
+        launchWindow?.close()
+        toast.error(t('toast.moodleConnectFailed'))
+        return
+      }
+
+      if (launchWindow && !launchWindow.closed) {
+        launchWindow.location.href = launchUrl
+      } else {
+        // Popup was blocked or closed — continue in the current tab instead.
+        window.location.assign(launchUrl)
+      }
+    } catch {
+      launchWindow?.close()
+      toast.error(t('toast.moodleConnectFailed'))
+    } finally {
+      setLaunchStarting(false)
+    }
   }
 
   const handleManualSubmit = async (event) => {
@@ -173,7 +207,13 @@ const MoodleIntegrationCard = ({
 
       const response = await api.connectMoodleToken(decoded)
       if (response?.status === 'error') {
-        toast.error(t('toast.moodleConnectFailed'))
+        const errorKey = MOODLE_CONNECT_ERROR_KEYS[response.error]
+        if (errorKey) {
+          setManualError(t(errorKey))
+          toast.error(t(errorKey))
+        } else {
+          toast.error(t('toast.moodleConnectFailed'))
+        }
         return
       }
 
@@ -303,9 +343,10 @@ const MoodleIntegrationCard = ({
                 <button
                   type="button"
                   onClick={handleConnectMoodle}
-                  className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container"
+                  disabled={launchStarting}
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <Link2 className="h-4 w-4" />
+                  {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
                   {t('moodle.actions.connect')}
                 </button>
               </div>
@@ -319,9 +360,10 @@ const MoodleIntegrationCard = ({
                   <button
                     type="button"
                     onClick={handleConnectMoodle}
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-3.5 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors"
+                    disabled={launchStarting}
+                    className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-3.5 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <ExternalLink className="h-4 w-4" />
+                    {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
                     {t('moodle.actions.openMoodleLogin')}
                   </button>
                 </div>
@@ -331,6 +373,9 @@ const MoodleIntegrationCard = ({
                     <label className="text-sm font-semibold text-on-surface" htmlFor="profile-moodle-manual-token">
                       {t('moodle.card.manualPasteLabel')}
                     </label>
+                    <p className="text-xs text-on-surface-variant">
+                      {t('moodle.card.manualPasteHint')}
+                    </p>
                     <input
                       id="profile-moodle-manual-token"
                       type="text"

@@ -22,13 +22,20 @@ const normalizeHttpError = (error) => {
 
   if (error?.response?.status === 422) {
     const errors = error?.response?.data?.errors
-    const errKey = (errors?.email || errors?.password) ? 'invalid_credentials' : (Object.values(errors ?? {}).flat()[0] ?? 'validation_error')
+    // Domain errors (e.g. Moodle launch checks) come as { error: 'code' } without a validation bag
+    const errorCode = typeof error?.response?.data?.error === 'string' ? error.response.data.error : null
+    const errKey = (errors?.email || errors?.password) ? 'invalid_credentials' : (Object.values(errors ?? {}).flat()[0] ?? errorCode ?? 'validation_error')
     return {
       data: null,
       error: errKey,
       errors: errors,
       status: 'error'
     }
+  }
+
+  if (error?.response?.status === 409 && typeof error?.response?.data?.error === 'string') {
+    // Conflict with a machine-readable code (e.g. 'agent_mode' when STAG is synced by the local agent)
+    return failure(error.response.data.error)
   }
 
   if (error?.response?.status === 429) {
@@ -61,16 +68,13 @@ const normalizeRegisterPayload = (args) => {
     return args[0]
   }
 
-  const [name, username, email, password, stagStudentId, stagUsername, stagPassword] = args
+  const [name, username, email, password] = args
 
   return {
     name,
     username,
     email,
     password,
-    ...(stagStudentId ? { stag_student_id: stagStudentId } : {}),
-    ...(stagUsername ? { stag_username: stagUsername } : {}),
-    ...(stagPassword ? { stag_password: stagPassword } : {}),
   }
 }
 
@@ -109,8 +113,13 @@ export const getStagRedirectUrl = async () => {
   return request(() => httpClient.get('/user/stag/redirect').then((res) => res.data))
 }
 
-export const connectStag = async (payload) => {
-  return request(() => httpClient.post('/user/stag', payload).then((res) => res.data))
+// The plain token is in the response only — callers must keep it in local component state.
+export const createStagAgentToken = async () => {
+  return request(() => httpClient.post('/user/stag/agent-token').then((res) => res.data))
+}
+
+export const revokeStagAgentToken = async () => {
+  return request(() => httpClient.delete('/user/stag/agent-token').then((res) => res.data))
 }
 
 export const disconnectStag = async () => {
@@ -123,6 +132,10 @@ export const getStagSyncStatus = async () => {
 
 export const resyncStag = async () => {
   return request(() => httpClient.post('/user/stag/resync').then((res) => res.data))
+}
+
+export const startMoodleLaunch = async () => {
+  return request(() => httpClient.post('/user/moodle/launch').then((res) => res.data))
 }
 
 export const connectMoodleToken = async (token) => {

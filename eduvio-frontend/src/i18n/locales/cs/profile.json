@@ -176,6 +176,67 @@
       "started": "Synchronizace byla spuštěna a rozvrh se na pozadí obnovuje.",
       "recentlyTriggered": "Synchronizace už byla nedávno spuštěna. Zkuste to znovu za {{minutes}} minut.",
       "failed": "Synchronizaci se nepodařilo spustit."
+    },
+    "errors": {
+      "agentMode": "IS/STAG se v této instalaci synchronizuje přes agenta na vašem počítači. Přihlášení ani synchronizace ze serveru tu nejsou k dispozici."
+    },
+    "agent": {
+      "card": {
+        "subtitle": "Synchronizace přes agenta na vašem počítači",
+        "helper": "IS/STAG je dostupný jen ze sítě UPOL (VPN). Rozvrh a předměty proto stahuje agent na vašem počítači a posílá je do Eduvia s tokenem agenta. Token smí jen nahrávat data ze STAGu."
+      },
+      "status": {
+        "title": "Synchronizace přes agenta",
+        "lastSync": "Poslední synchronizace:",
+        "never": "zatím neproběhla",
+        "success": "proběhla úspěšně",
+        "failed": "poslední synchronizace selhala",
+        "error": "Chyba: {{error}}"
+      },
+      "stale": {
+        "old": "Poslední synchronizace je starší než 14 dní. Spusťte agenta na počítači připojeném k VPN UPOL.",
+        "never": "Zatím neproběhla žádná synchronizace. Spusťte agenta na počítači připojeném k VPN UPOL."
+      },
+      "token": {
+        "title": "Token agenta",
+        "none": "Pro spuštění agenta potřebujete token. Vytvořte ho a vložte do agenta příkazem setup.",
+        "create": "Vytvořit token agenta",
+        "regenerate": "Vytvořit nový",
+        "revoke": "Zrušit token",
+        "revoked": "Token agenta byl zrušen.",
+        "created": "Vytvořen",
+        "expires": "Platí do",
+        "lastUsed": "Naposledy použit",
+        "neverUsed": "Zatím nepoužit"
+      },
+      "confirm": {
+        "regenerate": "Vytvořit nový token? Stávající token přestane okamžitě fungovat a agenta bude potřeba znovu nastavit příkazem setup.",
+        "regenerateConfirm": "Ano, vytvořit nový",
+        "revoke": "Zrušit token agenta? Agent přestane synchronizovat, dokud nevytvoříte nový token.",
+        "revokeConfirm": "Ano, zrušit token"
+      },
+      "reveal": {
+        "title": "Nový token agenta",
+        "warning": "Zkopírujte si ho hned a vložte do agenta (python3 stag_agent.py setup). Po zavření ho už znovu neuvidíte.",
+        "label": "Token agenta",
+        "copyLabel": "Kopírovat token agenta",
+        "done": "Hotovo, token mám uložený"
+      },
+      "guide": {
+        "title": "Jak spustit agenta",
+        "setup": "Nastavení – zadáte adresu Eduvia a token agenta:",
+        "login": "Přihlášení do IS/STAG (otevře prohlížeč):",
+        "sync": "Synchronizace – spouštějte na počítači připojeném k VPN UPOL:",
+        "copyLabel": "Kopírovat příkaz {{command}}",
+        "footer": "Agent najdete ve složce stag_mock_import. Podrobný návod včetně pravidelného spouštění je v AGENT.md."
+      },
+      "copy": "Kopírovat",
+      "copied": "Zkopírováno do schránky.",
+      "copyFailed": "Kopírování se nepodařilo. Označte text a zkopírujte ho ručně.",
+      "errors": {
+        "createFailed": "Token agenta se nepodařilo vytvořit. Zkuste to prosím znovu.",
+        "revokeFailed": "Token agenta se nepodařilo zrušit. Zkuste to prosím znovu."
+      }
     }
   },
   "toast": {
@@ -198,7 +259,8 @@
       "helper": "Propojte svůj účet Moodle a synchronizujte kurzy a termíny odevzdání úkolů přímo do Eduvia.",
       "unsupportedBrowser": "Váš prohlížeč (např. Safari na iOS) nepodporuje automatické zachycení protokolu. Otevřete přihlášení do Moodle a vložte získaný token nebo odkaz ručně níže.",
       "manualPasteLabel": "Ověřovací token nebo odkaz",
-      "manualPastePlaceholder": "Vložte odkaz nebo token (web+eduvio://token=...)"
+      "manualPastePlaceholder": "Vložte odkaz nebo token (web+eduvio://token=...)",
+      "manualPasteHint": "Nejdřív klikněte na tlačítko pro otevření přihlášení v Moodlu – token musí patřit k právě spuštěnému pokusu o připojení."
     },
     "labels": {
       "username": "Uživatelské jméno",
@@ -226,7 +288,9 @@
     "errors": {
       "missingToken": "Chybí ověřovací token z Moodlu.",
       "decodeFailed": "Nepodařilo se zpracovat ověřovací token z Moodlu.",
-      "tokenRejected": "Ověřovací token byl systémem Moodle odmítnut."
+      "tokenRejected": "Ověřovací token byl systémem Moodle odmítnut.",
+      "launchNotStarted": "Nejdřív spusť připojení tlačítkem.",
+      "invalidSignature": "Token nepatří k tomuto pokusu o připojení, zkus to znovu."
     },
     "callback": {
       "connecting": "Připojování k Moodlu..."

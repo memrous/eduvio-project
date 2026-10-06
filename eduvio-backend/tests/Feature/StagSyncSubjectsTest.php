@@ -21,7 +21,7 @@ class StagSyncSubjectsTest extends TestCase
     public function test_validation_fails_on_invalid_data(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $payload = [
             [
@@ -40,7 +40,7 @@ class StagSyncSubjectsTest extends TestCase
     public function test_sync_subjects_creates_new_subjects_with_fallbacks(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $payload = [
             [
@@ -99,7 +99,7 @@ class StagSyncSubjectsTest extends TestCase
     public function test_resync_updates_fields_without_overwriting_custom_description(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         // Pre-create subject with custom user description
         $subject = Subject::create([
@@ -153,7 +153,7 @@ class StagSyncSubjectsTest extends TestCase
     public function test_sync_subjects_saves_statut_and_derives_is_mandatory(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $payload = [
             [

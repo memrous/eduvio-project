@@ -18,6 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
+
+        $middleware->alias([
+            'abilities'   => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
+            'ability'     => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
+            'full-access' => \App\Http\Middleware\EnsureFullAccessToken::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

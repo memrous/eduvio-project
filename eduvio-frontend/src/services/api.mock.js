@@ -22,8 +22,9 @@ const MOCK_USER_DB = [
     program: 'Applied Informatics',
     year: '1st Year',
     stag_student_id: null,
-    stag_username: null,
-    stag_password: null,
+    stag_ticket: null,
+    stag_ticket_expires_at: null,
+    stag_user_name: null,
     role: 'student',
     avatarUrl:
       'src/assets/icons/user.png',
@@ -31,9 +32,28 @@ const MOCK_USER_DB = [
 ]
 const mockRegisteredUsers = [...MOCK_USER_DB]
 
+// STAG sync mode of the mocked backend (config('stag.mode')): 'server' | 'agent'
+const MOCK_STAG_MODE = import.meta.env.VITE_MOCK_STAG_MODE === 'agent' ? 'agent' : 'server'
+const MOCK_AGENT_TOKEN_TTL_DAYS = 180
+// Stable "last sync" for server mode so the value does not change on every status poll
+const MOCK_SERVER_SYNCED_AT = new Date().toISOString()
+
+const hasValidAgentToken = (user) =>
+  Boolean(user?.stag_agent_token) && new Date(user.stag_agent_token.expires_at) > new Date()
+
+// Mirrors User::stag_connected on the backend:
+// - server mode: a ticket that is missing an expiry or not yet expired
+// - agent mode: a non-expired agent token
+const isStagConnected = (user) => {
+  if (MOCK_STAG_MODE === 'agent') return hasValidAgentToken(user)
+  return Boolean(user?.stag_ticket) && (!user.stag_ticket_expires_at || new Date(user.stag_ticket_expires_at) > new Date())
+}
+
 const sanitizeUser = (user) => {
-  const copy = { ...user }
+  const copy = { ...user, stag_connected: isStagConnected(user) }
   delete copy.password
+  delete copy.stag_ticket
+  delete copy.stag_agent_token
   delete copy.moodle_wstoken
   return copy
 }
@@ -71,16 +91,13 @@ const normalizeRegisterPayload = (args) => {
     return args[0]
   }
 
-  const [name, username, email, password, stagStudentId, stagUsername, stagPassword] = args
+  const [name, username, email, password] = args
 
   return {
     name,
     username,
     email,
     password,
-    stag_student_id: stagStudentId || null,
-    stag_username: stagUsername || null,
-    stag_password: stagPassword || null,
   }
 }
 
@@ -133,9 +150,10 @@ export const register = async (...args) => {
     faculty: 'Faculty of Science',
     program: 'Student',
     year: '1st Year',
-    stag_student_id: payload.stag_student_id ?? null,
-    stag_username: payload.stag_username ?? null,
-    stag_password: payload.stag_password ?? null,
+    stag_student_id: null,
+    stag_ticket: null,
+    stag_ticket_expires_at: null,
+    stag_user_name: null,
     role: 'student',
     avatarUrl:
       'src/assets/icons/user.png',
@@ -204,25 +222,11 @@ export const getStagRedirectUrl = async () => {
   if (!currentUser) {
     return failure('unauthorized')
   }
+  if (MOCK_STAG_MODE === 'agent') return failure('agent_mode')
 
   return success({
     redirect_url: 'https://stag-ws.upol.cz/ws/login?mock=true',
   })
-}
-
-export const connectStag = async (payload) => {
-  await delay(400)
-
-  const currentUser = getCurrentMockUser()
-  if (!currentUser) {
-    return failure('unauthorized')
-  }
-
-  currentUser.stag_student_id = payload.stag_student_id ?? payload.stagStudentId ?? null
-  currentUser.stag_username = payload.stag_username ?? payload.stagUsername ?? null
-  currentUser.stag_password = payload.stag_password ?? payload.stagPassword ?? null
-
-  return success({ user: sanitizeUser(currentUser) })
 }
 
 export const disconnectStag = async () => {
@@ -234,27 +238,126 @@ export const disconnectStag = async () => {
   }
 
   currentUser.stag_student_id = null
-  currentUser.stag_username = null
-  currentUser.stag_password = null
+  currentUser.stag_ticket = null
+  currentUser.stag_ticket_expires_at = null
+  currentUser.stag_user_name = null
+  currentUser.stag_sync_status = null
+  currentUser.stag_sync_error = null
+  currentUser.stag_synced_at = null
+  currentUser.stag_last_sync_attempt_at = null
 
   return success({ user: sanitizeUser(currentUser) })
 }
 
 export const getStagSyncStatus = async () => {
   await delay(200)
-  return success({ stag_sync_status: 'success', stag_synced_at: new Date().toISOString(), next_allowed_at: null })
+  const currentUser = getCurrentMockUser()
+  if (!currentUser) return failure('unauthorized')
+
+  // Same shape as StagConnectController::status — token metadata only, never the token itself
+  const agentToken = currentUser.stag_agent_token ? { ...currentUser.stag_agent_token } : null
+
+  if (MOCK_STAG_MODE === 'agent') {
+    return success({
+      mode: 'agent',
+      stag_connected: isStagConnected(currentUser),
+      stag_sync_status: currentUser.stag_sync_status ?? null,
+      stag_synced_at: currentUser.stag_synced_at ?? null,
+      stag_sync_error: currentUser.stag_sync_error ?? null,
+      next_allowed_at: null,
+      agent_token: agentToken,
+    })
+  }
+
+  return success({
+    mode: 'server',
+    stag_connected: isStagConnected(currentUser),
+    stag_sync_status: 'success',
+    stag_synced_at: MOCK_SERVER_SYNCED_AT,
+    stag_sync_error: null,
+    next_allowed_at: null,
+    agent_token: agentToken,
+  })
+}
+
+export const createStagAgentToken = async () => {
+  await delay(300)
+  const currentUser = getCurrentMockUser()
+  if (!currentUser) return failure('unauthorized')
+
+  const bytes = crypto.getRandomValues(new Uint8Array(30))
+  const secret = Array.from(bytes, (b) => b.toString(36).padStart(2, '0')).join('').slice(0, 40)
+  const now = new Date()
+  const expiresAt = new Date(now.getTime() + MOCK_AGENT_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000).toISOString()
+
+  // Like the backend: replaces any previous token and keeps only metadata
+  currentUser.stag_agent_token = {
+    created_at: now.toISOString(),
+    expires_at: expiresAt,
+    last_used_at: null,
+  }
+
+  return success({ token: `${Math.floor(Math.random() * 1000) + 1}|${secret}`, expires_at: expiresAt })
+}
+
+export const revokeStagAgentToken = async () => {
+  await delay(300)
+  const currentUser = getCurrentMockUser()
+  if (!currentUser) return failure('unauthorized')
+
+  currentUser.stag_agent_token = null
+  return success({ message: 'STAG agent token revoked.' })
+}
+
+/**
+ * Dev helper (mock mode only): simulates the local agent calling POST /stag/agent/report.
+ * Usage in the browser console: window.__eduvioMock.stagAgentReport('success')
+ *                               window.__eduvioMock.stagAgentReport('failed', 'VPN down')
+ */
+const mockStagAgentReport = (status = 'success', error = null) => {
+  const currentUser = getCurrentMockUser()
+  if (!hasValidAgentToken(currentUser)) return false
+
+  currentUser.stag_agent_token.last_used_at = new Date().toISOString()
+  currentUser.stag_sync_status = status
+  if (status === 'success') {
+    currentUser.stag_synced_at = new Date().toISOString()
+    currentUser.stag_sync_error = null
+  } else {
+    currentUser.stag_sync_error = error ? String(error).slice(0, 500) : null
+  }
+  return true
+}
+
+if (import.meta.env.VITE_USE_MOCK === 'true' && import.meta.env.DEV && typeof window !== 'undefined') {
+  window.__eduvioMock = { ...(window.__eduvioMock ?? {}), stagAgentReport: mockStagAgentReport }
 }
 
 export const resyncStag = async () => {
   await delay(400)
   const currentUser = getCurrentMockUser()
   if (!currentUser) return failure('unauthorized')
-  if (!currentUser.stag_student_id) return { data: null, error: 'STAG is not connected.', status: 'error' }
+  if (MOCK_STAG_MODE === 'agent') return failure('agent_mode')
+  if (!isStagConnected(currentUser)) return { data: null, error: 'STAG is not connected.', status: 'error' }
   // In mock mode, always succeed
   const nextAllowedAt = new Date(Date.now() + 30 * 60 * 1000).toISOString()
   return success({
     message: 'Resync started in background.',
     next_allowed_at: nextAllowedAt,
+  })
+}
+
+export const startMoodleLaunch = async () => {
+  await delay(200)
+
+  const currentUser = getCurrentMockUser()
+  if (!currentUser) {
+    return failure('unauthorized')
+  }
+
+  const passport = Math.random().toString(36).slice(2)
+  return success({
+    launch_url: `https://moodle.example.test/admin/tool/mobile/launch.php?service=moodle_mobile_app&passport=${passport}&urlscheme=web%2Beduvio`,
   })
 }
 

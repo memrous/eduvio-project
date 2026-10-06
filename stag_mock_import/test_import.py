@@ -4,6 +4,8 @@ from datetime import date, datetime
 import requests
 
 # --- KONFIGURACE (injected by StagSyncJob via environment variables) ---
+# Používá je jen main(); funkce níže dostávají všechny hodnoty parametrem,
+# aby šly importovat (např. ze stag_agent.py).
 LARAVEL_API_URL  = os.environ.get("LARAVEL_API_URL",  "http://localhost/api")
 BEARER_TOKEN     = os.environ.get("BEARER_TOKEN",     "")
 STAG_TICKET      = os.environ.get("STAG_TICKET",      "")
@@ -22,6 +24,24 @@ DNY_MAP = {
 }
 
 
+class StagWsError(RuntimeError):
+    """STAG WS vrátilo jiný stav než 200 (např. 401 = neplatný ticket)."""
+
+    def __init__(self, status_code: int, text: str):
+        super().__init__(f"Chyba při volání STAG WS (Status: {status_code}): {text}")
+        self.status_code = status_code
+        self.text = text
+
+
+class ApiError(RuntimeError):
+    """Laravel API vrátilo jiný stav než 200."""
+
+    def __init__(self, message: str, status_code: int, text: str):
+        super().__init__(f"{message} (Status: {status_code}): {text}")
+        self.status_code = status_code
+        self.text = text
+
+
 def zjisti_aktualni_semestr() -> str:
     """Vrátí aktuální semestr (ZS pro září–leden, LS pro únor–srpen)."""
     mesic = date.today().month
@@ -30,8 +50,11 @@ def zjisti_aktualni_semestr() -> str:
     return "LS"
 
 
-def nacti_predmety_ze_stagu(ticket: str, student_id: str, base_url: str, semestr: str) -> list:
-    """Načte zapsané předměty studenta ze STAG Web Services."""
+def stahni_predmety_ze_stagu(ticket: str, student_id: str, base_url: str, semestr: str) -> list:
+    """Načte zapsané předměty studenta ze STAG Web Services.
+
+    Vyhazuje StagWsError (stav != 200) nebo requests.RequestException (síť).
+    """
     url = f"{base_url.rstrip('/')}/services/rest2/predmety/getPredmetyByStudent"
     params = {
         "osCislo": student_id,
@@ -39,13 +62,20 @@ def nacti_predmety_ze_stagu(ticket: str, student_id: str, base_url: str, semestr
         "outputFormat": "JSON"
     }
     print(f"📡 Načítám předměty ze STAG WS pro studenta {student_id} (semestr: {semestr})...")
+    response = requests.get(url, params=params, auth=(ticket, ""), timeout=15)
+    if response.status_code != 200:
+        raise StagWsError(response.status_code, response.text)
+    data = response.json()
+    return data.get("predmetStudenta", [])
+
+
+def nacti_predmety_ze_stagu(ticket: str, student_id: str, base_url: str, semestr: str) -> list:
+    """Načte zapsané předměty studenta ze STAG Web Services; při chybě ukončí skript."""
     try:
-        response = requests.get(url, params=params, auth=(ticket, ""), timeout=15)
-        if response.status_code != 200:
-            print(f"❌ Chyba při volání STAG WS (Status: {response.status_code}): {response.text}", file=sys.stderr)
-            sys.exit(1)
-        data = response.json()
-        return data.get("predmetStudenta", [])
+        return stahni_predmety_ze_stagu(ticket, student_id, base_url, semestr)
+    except StagWsError as e:
+        print(f"❌ {e}", file=sys.stderr)
+        sys.exit(1)
     except requests.RequestException as e:
         print(f"❌ Chyba sítě při komunikaci se STAG WS: {e}", file=sys.stderr)
         sys.exit(1)
@@ -69,23 +99,36 @@ def transformuj_predmety_pro_laravel(surova_data: list, semestr: str) -> list:
     return vysledek
 
 
-def odesli_predmety_do_laravelu(bearer_token: str, data: list):
-    """Odešle transformovaná data předmětů na chráněný endpoint /api/stag/sync-subjects."""
-    url = f"{LARAVEL_API_URL}/stag/sync-subjects"
-    headers = {
+def _api_headers(bearer_token: str) -> dict:
+    return {
         "Authorization": f"Bearer {bearer_token}",
         "Content-Type": "application/json",
         "Accept": "application/json"
     }
 
+
+def posli_predmety_do_laravelu(api_url: str, bearer_token: str, data: list):
+    """Odešle transformovaná data předmětů na chráněný endpoint /api/stag/sync-subjects.
+
+    Vyhazuje ApiError (stav != 200) nebo requests.RequestException (síť).
+    """
+    url = f"{api_url}/stag/sync-subjects"
+
     print(f"📡 Odesílám {len(data)} předmětů na Laravel API...")
+    response = requests.post(url, json=data, headers=_api_headers(bearer_token), timeout=10)
+    if response.status_code == 200:
+        print(f"🎉 Odezva serveru: {response.json().get('message')}")
+    else:
+        raise ApiError("Chyba při synchronizaci předmětů", response.status_code, response.text)
+
+
+def odesli_predmety_do_laravelu(api_url: str, bearer_token: str, data: list):
+    """Odešle předměty na Laravel API; při chybě ukončí skript."""
     try:
-        response = requests.post(url, json=data, headers=headers, timeout=10)
-        if response.status_code == 200:
-            print(f"🎉 Odezva serveru: {response.json().get('message')}")
-        else:
-            print(f"❌ Chyba při synchronizaci předmětů (Status: {response.status_code}): {response.text}", file=sys.stderr)
-            sys.exit(1)
+        posli_predmety_do_laravelu(api_url, bearer_token, data)
+    except ApiError as e:
+        print(f"❌ {e}", file=sys.stderr)
+        sys.exit(1)
     except requests.RequestException as e:
         print(f"❌ Chyba sítě při odesílání předmětů: {e}", file=sys.stderr)
         sys.exit(1)
@@ -102,7 +145,7 @@ def nacti_rozvrh_ze_stagu(ticket: str, student_id: str, base_url: str, semestr: 
     print(f"📡 Načítám rozvrh ze STAG WS pro studenta {student_id} (semestr: {semestr})...")
     response = requests.get(url, params=params, auth=(ticket, ""), timeout=15)
     if response.status_code != 200:
-        raise RuntimeError(f"Chyba při volání STAG WS (Status: {response.status_code}): {response.text}")
+        raise StagWsError(response.status_code, response.text)
     data = response.json()
     return data.get("rozvrhovaAkce", [])
 
@@ -206,24 +249,22 @@ def transformuj_rozvrh_pro_laravel(surova_data: list, subjects_by_code: dict, se
     return vysledek
 
 
-def odesli_rozvrh_do_laravelu(bearer_token: str, data: list):
-    """Odešle transformovaná data rozvrhu na chráněný endpoint /api/stag/sync-schedule."""
-    url = f"{LARAVEL_API_URL}/stag/sync-schedule"
-    headers = {
-        "Authorization": f"Bearer {bearer_token}",
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    }
+def odesli_rozvrh_do_laravelu(api_url: str, bearer_token: str, data: list):
+    """Odešle transformovaná data rozvrhu na chráněný endpoint /api/stag/sync-schedule.
+
+    Vyhazuje ApiError (stav != 200) nebo requests.RequestException (síť).
+    """
+    url = f"{api_url}/stag/sync-schedule"
 
     print(f"📡 Odesílám {len(data)} rozvrhových událostí na Laravel API...")
-    response = requests.post(url, json=data, headers=headers, timeout=30)
+    response = requests.post(url, json=data, headers=_api_headers(bearer_token), timeout=30)
     if response.status_code == 200:
         print(f"🎉 Odezva serveru: {response.json().get('message')}")
     else:
-        raise RuntimeError(f"Chyba při synchronizaci rozvrhu (Status: {response.status_code}): {response.text}")
+        raise ApiError("Chyba při synchronizaci rozvrhu", response.status_code, response.text)
 
 
-if __name__ == "__main__":
+def main():
     # 1. Validace povinných proměnných prostředí
     if not BEARER_TOKEN:
         print("❌ Chyba: BEARER_TOKEN není nastaven. Skript musí být spuštěn přes StagSyncJob.", file=sys.stderr)
@@ -249,7 +290,7 @@ if __name__ == "__main__":
     pripravene_predmety = transformuj_predmety_pro_laravel(surova_predmety, semestr)
 
     if pripravene_predmety:
-        odesli_predmety_do_laravelu(BEARER_TOKEN, pripravene_predmety)
+        odesli_predmety_do_laravelu(LARAVEL_API_URL, BEARER_TOKEN, pripravene_predmety)
     else:
         print("📭 Žádné předměty k odeslání.")
 
@@ -261,7 +302,7 @@ if __name__ == "__main__":
         if surovy_rozvrh:
             pripraveny_rozvrh = transformuj_rozvrh_pro_laravel(surovy_rozvrh, subjects_by_code, semestr)
             if pripraveny_rozvrh:
-                odesli_rozvrh_do_laravelu(BEARER_TOKEN, pripraveny_rozvrh)
+                odesli_rozvrh_do_laravelu(LARAVEL_API_URL, BEARER_TOKEN, pripraveny_rozvrh)
             else:
                 print("📭 Žádné rozvrhové události po rozbalení termínů k odeslání.")
         else:
@@ -271,3 +312,7 @@ if __name__ == "__main__":
         print(f"⚠️ Synchronizace rozvrhu selhala: {e}", file=sys.stderr)
 
     sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

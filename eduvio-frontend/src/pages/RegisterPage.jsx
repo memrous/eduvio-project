@@ -15,7 +15,6 @@ import {
   Loader2,
   CheckCircle2,
   IdCard,
-  KeyRound,
   ChevronDown,
   Building2,
   Check,
@@ -102,15 +101,6 @@ const validateStep2 = (form) => {
   return errors
 }
 
-const validateStep3 = (form, connectStagLater) => {
-  if (connectStagLater) return {}
-  const errors = {}
-  if (!form.stag_student_id.trim()) errors.stag_student_id = 'errors.stagStudentIdRequired'
-  if (!form.stag_username.trim()) errors.stag_username = 'errors.stagUsernameRequired'
-  if (!form.stag_password) errors.stag_password = 'errors.stagPasswordRequired'
-  return errors
-}
-
 const formatError = (t, error) => {
   if (Array.isArray(error)) return t(error[0])
   return error ? t(error) : ''
@@ -146,11 +136,7 @@ const RegisterPage = () => {
     faculty_id: '',
     study_program_id: '',
     academic_year: '',
-    stag_student_id: '',
-    stag_username: '',
-    stag_password: '',
   })
-  const [connectStagLater, setConnectStagLater] = useState(true)
 
   const [universities, setUniversities] = useState([])
   const [faculties, setFaculties] = useState([])
@@ -158,10 +144,10 @@ const RegisterPage = () => {
 
   const [showPass, setShowPass] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
-  const [showStagPass, setShowStagPass] = useState(false)
   const [errors, setErrors] = useState({})
   const [serverError, setServerError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [checking, setChecking] = useState(false)
 
   // ── Fetch universities on mount ──────────────────────────────────
   useEffect(() => {
@@ -220,28 +206,6 @@ const RegisterPage = () => {
     setErrors((prev) => ({ ...prev, [key]: '' }))
   }
 
-  const handleConnectStagLater = (e) => {
-    const checked = e.target.checked
-    setConnectStagLater(checked)
-    if (checked) {
-      setForm((prev) => ({
-        ...prev,
-        stag_student_id: '',
-        stag_username: '',
-        stag_password: '',
-      }))
-      setErrors((prev) => {
-        const next = { ...prev }
-        delete next.stag_student_id
-        delete next.stag_username
-        delete next.stag_password
-        return next
-      })
-    }
-  }
-
-  const [checking, setChecking] = useState(false)
-
   const handleNext = async () => {
     setServerError('')
     let fieldErrors = {}
@@ -282,7 +246,6 @@ const RegisterPage = () => {
     let fieldErrors = {}
     if (currentStep === 1) fieldErrors = validateStep1(form)
     else if (currentStep === 2) fieldErrors = validateStep2(form)
-    else if (currentStep === 3) fieldErrors = validateStep3(form, connectStagLater)
 
     if (Object.keys(fieldErrors).length) {
       setErrors(fieldErrors)
@@ -307,13 +270,6 @@ const RegisterPage = () => {
       faculty_id: Number(form.faculty_id),
       study_program_id: Number(form.study_program_id),
       academic_year: form.academic_year,
-      ...(!connectStagLater
-        ? {
-            stag_student_id: form.stag_student_id,
-            stag_username: form.stag_username,
-            stag_password: form.stag_password,
-          }
-        : {}),
     }
 
     setSubmitting(true)
@@ -346,11 +302,6 @@ const RegisterPage = () => {
     'w-full pl-10 pr-10 py-2.5 bg-[#F8F9FB] rounded-lg border text-body-md text-gray-900 focus:outline-none focus:bg-white transition-colors appearance-none cursor-pointer'
   const selectOk = `${selectBase} border-[#E2E8F0] focus:border-[#004ac6]`
   const selectErr = `${selectBase} border-red-400 focus:border-red-500 bg-red-50`
-
-  const stagInputBase =
-    'w-full px-4 py-2.5 bg-[#F8F9FB] rounded-lg border text-body-md text-gray-900 focus:outline-none focus:bg-white transition-colors'
-  const stagInputOk = `${stagInputBase} border-[#E2E8F0] focus:border-[#004ac6]`
-  const stagInputErr = `${stagInputBase} border-red-400 focus:border-red-500 bg-red-50`
 
   const meta = STEP_META[currentStep - 1]
   const progressPercent = Math.round((currentStep / 3) * 100)
@@ -759,108 +710,16 @@ const RegisterPage = () => {
             {/* ═══════════════ STEP 3 — University Sync ═══════════════ */}
             {currentStep === 3 && (
               <>
-                {/* Connect STAG later checkbox */}
-                <label className="flex items-start gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8F9FB] px-4 py-3 text-sm text-gray-900 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={connectStagLater}
-                    onChange={handleConnectStagLater}
-                    className="mt-1 h-4 w-4 rounded border-[#CBD5E1] text-[#004ac6] focus:ring-[#004ac6]"
-                  />
-                  <span className="leading-relaxed">
-                    <span className="font-semibold">{t('register.info.connectStagLaterTitle')}</span>
-                    <span className="block text-gray-500">
-                      {t('register.info.connectStagLaterDescription')}
-                    </span>
-                  </span>
-                </label>
-
-                {/* STAG fields (shown when connectStagLater is false) */}
-                {!connectStagLater && (
-                  <div className="rounded-2xl border border-[#E2E8F0] bg-slate-50/70 p-4 space-y-4">
-                    <div className="flex items-center gap-2">
-                      <IdCard className="w-4 h-4 text-[#004ac6]" />
-                      <h3 className="text-label-md font-semibold text-gray-900">{t('register.info.stagConnectionTitle')}</h3>
-                    </div>
-
-                    <div className="grid gap-4">
-                      {/* STAG Student ID */}
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-label-md font-semibold text-gray-900" htmlFor="stag-student-id">
-                          {t('register.fields.stagStudentId.label')}
-                        </label>
-                        <input
-                          id="stag-student-id"
-                          type="text"
-                          value={form.stag_student_id}
-                          onChange={set('stag_student_id')}
-                          placeholder={t('register.fields.stagStudentId.placeholder')}
-                          className={errors.stag_student_id ? stagInputErr : stagInputOk}
-                        />
-                        {errors.stag_student_id && (
-                          <p className="text-label-sm text-red-600 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" /> {formatError(t, errors.stag_student_id)}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* STAG Username */}
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-label-md font-semibold text-gray-900" htmlFor="stag-username">
-                          {t('register.fields.stagUsername.label')}
-                        </label>
-                        <input
-                          id="stag-username"
-                          type="text"
-                          value={form.stag_username}
-                          onChange={set('stag_username')}
-                          placeholder={t('register.fields.stagUsername.placeholder')}
-                          className={errors.stag_username ? stagInputErr : stagInputOk}
-                        />
-                        {errors.stag_username && (
-                          <p className="text-label-sm text-red-600 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" /> {formatError(t, errors.stag_username)}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* STAG Password */}
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-label-md font-semibold text-gray-900" htmlFor="stag-password">
-                          {t('register.fields.stagPassword.label')}
-                        </label>
-                        <div className="relative">
-                          <KeyRound className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                          <input
-                            id="stag-password"
-                            type={showStagPass ? 'text' : 'password'}
-                            value={form.stag_password}
-                            onChange={set('stag_password')}
-                            placeholder={t('register.fields.stagPassword.placeholder')}
-                            className={`${errors.stag_password ? stagInputErr : stagInputOk} pl-10 pr-10`}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowStagPass((v) => !v)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors"
-                            aria-label={showStagPass ? t('register.aria.hideStagPassword') : t('register.aria.showStagPassword')}
-                          >
-                            {showStagPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-                        {errors.stag_password && (
-                          <p className="text-label-sm text-red-600 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" /> {formatError(t, errors.stag_password)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                {/* STAG is connected after registration via the ticket login in the profile */}
+                <div className="rounded-2xl border border-[#E2E8F0] bg-slate-50/70 p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <IdCard className="w-4 h-4 text-[#004ac6]" />
+                    <h3 className="text-label-md font-semibold text-gray-900">{t('register.info.stagConnectionTitle')}</h3>
                   </div>
-                )}
-
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  {t('register.info.credentialsEncrypted')}
-                </p>
+                  <p className="text-sm text-gray-500 leading-relaxed">
+                    {t('register.info.stagConnectInProfile')}
+                  </p>
+                </div>
               </>
             )}
 

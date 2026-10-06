@@ -5,6 +5,9 @@ import { useTranslation } from 'react-i18next'
 import { extractMoodleToken } from '../utils/moodleToken'
 import * as api from '../services/api'
 
+// Backend error codes passed through to the profile page as ?reason=
+const LAUNCH_ERROR_REASONS = ['launch_not_started', 'invalid_signature']
+
 const MoodleCallbackPage = () => {
   const { t } = useTranslation('profile')
   const [searchParams] = useSearchParams()
@@ -31,7 +34,8 @@ const MoodleCallbackPage = () => {
       try {
         const response = await api.connectMoodleToken(decoded)
         if (response?.status === 'error') {
-          navigate('/profile?moodle=error&reason=token_rejected', { replace: true })
+          const reason = LAUNCH_ERROR_REASONS.includes(response.error) ? response.error : 'token_rejected'
+          navigate(`/profile?moodle=error&reason=${reason}`, { replace: true })
           return
         }
         navigate('/profile?moodle=connected', { replace: true })

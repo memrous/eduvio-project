@@ -42,7 +42,8 @@ Projekt je rozdělený na dvě samostatné aplikace, které spolu komunikují p�
 - Axios
 
 **Integrace**
-- Python skripty pro import dat ze STAG Web Services a Moodle (`stag_mock_import`, `moodle_mock_import`)
+- Python skripty pro import dat ze STAG Web Services (`stag_mock_import`)
+- Moodle Web Services volané přímo z PHP (`MoodleSyncJob`, `app/Services/Moodle`)
 
 ## Struktura repozitáře
 
@@ -61,8 +62,7 @@ eduvio-project/
 │       ├── hooks/
 │       ├── services/       # api.mock.js / api.real.js
 │       └── i18n/
-├── stag_mock_import/        # testovací import dat ze STAG
-└── moodle_mock_import/      # testovací import dat z Moodle
+└── stag_mock_import/        # testovací import dat ze STAG
 ```
 
 ## Požadavky
@@ -103,7 +103,7 @@ Frontend poběží na `http://localhost:5175` (viz `vite.config.js` / `package.j
 
 ### Spuštění přes Docker (Laravel Sail)
 
-Backend obsahuje `compose.yaml` s Laravel Sail (PHP kontejner, PostgreSQL, Redis, queue worker) a rovnou mountuje složky `stag_mock_import` a `moodle_mock_import` do kontejneru:
+Backend obsahuje `compose.yaml` s Laravel Sail (PHP kontejner, PostgreSQL, Redis, queue worker) a rovnou mountuje složku `stag_mock_import` do kontejneru:
 
 ```bash
 cd eduvio-backend
@@ -115,7 +115,7 @@ cd eduvio-backend
 Backend obsahuje dedikované konfigurace a controllery pro napojení na univerzitní systémy:
 
 - **STAG** — `config/stag.php`, `StagController`, `StagAuthController`, `StagConnectController` — synchronizace rozvrhu, předmětů a výsledků, cooldown na manuální resync, OAuth-like redirect flow (`STAG_WS_BASE_URL`).
-- **Moodle** — `config/moodle.php`, `MoodleController`, `MoodleConnectController` — synchronizace požadavků/aktivit z kurzů (`MOODLE_BASE_URL`).
+- **Moodle** — `config/moodle.php`, `MoodleConnectController`, `MoodleSyncJob`, `app/Services/Moodle` — připojení přes Moodle mobile launch (wstoken), synchronizace úkolů a materiálů z kurzů voláním Moodle Web Services přímo z PHP, cooldown na manuální resync (`MOODLE_BASE_URL`).
 
 Relevantní proměnné prostředí (`.env`):
 
@@ -129,7 +129,9 @@ FRONTEND_URL=http://localhost:5173
 
 ## Mock importy
 
-Složky `stag_mock_import/` a `moodle_mock_import/` obsahují Python skripty (`test_import.py`), které simulují data z reálných univerzitních systémů a posílají je na Laravel API. Slouží k vývoji a testování synchronizace bez nutnosti reálného přístupu do STAG/Moodle. Konfigurují se přes proměnné prostředí (např. `LARAVEL_API_URL`, `BEARER_TOKEN`, `STAG_TICKET`, `MOODLE_URL` apod.), které jim za běhu předává příslušný Laravel job (`StagSyncJob`, `MoodleSyncJob`).
+Složka `stag_mock_import/` obsahuje Python skript (`test_import.py`), který simuluje data ze STAGu a posílá je na Laravel API. Slouží k vývoji a testování synchronizace bez nutnosti reálného přístupu do STAGu. Konfiguruje se přes proměnné prostředí (např. `LARAVEL_API_URL`, `BEARER_TOKEN`, `STAG_TICKET` apod.), které mu za běhu předává `StagSyncJob`.
+
+Moodle žádný mock import nemá: `MoodleSyncJob` volá Moodle Web Services přímo z PHP (`app/Services/Moodle`) s tokenem uživatele.
 
 ## API
 
@@ -144,7 +146,7 @@ Hlavní REST endpointy (`eduvio-backend/routes/api.php`):
 | Materiály | `GET/POST/DELETE /materials` |
 | Dashboard | `GET /dashboard/summary` |
 | STAG | `POST /stag/sync-schedule`, `POST /stag/sync-subjects`, `GET/POST/DELETE /user/stag*` |
-| Moodle | `POST /moodle/sync-requirements`, `GET/POST/DELETE /user/moodle*` |
+| Moodle | `GET/POST/DELETE /user/moodle*` |
 
 Chráněné endpointy vyžadují hlavičku `Authorization: Bearer <token>` (Laravel Sanctum).
 

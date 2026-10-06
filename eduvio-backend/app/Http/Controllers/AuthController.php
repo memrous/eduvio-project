@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use App\Jobs\StagSyncJob;
 
 class AuthController extends Controller
 {
@@ -34,9 +33,6 @@ class AuthController extends Controller
             'faculty_id' => 'nullable|integer',
             'study_program_id' => 'nullable|integer',
             'academic_year' => 'nullable|integer',
-            'stag_student_id' => 'nullable|string',
-            'stag_username' => 'nullable|string',
-            'stag_password' => 'nullable|string',
         ]);
 
         $user = User::create([
@@ -48,17 +44,10 @@ class AuthController extends Controller
             'faculty_id' => $validated['faculty_id'] ?? null,
             'study_program_id' => $validated['study_program_id'] ?? null,
             'academic_year' => $validated['academic_year'] ?? null,
-            'stag_student_id' => $validated['stag_student_id'] ?? null,
-            'stag_username' => $validated['stag_username'] ?? null,
-            'stag_password' => $validated['stag_password'] ?? null,
         ]);
 
         // Vygenerujeme token, aby byl uživatel po registraci rovnou přihlášen
         $token = $user->createToken('auth_token')->plainTextToken;
-
-        if ($user->stag_username && $user->stag_password) {
-            StagSyncJob::dispatch($user);
-        }
 
         return response()->json([
             'user' => $user,

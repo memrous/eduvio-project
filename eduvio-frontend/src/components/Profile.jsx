@@ -105,6 +105,8 @@ const Profile = ({ user: initialUser }) => {
         missing_token: t('moodle.errors.missingToken', 'Chybí ověřovací token z Moodlu.'),
         decode_failed: t('moodle.errors.decodeFailed', 'Nepodařilo se zpracovat token z Moodlu.'),
         token_rejected: t('moodle.errors.tokenRejected', 'Ověřovací token byl systémem Moodle odmítnut.'),
+        launch_not_started: t('moodle.errors.launchNotStarted'),
+        invalid_signature: t('moodle.errors.invalidSignature'),
       }
       toast.error(errorMessages[reason] || t('toast.moodleConnectFailed'))
     }
@@ -113,7 +115,7 @@ const Profile = ({ user: initialUser }) => {
   }, [navigate, refreshUser, t, toast])
 
   const effectiveUser = user ?? initialUser
-  const isStagConnected = Boolean(effectiveUser?.stag_student_id)
+  const isStagConnected = Boolean(effectiveUser?.stag_connected)
   const isMoodleConnected = Boolean(effectiveUser?.moodle_connected)
 
   const copyId = async () => {

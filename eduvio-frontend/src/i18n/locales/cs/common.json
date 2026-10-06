@@ -40,5 +40,7 @@
   "toast": {
     "dismiss": "Zavřít oznámení",
     "container": "Oznámení"
-  }
+  },
+  "awaitingFirstSync": "Čeká na první synchronizaci",
+  "awaitingFirstSyncDescription": "Token agenta je připravený. Spusťte STAG agenta na počítači připojeném k VPN UPOL a data se tu objeví."
 }

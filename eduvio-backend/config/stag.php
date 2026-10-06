@@ -31,4 +31,26 @@ return [
     |
     */
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | STAG Sync Mode
+    |--------------------------------------------------------------------------
+    |
+    | "server" — the server syncs via StagSyncJob (needs network access to STAG WS).
+    | "agent"  — a local agent on the user's machine pulls data from STAG and
+    |            pushes it to the API with a restricted "stag-agent" token.
+    |
+    */
+    'mode' => env('STAG_MODE', 'server'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | STAG Agent Token Lifetime
+    |--------------------------------------------------------------------------
+    |
+    | Number of days a newly issued "stag-agent" token stays valid.
+    |
+    */
+    'agent_token_ttl_days' => env('STAG_AGENT_TOKEN_TTL_DAYS', 180),
 ];

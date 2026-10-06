@@ -16,7 +16,7 @@ class RequirementFlowTest extends TestCase
     public function test_user_can_list_requirements_optionally_filtered_by_subject(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $subject1 = Subject::create([
             'user_id' => $user->id,
@@ -69,7 +69,7 @@ class RequirementFlowTest extends TestCase
     public function test_user_can_create_requirement(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $subject = Subject::create([
             'user_id' => $user->id,
@@ -116,7 +116,7 @@ class RequirementFlowTest extends TestCase
     public function test_user_can_update_requirement(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $subject = Subject::create([
             'user_id' => $user->id,
@@ -160,7 +160,7 @@ class RequirementFlowTest extends TestCase
     public function test_user_can_delete_requirement(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $subject = Subject::create([
             'user_id' => $user->id,
@@ -216,7 +216,7 @@ class RequirementFlowTest extends TestCase
             'completed' => false,
         ]);
 
-        Sanctum::actingAs($user1);
+        Sanctum::actingAs($user1, ['*']);
 
         // Try to update
         $updateResponse = $this->putJson("/api/requirements/{$requirement->id}", [

@@ -3,7 +3,7 @@
  *
  * Moodle redirects back via a custom protocol scheme or URL parameter
  * containing a base64-encoded token in the format:
- * "wstoken:::privatetoken:::signature".
+ * "signature:::wstoken:::privatetoken", where signature = md5(moodle_wwwroot + passport).
  *
  * @param {string} rawValue - Raw URL, query parameter, or pasted token
  * @returns {string|null} Decoded token string containing ":::", or null on failure

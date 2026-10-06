@@ -12,28 +12,29 @@ class StagSyncJobTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_dispatches_stag_sync_job_when_credentials_present(): void
+    public function test_registration_ignores_stag_fields_and_does_not_dispatch_job(): void
     {
         Queue::fake();
 
+        // STAG is connected later from the profile via ticket login, never at registration.
         $response = $this->postJson('/api/register', [
             'name' => 'John Doe',
             'username' => 'johndoe',
             'email' => 'john@example.com',
             'password' => 'password123',
-            'stag_username' => 'stag_user_123',
-            'stag_password' => 'stag_pass_123',
             'stag_student_id' => 'S12345',
         ]);
 
         $response->assertStatus(201);
+        $response->assertJsonPath('user.stag_connected', false);
 
-        Queue::assertPushed(StagSyncJob::class, function ($job) {
-            return $job->user->email === 'john@example.com';
-        });
+        $user = User::where('email', 'john@example.com')->firstOrFail();
+        $this->assertNull($user->stag_student_id);
+
+        Queue::assertNotPushed(StagSyncJob::class);
     }
 
-    public function test_registration_does_not_dispatch_job_when_credentials_missing(): void
+    public function test_registration_does_not_dispatch_job_without_stag_fields(): void
     {
         Queue::fake();
 
@@ -56,12 +57,11 @@ class StagSyncJobTest extends TestCase
             'username' => 'johndoe',
             'email' => 'john@example.com',
             'password' => 'password123',
-            'stag_username' => 'stag_user_123',
-            'stag_password' => 'stag_pass_123',
             'stag_student_id' => 'S12345',
+            'stag_ticket' => null,
         ]);
 
-        // Dispatch synchronously
+        // Dispatch synchronously — without a ticket the job must fail fast
         StagSyncJob::dispatchSync($user);
 
         // Assert that the token was revoked/deleted

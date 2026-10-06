@@ -176,6 +176,67 @@
       "started": "Sync started — refreshing your schedule in the background.",
       "recentlyTriggered": "Sync was already triggered recently — try again in {{minutes}} minutes.",
       "failed": "Failed to trigger sync."
+    },
+    "errors": {
+      "agentMode": "In this installation IS/STAG is synced by the agent on your computer. Signing in or syncing from the server is not available here."
+    },
+    "agent": {
+      "card": {
+        "subtitle": "Synced by the agent on your computer",
+        "helper": "IS/STAG is only reachable from the UPOL network (VPN). The agent on your computer downloads your schedule and subjects and sends them to Eduvio using an agent token. The token can only upload STAG data."
+      },
+      "status": {
+        "title": "Syncing via agent",
+        "lastSync": "Last sync:",
+        "never": "not yet",
+        "success": "succeeded",
+        "failed": "last sync failed",
+        "error": "Error: {{error}}"
+      },
+      "stale": {
+        "old": "The last sync is older than 14 days. Run the agent on a computer connected to the UPOL VPN.",
+        "never": "No sync has run yet. Run the agent on a computer connected to the UPOL VPN."
+      },
+      "token": {
+        "title": "Agent token",
+        "none": "The agent needs a token. Create one and paste it into the agent with the setup command.",
+        "create": "Create agent token",
+        "regenerate": "Create new",
+        "revoke": "Revoke token",
+        "revoked": "The agent token was revoked.",
+        "created": "Created",
+        "expires": "Valid until",
+        "lastUsed": "Last used",
+        "neverUsed": "Not used yet"
+      },
+      "confirm": {
+        "regenerate": "Create a new token? The current token stops working immediately and the agent will need to be set up again with the setup command.",
+        "regenerateConfirm": "Yes, create new",
+        "revoke": "Revoke the agent token? The agent stops syncing until you create a new token.",
+        "revokeConfirm": "Yes, revoke token"
+      },
+      "reveal": {
+        "title": "New agent token",
+        "warning": "Copy it now and paste it into the agent (python3 stag_agent.py setup). You will not see it again after closing this.",
+        "label": "Agent token",
+        "copyLabel": "Copy agent token",
+        "done": "Done, I saved the token"
+      },
+      "guide": {
+        "title": "How to run the agent",
+        "setup": "Setup – enter the Eduvio address and the agent token:",
+        "login": "Sign in to IS/STAG (opens a browser):",
+        "sync": "Sync – run it on a computer connected to the UPOL VPN:",
+        "copyLabel": "Copy command {{command}}",
+        "footer": "The agent lives in the stag_mock_import folder. See AGENT.md for the full guide, including scheduled runs."
+      },
+      "copy": "Copy",
+      "copied": "Copied to clipboard.",
+      "copyFailed": "Copying failed. Select the text and copy it manually.",
+      "errors": {
+        "createFailed": "Could not create the agent token. Please try again.",
+        "revokeFailed": "Could not revoke the agent token. Please try again."
+      }
     }
   },
   "toast": {
@@ -198,7 +259,8 @@
       "helper": "Connect your Moodle account to automatically sync courses and assignment deadlines into Eduvio.",
       "unsupportedBrowser": "Your browser (e.g. Safari on iOS) does not support automatic protocol handling. Open Moodle login and paste the received token or URL manually below.",
       "manualPasteLabel": "Authentication token or link",
-      "manualPastePlaceholder": "Paste link or token (web+eduvio://token=...)"
+      "manualPastePlaceholder": "Paste link or token (web+eduvio://token=...)",
+      "manualPasteHint": "Click the button to open Moodle login first — the token must belong to the connection attempt you just started."
     },
     "labels": {
       "username": "Username",
@@ -226,7 +288,9 @@
     "errors": {
       "missingToken": "Missing Moodle authentication token.",
       "decodeFailed": "Failed to decode Moodle authentication token.",
-      "tokenRejected": "Moodle authentication token was rejected."
+      "tokenRejected": "Moodle authentication token was rejected.",
+      "launchNotStarted": "Start the connection with the button first.",
+      "invalidSignature": "This token doesn't belong to this connection attempt, please try again."
     },
     "callback": {
       "connecting": "Connecting to Moodle..."

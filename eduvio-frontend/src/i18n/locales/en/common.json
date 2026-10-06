@@ -40,5 +40,7 @@
   "toast": {
     "dismiss": "Dismiss notification",
     "container": "Notifications"
-  }
+  },
+  "awaitingFirstSync": "Waiting for the first sync",
+  "awaitingFirstSyncDescription": "Your agent token is ready. Run the STAG agent on a computer connected to the UPOL VPN and your data will show up here."
 }

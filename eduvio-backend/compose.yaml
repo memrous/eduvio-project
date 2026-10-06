@@ -13,7 +13,6 @@ services:
         volumes:
             - '.:/var/www/html'
             - '../stag_mock_import:/var/www/stag_mock_import'
-            - '../moodle_mock_import:/var/www/moodle_mock_import'
         networks:
             - sail
         depends_on:
@@ -42,7 +41,6 @@ services:
         volumes:
             - '.:/var/www/html'
             - '../stag_mock_import:/var/www/stag_mock_import'
-            - '../moodle_mock_import:/var/www/moodle_mock_import'
         networks:
             - sail
         depends_on:

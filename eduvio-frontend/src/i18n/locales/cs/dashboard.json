@@ -29,33 +29,9 @@
     "upcomingExams": "Blížící se zkoušky"
   },
   "timetable": {
-    "titleMobile": "Dnešní rozvrh",
-    "titleDesktop": "Týdenní rozvrh",
     "lecturer": "Vyučující:",
-    "subjectDescription": "Popis předmětu:",
-    "noClassesToday": "Na dnešek není naplánována žádná výuka.",
-    "noClasses": "Bez výuky",
-    "prev": "← Předchozí",
-    "current": "Aktuální",
-    "next": "Další →",
-    "openSubjectHub": "Otevřít předmět",
     "room": "Učebna {{room}}",
     "roomLabel": "Místnost",
-    "fallbacks": {
-      "subjectCode": "GEN 101",
-      "room201": "Místnost 201",
-      "room105": "Místnost 105",
-      "mainHall": "Hlavní sál",
-      "unknownSubject": "Neznámý předmět",
-      "notSpecified": "Neuvedeno"
-    },
-    "days": {
-      "mon": "Po",
-      "tue": "Út",
-      "wed": "St",
-      "thu": "Čt",
-      "fri": "Pá"
-    },
     "eventTypes": {
       "Lecture": "Přednáška",
       "Lab": "Cvičení",
@@ -64,8 +40,7 @@
       "Quiz": "Kvíz",
       "Exam": "Zkouška",
       "Deadline": "Termín"
-    },
-    "creditsCompletion": "Kredity / ukončení:"
+    }
   },
   "deadlines": {
     "urgent": "Naléhavé termíny",

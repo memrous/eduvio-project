@@ -193,9 +193,6 @@ export const AuthProvider = ({ children }) => {
           username: args[1],
           email: args[2],
           password: args[3],
-          ...(args[4] ? { stag_student_id: args[4] } : {}),
-          ...(args[5] ? { stag_username: args[5] } : {}),
-          ...(args[6] ? { stag_password: args[6] } : {}),
         }
 
     const response = await api.register(payload)

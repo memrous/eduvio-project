@@ -5,13 +5,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\StagAgentController;
 use App\Http\Controllers\StagController;
 use App\Http\Controllers\StagConnectController;
 use App\Http\Controllers\StagAuthController;
 use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\MoodleController;
 use App\Http\Controllers\MoodleConnectController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,8 +26,17 @@ Route::get('/academic/universities', [AcademicController::class, 'getUniversitie
 Route::get('/academic/universities/{universityId}/faculties', [AcademicController::class, 'getFaculties']);
 Route::get('/academic/faculties/{facultyId}/programs', [AcademicController::class, 'getPrograms']);
 
-// Chráněné endpointy (vyžadují v hlavičce: Authorization: Bearer <token>)
-Route::middleware('auth:sanctum')->group(function () {
+// Endpointy STAG agenta: projde token s ability "stag:sync" (stag-agent) i plný token "*"
+// (StagSyncJob v režimu server). Jediné routy, kam smí omezený token agenta.
+Route::middleware(['auth:sanctum', 'ability:stag:sync', 'throttle:30,1'])->group(function () {
+    Route::post('/stag/sync-schedule', [StagController::class, 'syncSchedule']);
+    Route::post('/stag/sync-subjects', [StagController::class, 'syncSubjects']);
+    Route::post('/stag/agent/report',  [StagAgentController::class, 'report']);
+    Route::get('/stag/agent/whoami',   [StagAgentController::class, 'whoami']);
+});
+
+// Chráněné endpointy (vyžadují v hlavičce: Authorization: Bearer <token> s plným přístupem)
+Route::middleware(['auth:sanctum', 'full-access'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -61,17 +70,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 
     // STAG Synchronizace
-    Route::post('/stag/sync-schedule', [StagController::class, 'syncSchedule']);
-    Route::post('/stag/sync-subjects', [StagController::class, 'syncSubjects']);
-    // DEPRECATED - viz StagAuthController
-    Route::post('/user/stag',          [StagConnectController::class, 'connect']);
     Route::delete('/user/stag',        [StagConnectController::class, 'disconnect']);
     Route::get('/user/stag/status',    [StagConnectController::class, 'status']);
     Route::post('/user/stag/resync',   [StagConnectController::class, 'resync']);
     Route::get('/user/stag/redirect',  [StagAuthController::class, 'redirect']);
+    Route::post('/user/stag/agent-token',   [StagAgentController::class, 'createToken']);
+    Route::delete('/user/stag/agent-token', [StagAgentController::class, 'revokeToken']);
 
     // Moodle Synchronizace
-    Route::post('/moodle/sync-requirements', [MoodleController::class, 'syncRequirements']);
+    Route::post('/user/moodle/launch',   [MoodleConnectController::class, 'startLaunch']);
     Route::post('/user/moodle/token',    [MoodleConnectController::class, 'connectToken']);
     Route::delete('/user/moodle',        [MoodleConnectController::class, 'disconnect']);
     Route::get('/user/moodle/status',    [MoodleConnectController::class, 'status']);

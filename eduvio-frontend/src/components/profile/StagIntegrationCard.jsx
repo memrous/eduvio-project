@@ -10,8 +10,46 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import * as api from '../../services/api'
+import { useStagStatus } from '../../hooks/useStagStatus'
+import StagAgentPanel from './StagAgentPanel'
 
-const StagIntegrationCard = ({
+/**
+ * Chooses the UI by the backend's STAG mode (GET /user/stag/status → mode):
+ * - 'server': ticket login + server-side sync (StagServerCard, unchanged flow)
+ * - 'agent':  the local agent syncs; manage its token and show sync status
+ */
+const StagIntegrationCard = (props) => {
+  const { t } = useTranslation('profile')
+  const { status, mode, isLoading } = useStagStatus()
+
+  if (mode === 'agent') {
+    return (
+      <StagAgentPanel
+        status={status}
+        refreshUser={props.refreshUser}
+        onUserUpdate={props.onUserUpdate}
+        toast={props.toast}
+      />
+    )
+  }
+
+  // Avoid flashing the server login UI before the mode is known
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5">
+        <div className="flex items-center gap-2 text-sm text-on-surface-variant">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {t('stag.card.title')}
+        </div>
+      </div>
+    )
+  }
+
+  // 'server', or status unavailable (fall back to the existing flow)
+  return <StagServerCard {...props} />
+}
+
+const StagServerCard = ({
   effectiveUser,
   isStagConnected,
   refreshUser,
@@ -134,7 +172,7 @@ const StagIntegrationCard = ({
     try {
       const response = await api.getStagRedirectUrl()
       if (response.status === 'error' || !response.data?.redirect_url) {
-        toast.error(t('toast.connectFailed'))
+        toast.error(response.error === 'agent_mode' ? t('stag.errors.agentMode') : t('toast.connectFailed'))
         setStagRedirecting(false)
         return
       }
@@ -184,6 +222,8 @@ const StagIntegrationCard = ({
             setNextAllowedAt(nextAllowed)
           }
           toast.error(t('stag.syncing.recentlyTriggered', { minutes: retryMin }))
+        } else if (response.error === 'agent_mode') {
+          toast.error(t('stag.errors.agentMode'))
         } else {
           toast.error(response.error || t('stag.syncing.failed'))
         }
@@ -279,7 +319,7 @@ const StagIntegrationCard = ({
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-success">{t('stag.labels.username')}</p>
-                <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_user_name || effectiveUser.stag_username || 'N/A'}</p>
+                <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_user_name || 'N/A'}</p>
               </div>
             </div>
 

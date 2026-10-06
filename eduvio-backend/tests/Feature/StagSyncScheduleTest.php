@@ -22,7 +22,7 @@ class StagSyncScheduleTest extends TestCase
     public function test_sync_schedule_creates_new_subject_and_event_with_department(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $payload = [
             [
@@ -72,7 +72,7 @@ class StagSyncScheduleTest extends TestCase
     public function test_sync_schedule_updates_existing_subject_placeholders(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         // Subject exists with placeholder lecturer and no department
         $subject = Subject::create([
@@ -124,7 +124,7 @@ class StagSyncScheduleTest extends TestCase
     public function test_sync_schedule_does_not_overwrite_valid_lecturer_with_nespecifikovano(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $subject = Subject::create([
             'user_id' => $user->id,
@@ -169,7 +169,7 @@ class StagSyncScheduleTest extends TestCase
     public function test_sync_schedule_saves_statut_and_derives_is_mandatory(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $payload = [
             [

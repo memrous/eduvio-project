@@ -17,7 +17,7 @@ class SubjectFlowTest extends TestCase
     public function test_user_can_delete_their_own_subject_and_associated_relations(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $subject = Subject::create([
             'user_id' => $user->id,
@@ -87,7 +87,7 @@ class SubjectFlowTest extends TestCase
             'semester' => 'Winter',
         ]);
 
-        Sanctum::actingAs($user1);
+        Sanctum::actingAs($user1, ['*']);
 
         $response = $this->deleteJson("/api/subjects/{$subject->id}");
 
@@ -98,7 +98,7 @@ class SubjectFlowTest extends TestCase
     public function test_user_can_create_subject_with_guarantor_and_pass_threshold(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $payload = [
             'code' => 'KMI/ALGO2',
@@ -131,7 +131,7 @@ class SubjectFlowTest extends TestCase
     public function test_user_can_manage_global_materials(): void
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         // Store global material (subjectId is null)
         $payload = [

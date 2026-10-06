@@ -28,33 +28,9 @@
     "upcomingExams": "Upcoming Exams"
   },
   "timetable": {
-    "titleMobile": "Today's Schedule",
-    "titleDesktop": "Weekly Timetable",
     "lecturer": "Lecturer:",
-    "subjectDescription": "Subject Description:",
-    "noClassesToday": "No classes scheduled for today.",
-    "noClasses": "No classes",
-    "prev": "← Prev",
-    "current": "Current",
-    "next": "Next →",
-    "openSubjectHub": "Open Subject Hub",
     "room": "Room {{room}}",
     "roomLabel": "Room",
-    "fallbacks": {
-      "subjectCode": "GEN 101",
-      "room201": "Room 201",
-      "room105": "Room 105",
-      "mainHall": "Main Hall",
-      "unknownSubject": "Unknown Subject",
-      "notSpecified": "Not specified"
-    },
-    "days": {
-      "mon": "Mon",
-      "tue": "Tue",
-      "wed": "Wed",
-      "thu": "Thu",
-      "fri": "Fri"
-    },
     "eventTypes": {
       "Lecture": "Lecture",
       "Lab": "Lab",
@@ -63,8 +39,7 @@
       "Quiz": "Quiz",
       "Exam": "Exam",
       "Deadline": "Deadline"
-    },
-    "creditsCompletion": "Credits / Completion:"
+    }
   },
   "deadlines": {
     "urgent": "Urgent Deadlines",
