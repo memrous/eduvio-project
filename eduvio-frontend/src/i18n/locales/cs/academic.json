@@ -91,6 +91,29 @@
       "elective": "Volitelné předměty"
     }
   },
+  "subjectSchedule": {
+    "title": "Rozvrh",
+    "next": "Příští hodina",
+    "today": "Dnes",
+    "openInCalendar": "Otevřít v kalendáři",
+    "regular": "Pravidelně",
+    "evenWeek": "sudý týden",
+    "oddWeek": "lichý týden",
+    "occurrences_one": "{{count}} termín",
+    "occurrences_few": "{{count}} termíny",
+    "occurrences_other": "{{count}} termínů",
+    "types": {
+      "Přednáška": "Přednáška",
+      "Cvičení": "Cvičení",
+      "Seminář": "Seminář",
+      "Laboratoř": "Laboratoř",
+      "Ateliér": "Ateliér",
+      "Exkurze": "Exkurze",
+      "Konzultace": "Konzultace",
+      "Praxe": "Praxe",
+      "Blok": "Blok"
+    }
+  },
   "stagRemoved": {
     "badge": "Odebráno ze STAGu",
     "description": "Tento předmět už ve STAGu není, ale obsahuje tvoje data (poznámky, vlastní požadavky nebo materiály), proto zůstal zachován. Pokud ho už nepotřebuješ, můžeš ho smazat.",

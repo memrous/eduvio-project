@@ -21,6 +21,7 @@ import {
 import SubjectSummaryStrip from './subject/SubjectSummaryStrip'
 import SubjectMoodleActivities from './subject/SubjectMoodleActivities'
 import SubjectStagResultCard from './subject/SubjectStagResultCard'
+import SubjectSchedule from './subject/SubjectSchedule'
 import { formatSemesterLabel } from '../utils/semester'
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -375,6 +376,9 @@ const SubjectDetailView = ({
       <SubjectHeader subject={subject} requirements={requirements} onShowInfo={() => setShowInfo(true)} />
 
       {subject.stag_removed_at && <StagRemovedNotice subject={subject} onDelete={onDeleteSubject} />}
+
+      {/* SCHEDULE */}
+      <div className="page-section empty:hidden"><SubjectSchedule subject={subject} /></div>
 
       {/* 2. SUMMARY STRIP (2-3 METRIC CARDS) */}
       <div className="page-section"><SubjectSummaryStrip subject={subject} requirements={requirements} /></div>
