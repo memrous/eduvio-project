@@ -21,6 +21,7 @@ import {
 import SubjectSummaryStrip from './subject/SubjectSummaryStrip'
 import SubjectMoodleActivities from './subject/SubjectMoodleActivities'
 import SubjectStagResultCard from './subject/SubjectStagResultCard'
+import { formatSemesterLabel } from '../utils/semester'
 
 // ─── Helpers ─────────────────────────────────────────────────
 
@@ -83,9 +84,7 @@ const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
             {subject.code}
           </span>
           <span className="text-xs font-medium text-on-surface-variant">
-            {subject.semester === 'Winter'
-              ? t('dashboard:subjectCard.semester.winter')
-              : t('dashboard:subjectCard.semester.summer')}
+            {formatSemesterLabel(subject.semester, t)}
           </span>
         </div>
 

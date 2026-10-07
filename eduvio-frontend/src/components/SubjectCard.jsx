@@ -1,17 +1,12 @@
 import { User, Trash2, Building2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import CustomIcon from './CustomIcon'
+import { formatSemesterLabel } from '../utils/semester'
 
 const SubjectIcon = () => <CustomIcon name="book" className="w-5 h-5" />
 
 const SubjectCard = ({ subject, onSelect, onDelete }) => {
   const { t } = useTranslation('dashboard')
-
-  const getSemesterLabel = (semester) => {
-    if (semester === 'Winter') return t('subjectCard.semester.winter')
-    if (semester === 'Summer') return t('subjectCard.semester.summer')
-    return semester
-  }
 
   const getScoreColorClass = (score) => {
     if (score >= 70) return 'bg-success-container text-success'
@@ -101,7 +96,7 @@ const SubjectCard = ({ subject, onSelect, onDelete }) => {
       {/* Semester Details & Open Button */}
       <div className="flex items-center justify-between mt-2 pt-3 border-t border-outline-variant">
         <span className="text-label-sm text-on-surface-variant font-semibold">
-          {getSemesterLabel(subject.semester)}
+          {formatSemesterLabel(subject.semester, t)}
         </span>
         
         <div className="flex items-center gap-2">

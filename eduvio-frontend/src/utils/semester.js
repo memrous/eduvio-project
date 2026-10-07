@@ -68,6 +68,32 @@ export function isWinterSemester(semesterStr) {
 }
 
 /**
+ * Formats a semester string for display, e.g. "ZS 2026" -> "Zimní semestr 2026/2027".
+ * STAG sends the first year of the academic year, so "LS 2026" -> "Letní semestr 2026/2027".
+ * Legacy values without a year ("Winter"/"Summer") return just the semester name,
+ * unknown formats return the original string.
+ * @param {string|null|undefined} semesterStr
+ * @param {import('i18next').TFunction} t
+ * @returns {string}
+ */
+export function formatSemesterLabel(semesterStr, t) {
+  const parsed = parseSemester(semesterStr)
+  if (!parsed?.type) return semesterStr ?? ''
+
+  const name = t(
+    parsed.type === 'ZS'
+      ? 'academic:subjectsView.semesters.winter'
+      : 'academic:subjectsView.semesters.summer'
+  )
+  if (!parsed.year) return name
+
+  const year = /^\d{4}$/.test(parsed.year)
+    ? `${parsed.year}/${Number(parsed.year) + 1}`
+    : parsed.year
+  return `${name} ${year}`
+}
+
+/**
  * Returns Tailwind CSS classes for statut badge based on STAG statut value.
  * Uses design tokens from the project's design system (DESIGN.md).
  *
