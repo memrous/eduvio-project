@@ -3,27 +3,11 @@
     "overview": "Overview",
     "account": "Personal Details",
     "integrations": "Integrations",
-    "security": "Security",
-    "notifications": "Notifications"
-  },
-  "progress": {
-    "title": "Study Progress",
-    "subtitle": "Overview of acquired credits and completed subjects.",
-    "credits": "Credits",
-    "creditsFoot": "{{current}} of {{total}} credits",
-    "semesterFoot": "Semester {{semester}}",
-    "completedSubjects": "Completed Subjects",
-    "averageGrade": "Average",
-    "target": "Target",
-    "status": "On track"
+    "security": "Security"
   },
   "sidebar": {
     "badge": "INSTITUTIONAL ACCOUNT",
     "role": "Student",
-    "currentStudy": "CURRENT STUDY",
-    "active": "ACTIVE",
-    "studyMode": "Mode",
-    "fullTime": "Full-time",
     "logout": "Sign out",
     "copyId": "Copy ID"
   },
@@ -31,38 +15,26 @@
     "badge": "ACCOUNT SETTINGS",
     "title": "Profile & Settings",
     "subtitle": "Manage your personal details and account preferences.",
-    "syncedAgo": "Synced 2 mins ago"
+    "syncedAgo": "Synced {{time}}",
+    "neverSynced": "Not synced yet",
+    "syncing": "Sync in progress"
   },
   "overview": {
     "personalInfo": "Personal Details",
-    "personalInfoDesc": "Basic information from the university system.",
-    "edit": "Edit",
-    "phoneHint": "Visible only to you",
-    "securityTitle": "Account Security",
-    "securityDesc": "Your account is protected and in good standing.",
-    "secured": "Secured",
-    "twoFactor": "Two-factor authentication",
-    "twoFactorDesc": "Add an extra layer of protection when signing in.",
-    "password": "Password",
-    "passwordDesc": "Last changed 3 months ago.",
-    "changePassword": "Change password",
+    "personalInfoDesc": "Your Eduvio account details.",
     "integrationsTitle": "University Integrations",
     "integrationsDesc": "Connected services and synchronization.",
     "moodle": "Moodle",
     "moodleDesc": "Courses, assignments and deadlines",
-    "calendar": "Calendar",
-    "calendarDesc": "Schedule export to calendar",
     "connected": "Connected",
-    "disconnected": "Disconnected"
-  },
-  "actions": {
-    "exportData": "Export data",
-    "addToCalendar": "Add to calendar"
+    "stag": "IS/STAG",
+    "stagDesc": "Subjects, schedule and results",
+    "notConnected": "Not connected",
+    "manage": "Manage",
+    "connect": "Connect"
   },
   "footer": {
-    "help": "Need help?",
-    "contactSupport": "Contact support",
-    "version": "Version 2.4.1"
+    "version": "Version {{version}}"
   },
   "validation": {
     "studentIdRequired": "Student ID is required.",
@@ -79,69 +51,27 @@
     "avatarAlt": "Student Avatar"
   },
   "sections": {
-    "academicDetails": {
-      "title": "Academic Details",
-      "subtitle": "Official curriculum details synced from Palacky University STAG system."
-    },
     "universityIntegration": {
       "title": "University integration",
       "subtitle": "We separate STAG and Moodle integration in one place."
     }
   },
   "academic": {
-    "university": "University",
-    "faculty": "Faculty",
-    "studyProgram": "Study Program",
-    "academicYear": "Academic Year",
-    "phone": "Phone Number",
-    "appLanguage": "App Language",
-    "infoBanner": "To change personal details, please contact the study department.",
-    "infoBannerSub": "Personal identification details are synced with the central university database and cannot be modified directly in the app.",
-    "defaults": {
-      "university": "Palacky University Olomouc",
-      "faculty": "Faculty of Science",
-      "studyProgram": "Applied Informatics",
-      "academicYear": "1st Year",
-      "phone": "+420 123 456 789",
-      "appLanguage": "English (EN)"
-    }
+    "appLanguage": "App Language"
   },
   "security": {
-    "twoFactor": {
-      "title": "Two-Factor Authentication (2FA)",
-      "subtitle": "Secure your account by requiring a verification code on each login.",
-      "status": "Two-factor authentication status",
-      "active": "Active",
-      "inactive": "Inactive",
-      "mockNote": "Mock setting"
-    },
     "password": {
       "title": "Account Password",
-      "subtitle": "Password is managed by the central identity of Palacky University (Portal UP).",
+      "subtitle": "Password for your Eduvio account.",
       "action": "Change Password"
     },
     "sessions": {
       "title": "Active Sessions",
       "subtitle": "You can log out from all other devices and browsers where you are signed in.",
       "action": "Log out from all devices"
-    }
-  },
-  "notifications": {
-    "title": "Notification Settings",
-    "subtitle": "Choose which channels and types of alerts you want to receive.",
-    "mockNote": "Notifications are stored locally in your browser only (mock mode).",
-    "emailNews": {
-      "title": "Email news and summaries",
-      "subtitle": "Receive a weekly summary of completed and upcoming study requirements."
     },
-    "moodleSync": {
-      "title": "Moodle synchronization notifications",
-      "subtitle": "Notify about newly assigned tasks and changed deadlines from Moodle."
-    },
-    "calendarAlerts": {
-      "title": "Calendar and class reminders",
-      "subtitle": "Push notifications and reminders 15 minutes before a lecture or seminar starts."
-    }
+    "subtitle": "Password and signed-in devices.",
+    "comingSoon": "Soon"
   },
   "stag": {
     "status": {
@@ -260,6 +190,8 @@
       "unsupportedBrowser": "Your browser (e.g. Safari on iOS) does not support automatic protocol handling. Open Moodle login and paste the received token or URL manually below.",
       "manualPasteLabel": "Authentication token or link",
       "manualPastePlaceholder": "Paste link or token (web+eduvio://token=...)",
+      "manualToggle": "Didn't the sign-in come back to the app? Paste the address manually",
+      "returnFailed": "The return from Moodle did not work. Copy the address of the page where the sign-in ended and paste it here.",
       "manualPasteHint": "Click the button to open Moodle login first — the token must belong to the connection attempt you just started."
     },
     "labels": {
@@ -295,5 +227,46 @@
     "callback": {
       "connecting": "Connecting to Moodle..."
     }
+  },
+  "study": {
+    "title": "Study",
+    "empty": "Details will appear after the STAG sync.",
+    "syncedAgo": "From STAG {{time}}",
+    "yearValue": "{{year}}",
+    "fields": {
+      "faculty": "Faculty",
+      "year": "Year",
+      "form": "Form",
+      "type": "Degree",
+      "status": "Status"
+    },
+    "forms": {
+      "P": "Full-time",
+      "K": "Combined",
+      "D": "Distance"
+    },
+    "types": {
+      "B": "Bachelor's",
+      "N": "Follow-up Master's",
+      "M": "Master's",
+      "P": "Doctoral"
+    },
+    "statuses": {
+      "S": "Studying"
+    }
+  },
+  "studyOffice": {
+    "title": "Study department",
+    "officer": "Study officer"
+  },
+  "progress": {
+    "title": "Study progress",
+    "empty": "No completed subjects yet.",
+    "creditsOf": "{{earned}} of {{required}} credits",
+    "creditsEarned": "{{earned}} credits earned",
+    "requiredEstimated": "Required credits are approximate (based on the degree type).",
+    "weightedAverage": "Weighted average",
+    "completedSubjects": "Completed subjects",
+    "semesterCredits": "Credits this semester"
   }
 }

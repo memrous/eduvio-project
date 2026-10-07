@@ -155,13 +155,14 @@
       "completed": "Completed",
       "upcoming": "Upcoming"
     },
-    "showInfo": "Show subject description",
+    "showInfo": "About the subject",
     "infoDialog": {
-      "title": "Subject description",
+      "title": "About the subject",
       "close": "Close",
-      "importedFromStag": "Imported from IS/STAG · Lecturer: {{teacher}}",
-      "importedFromStagWithDept": "Imported from IS/STAG · Department: {{department}} · Lecturer: {{teacher}}",
-      "importedFromStagDeptOnly": "Imported from IS/STAG · Department: {{department}}"
+      "annotation": "Annotation",
+      "syllabus": "Syllabus",
+      "literature": "Literature",
+      "ownDescription": "Your description"
     },
     "testsExamsTracked": "{{count}} tests and exams listed",
     "noTestsExams": "No tests or exams scheduled.",
@@ -177,7 +178,9 @@
     "tabs": {
       "requirements": "Requirements",
       "materials": "Materials & Links",
-      "notes": "My Notes"
+      "notes": "My Notes",
+      "fulfillment": "Requirements",
+      "tasks": "Tasks"
     },
     "requirements": {
       "noRequirements": "No requirements yet.",
@@ -215,24 +218,25 @@
       "stagBadge": "IS/STAG Official"
     },
     "metrics": {
-      "successRate": "Success Rate",
-      "estimatedGrade": "Estimated Grade",
-      "estimateNote": "Provisional estimate",
       "remainingTasks": "Remaining Activities",
       "remainingTasksCount_one": "{{count}} remaining activity",
       "remainingTasksCount_other": "{{count}} remaining activities",
-      "averageGrade": "Average Grade",
-      "creditGranted": "Credit Met",
-      "creditPending": "Credit Pending",
-      "noPointsSubject": "Credit Course"
+      "points": "Points from coursework",
+      "noPoints": "No graded tasks",
+      "passThreshold": "Pass threshold: {{value}} %",
+      "missingToThreshold": "{{diff}} % missing"
     },
     "stagSection": {
       "title": "Official STAG Result",
-      "pendingTitle": "Awaiting STAG Closure",
-      "pendingDescription": "The lecturer has not yet entered the final grade or credit approval in the academic system.",
       "finalGrade": "Final Grade:",
-      "creditsAwarded": "Credits Awarded:",
-      "closedDate": "Course Status:"
+      "credit": "Credit",
+      "exam": "Exam",
+      "noResult": "No result yet",
+      "attempt": "attempt {{count}}",
+      "examiner": "Examiner",
+      "points": "{{points}} pts",
+      "creditPassed": "Passed",
+      "creditFailed": "Not passed"
     },
     "moodleSection": {
       "checklistCompleted": "Completed",
@@ -244,6 +248,23 @@
       "save": "Save Notes",
       "saved": "Saved",
       "lastSaved": "Last saved: {{time}}"
+    },
+    "openInStag": "Open in STAG",
+    "creditBeforeExam": "Credit is required before the exam",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "people": {
+      "guarantor_one": "Guarantor",
+      "guarantor_other": "Guarantors",
+      "lecturers": "Lecturers",
+      "tutors": "Tutors",
+      "lecturer": "Lecturer"
+    },
+    "fulfillment": {
+      "requirements": "Student requirements",
+      "assessment": "Assessment methods",
+      "examForm": "Exam form",
+      "empty": "STAG lists no requirements for this subject."
     }
   },
   "calendarView": {

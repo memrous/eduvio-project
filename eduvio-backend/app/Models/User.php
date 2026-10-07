@@ -23,10 +23,6 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
-        'university_id',
-        'faculty_id',
-        'study_program_id',
-        'academic_year',
         'stag_student_id',
         'stag_ticket',
         'stag_ticket_expires_at',
@@ -44,6 +40,18 @@ class User extends Authenticatable
         'moodle_user_id',
         'moodle_launch_passport',
         'moodle_launch_expires_at',
+        'study_program',
+        'study_program_code',
+        'faculty',
+        'study_form',
+        'study_type',
+        'study_type_key',
+        'study_year',
+        'study_status',
+        'study_officer_name',
+        'study_officer_email',
+        'study_officer_phone',
+        'study_info_synced_at',
     ];
 
     /**
@@ -90,6 +98,8 @@ class User extends Authenticatable
             'moodle_synced_at'           => 'datetime',
             'moodle_last_sync_attempt_at'=> 'datetime',
             'moodle_launch_expires_at'   => 'datetime',
+            'study_year'                 => 'integer',
+            'study_info_synced_at'       => 'datetime',
         ];
     }
 
@@ -137,20 +147,5 @@ class User extends Authenticatable
     public function subjects()
     {
         return $this->hasMany(Subject::class);
-    }
-
-    public function university()
-    {
-        return $this->belongsTo(University::class);
-    }
-
-    public function faculty()
-    {
-        return $this->belongsTo(Faculty::class);
-    }
-
-    public function studyProgram()
-    {
-        return $this->belongsTo(StudyProgram::class);
     }
 }

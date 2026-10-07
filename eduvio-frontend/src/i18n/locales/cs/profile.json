@@ -3,27 +3,11 @@
     "overview": "Přehled",
     "account": "Osobní údaje",
     "integrations": "Integrace",
-    "security": "Zabezpečení",
-    "notifications": "Oznámení"
-  },
-  "progress": {
-    "title": "Postup studiem",
-    "subtitle": "Přehled získaných kreditů a splněných předmětů.",
-    "credits": "Kredity",
-    "creditsFoot": "{{current}} z {{total}} kreditů",
-    "semesterFoot": "{{semester}}. semestr",
-    "completedSubjects": "Splněné předměty",
-    "averageGrade": "Průměr",
-    "target": "Cíl",
-    "status": "Na dobré cestě"
+    "security": "Zabezpečení"
   },
   "sidebar": {
     "badge": "INSTITUCIONÁLNÍ ÚČET",
     "role": "Student",
-    "currentStudy": "AKTUÁLNÍ STUDIUM",
-    "active": "AKTIVNÍ",
-    "studyMode": "Forma",
-    "fullTime": "Prezenční",
     "logout": "Odhlásit se",
     "copyId": "Kopírovat ID"
   },
@@ -31,38 +15,26 @@
     "badge": "NASTAVENÍ ÚČTU",
     "title": "Profil a nastavení",
     "subtitle": "Spravujte své osobní údaje a preference účtu.",
-    "syncedAgo": "Synchronizováno před 2 min"
+    "syncedAgo": "Synchronizováno {{time}}",
+    "neverSynced": "Zatím nesynchronizováno",
+    "syncing": "Probíhá synchronizace"
   },
   "overview": {
     "personalInfo": "Osobní údaje",
-    "personalInfoDesc": "Základní informace z univerzitního systému.",
-    "edit": "Upravit",
-    "phoneHint": "Viditelné pouze vám",
-    "securityTitle": "Bezpečnost účtu",
-    "securityDesc": "Váš účet je chráněný a v pořádku.",
-    "secured": "Zabezpečeno",
-    "twoFactor": "Dvoufázové ověření",
-    "twoFactorDesc": "Přidejte další vrstvu ochrany při přihlašování.",
-    "password": "Heslo",
-    "passwordDesc": "Naposledy změněno před 3 měsíci.",
-    "changePassword": "Změnit heslo",
+    "personalInfoDesc": "Údaje vašeho účtu v Eduviu.",
     "integrationsTitle": "Univerzitní integrace",
     "integrationsDesc": "Propojené služby a synchronizace.",
     "moodle": "Moodle",
     "moodleDesc": "Kurzy, úkoly a termíny",
-    "calendar": "Kalendář",
-    "calendarDesc": "Export rozvrhu do kalendáře",
     "connected": "Připojeno",
-    "disconnected": "Odpojeno"
-  },
-  "actions": {
-    "exportData": "Exportovat údaje",
-    "addToCalendar": "Přidat do kalendáře"
+    "stag": "IS/STAG",
+    "stagDesc": "Předměty, rozvrh a výsledky",
+    "notConnected": "Nepřipojeno",
+    "manage": "Spravovat",
+    "connect": "Připojit"
   },
   "footer": {
-    "help": "Potřebujete pomoc?",
-    "contactSupport": "Kontaktujte podporu",
-    "version": "Verze 2.4.1"
+    "version": "Verze {{version}}"
   },
   "validation": {
     "studentIdRequired": "Studentské ID je povinné.",
@@ -79,69 +51,27 @@
     "avatarAlt": "Avatar studenta"
   },
   "sections": {
-    "academicDetails": {
-      "title": "Studijní údaje",
-      "subtitle": "Oficiální údaje o studiu synchronizované ze systému STAG Univerzity Palackého."
-    },
     "universityIntegration": {
       "title": "Univerzitní integrace",
       "subtitle": "Integrace STAGu a Moodlu jsou na jednom místě."
     }
   },
   "academic": {
-    "university": "Univerzita",
-    "faculty": "Fakulta",
-    "studyProgram": "Studijní program",
-    "academicYear": "Ročník",
-    "phone": "Telefonní číslo",
-    "appLanguage": "Jazyk aplikace",
-    "infoBanner": "Pro změnu osobních údajů kontaktujte studijní oddělení.",
-    "infoBannerSub": "Osobní identifikační údaje jsou synchronizovány s centrální univerzitní databází a nelze je upravovat přímo v aplikaci.",
-    "defaults": {
-      "university": "Univerzita Palackého v Olomouci",
-      "faculty": "Přírodovědecká fakulta",
-      "studyProgram": "Aplikovaná informatika",
-      "academicYear": "1. ročník",
-      "phone": "+420 123 456 789",
-      "appLanguage": "Čeština (CS)"
-    }
+    "appLanguage": "Jazyk aplikace"
   },
   "security": {
-    "twoFactor": {
-      "title": "Dvoufaktorové ověření (2FA)",
-      "subtitle": "Zabezpečte svůj účet vyžadováním ověřovacího kódu při každém přihlášení.",
-      "status": "Stav dvoufaktorového ověření",
-      "active": "Aktivní",
-      "inactive": "Neaktivní",
-      "mockNote": "Mock nastavení"
-    },
     "password": {
       "title": "Heslo k účtu",
-      "subtitle": "Heslo je spravováno centrální identitou Univerzity Palackého (Portal UP).",
+      "subtitle": "Heslo k vašemu účtu v Eduviu.",
       "action": "Změnit heslo"
     },
     "sessions": {
       "title": "Aktivní relace",
       "subtitle": "Můžete se odhlásit ze všech ostatních zařízení a prohlížečů, kde jste přihlášeni.",
       "action": "Odhlásit všechna zařízení"
-    }
-  },
-  "notifications": {
-    "title": "Nastavení oznámení",
-    "subtitle": "Zvolte, které kanály a typy upozornění chcete dostávat.",
-    "mockNote": "Oznámení jsou ukládána pouze lokálně ve vašem prohlížeči (mock režim).",
-    "emailNews": {
-      "title": "E-mailové novinky a souhrny",
-      "subtitle": "Dostávat týdenní přehled splněných a nadcházejících studijních povinností."
     },
-    "moodleSync": {
-      "title": "Moodle synchronizační notifikace",
-      "subtitle": "Upozornit na nově vypsané úkoly a změněné termíny odevzdání z Moodlu."
-    },
-    "calendarAlerts": {
-      "title": "Upozornění kalendáře a výuky",
-      "subtitle": "Push notifikace a připomenutí 15 minut před začátkem přednášky či cvičení."
-    }
+    "subtitle": "Heslo a přihlášená zařízení.",
+    "comingSoon": "Brzy"
   },
   "stag": {
     "status": {
@@ -260,6 +190,8 @@
       "unsupportedBrowser": "Váš prohlížeč (např. Safari na iOS) nepodporuje automatické zachycení protokolu. Otevřete přihlášení do Moodle a vložte získaný token nebo odkaz ručně níže.",
       "manualPasteLabel": "Ověřovací token nebo odkaz",
       "manualPastePlaceholder": "Vložte odkaz nebo token (web+eduvio://token=...)",
+      "manualToggle": "Přihlášení se nevrátilo do aplikace? Vložit adresu ručně",
+      "returnFailed": "Návrat z Moodlu se nepovedl. Zkopíruj adresu ze stránky, kde přihlášení skončilo, a vlož ji sem.",
       "manualPasteHint": "Nejdřív klikněte na tlačítko pro otevření přihlášení v Moodlu – token musí patřit k právě spuštěnému pokusu o připojení."
     },
     "labels": {
@@ -295,5 +227,46 @@
     "callback": {
       "connecting": "Připojování k Moodlu..."
     }
+  },
+  "study": {
+    "title": "Studium",
+    "empty": "Údaje se načtou po synchronizaci STAGu.",
+    "syncedAgo": "Ze STAGu {{time}}",
+    "yearValue": "{{year}}.",
+    "fields": {
+      "faculty": "Fakulta",
+      "year": "Ročník",
+      "form": "Forma",
+      "type": "Typ studia",
+      "status": "Stav"
+    },
+    "forms": {
+      "P": "Prezenční",
+      "K": "Kombinovaná",
+      "D": "Distanční"
+    },
+    "types": {
+      "B": "Bakalářský",
+      "N": "Navazující magisterský",
+      "M": "Magisterský",
+      "P": "Doktorský"
+    },
+    "statuses": {
+      "S": "Studuje"
+    }
+  },
+  "studyOffice": {
+    "title": "Studijní oddělení",
+    "officer": "Studijní referentka"
+  },
+  "progress": {
+    "title": "Postup studiem",
+    "empty": "Zatím žádné splněné předměty.",
+    "creditsOf": "{{earned}} z {{required}} kreditů",
+    "creditsEarned": "{{earned}} získaných kreditů",
+    "requiredEstimated": "Počet potřebných kreditů je orientační (podle typu studia).",
+    "weightedAverage": "Vážený průměr",
+    "completedSubjects": "Splněné předměty",
+    "semesterCredits": "Kreditů v semestru"
   }
 }

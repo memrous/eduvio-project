@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import {
-  GraduationCap,
   Mail,
   Lock,
   Eye,
@@ -10,20 +9,16 @@ import {
   AlertCircle,
   CalendarDays,
   BarChart3,
-  ArrowRight,
-  ArrowLeft,
   Loader2,
   CheckCircle2,
-  IdCard,
-  ChevronDown,
-  Building2,
   Check,
+  Info,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import CustomIcon from '../components/CustomIcon'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useAuth } from '../context/AuthContext'
-import httpClient from '../services/httpClient'
+import { useToast } from '../context/ToastContext'
 import { checkAvailability } from '../services/api'
 import logoImg from '../assets/images/logo.png'
 
@@ -32,21 +27,6 @@ const FEATURES = [
   { icon: () => <CustomIcon name="book" className="w-5 h-5" />, key: 'features.manageSubjects' },
   { icon: CalendarDays, key: 'features.calendar' },
   { icon: BarChart3, key: 'features.progress' },
-]
-
-const ACADEMIC_YEARS = [
-  { value: '1' },
-  { value: '2' },
-  { value: '3' },
-  { value: '4' },
-  { value: '5' },
-  { value: '6' },
-]
-
-const STEP_META = [
-  'step1',
-  'step2',
-  'step3',
 ]
 
 const getStrength = (pw) => {
@@ -66,7 +46,7 @@ const getStrength = (pw) => {
   return map[score] ?? map[0]
 }
 
-const validateStep1 = (form) => {
+const validateForm = (form) => {
   const errors = {}
   if (!form.name.trim()) errors.name = 'errors.nameRequired'
   if (!form.username || !form.username.trim()) {
@@ -89,15 +69,6 @@ const validateStep1 = (form) => {
   } else if (form.password !== form.confirmPassword) {
     errors.confirmPassword = 'errors.passwordMismatch'
   }
-  return errors
-}
-
-const validateStep2 = (form) => {
-  const errors = {}
-  if (!form.university_id) errors.university_id = 'errors.universityRequired'
-  if (!form.faculty_id) errors.faculty_id = 'errors.facultyRequired'
-  if (!form.study_program_id) errors.study_program_id = 'errors.studyProgramRequired'
-  if (!form.academic_year) errors.academic_year = 'errors.academicYearRequired'
   return errors
 }
 
@@ -124,23 +95,15 @@ const getStrengthLabelKey = (level) => {
 const RegisterPage = () => {
   const { register, isAuthenticated, isLoading: authLoading } = useAuth()
   const { t } = useTranslation('auth')
+  const toast = useToast()
 
-  const [currentStep, setCurrentStep] = useState(1)
   const [form, setForm] = useState({
     name: '',
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
-    university_id: '',
-    faculty_id: '',
-    study_program_id: '',
-    academic_year: '',
   })
-
-  const [universities, setUniversities] = useState([])
-  const [faculties, setFaculties] = useState([])
-  const [programs, setPrograms] = useState([])
 
   const [showPass, setShowPass] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -149,52 +112,7 @@ const RegisterPage = () => {
   const [submitting, setSubmitting] = useState(false)
   const [checking, setChecking] = useState(false)
 
-  // ── Fetch universities on mount ──────────────────────────────────
-  useEffect(() => {
-    httpClient
-      .get('/academic/universities')
-      .then((res) => {
-        const list = res.data?.data || res.data || []
-        setUniversities(list)
-        const upol = list.find((u) => u.code === 'UPOL')
-        if (upol) setForm((prev) => ({ ...prev, university_id: String(upol.id) }))
-      })
-      .catch(() => {})
-  }, [])
-
-  // ── Fetch faculties when university changes ──────────────────────
-  useEffect(() => {
-    if (!form.university_id) {
-      setFaculties([])
-      setPrograms([])
-      return
-    }
-    setFaculties([])
-    setPrograms([])
-    setForm((prev) => ({ ...prev, faculty_id: '', study_program_id: '' }))
-    httpClient
-      .get(`/academic/universities/${form.university_id}/faculties`)
-      .then((res) => setFaculties(res.data?.data || res.data || []))
-      .catch(() => {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.university_id])
-
-  // ── Fetch programs when faculty changes ──────────────────────────
-  useEffect(() => {
-    if (!form.faculty_id) {
-      setPrograms([])
-      return
-    }
-    setPrograms([])
-    setForm((prev) => ({ ...prev, study_program_id: '' }))
-    httpClient
-      .get(`/academic/faculties/${form.faculty_id}/programs`)
-      .then((res) => setPrograms(res.data?.data || res.data || []))
-      .catch(() => {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.faculty_id])
-
-  // ── Auth redirect ────────────────────────────────────────────────
+  // ── Auth redirect (already signed in) ────────────────────────────
   if (isAuthenticated && !authLoading) {
     return <Navigate to="/dashboard" replace />
   }
@@ -206,81 +124,43 @@ const RegisterPage = () => {
     setErrors((prev) => ({ ...prev, [key]: '' }))
   }
 
-  const handleNext = async () => {
-    setServerError('')
-    let fieldErrors = {}
-    if (currentStep === 1) fieldErrors = validateStep1(form)
-    if (currentStep === 2) fieldErrors = validateStep2(form)
-
-    if (Object.keys(fieldErrors).length) {
-      setErrors(fieldErrors)
-      return
-    }
-
-    // On Step 1, verify email + username are not already taken before advancing
-    if (currentStep === 1) {
-      setChecking(true)
-      const result = await checkAvailability({ email: form.email, username: form.username })
-      setChecking(false)
-      if (result.status === 'error' && result.errors) {
-        setErrors(result.errors)
-        return
-      }
-    }
-
-    setErrors({})
-    setCurrentStep((s) => s + 1)
-  }
-
-  const handleBack = () => {
-    setErrors({})
-    setServerError('')
-    setCurrentStep((s) => s - 1)
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setServerError('')
 
-    // Run validation for the current step
-    let fieldErrors = {}
-    if (currentStep === 1) fieldErrors = validateStep1(form)
-    else if (currentStep === 2) fieldErrors = validateStep2(form)
-
+    const fieldErrors = validateForm(form)
     if (Object.keys(fieldErrors).length) {
       setErrors(fieldErrors)
       return
     }
-    setErrors({})
 
-    // If not on last step, advance
-    if (currentStep < 3) {
-      setCurrentStep((s) => s + 1)
+    // Verify that the email and username are not taken yet
+    setChecking(true)
+    const availability = await checkAvailability({ email: form.email, username: form.username })
+    setChecking(false)
+    if (availability.status === 'error' && availability.errors) {
+      setErrors(availability.errors)
       return
     }
+    setErrors({})
 
-    // Build final payload
+    // Account details only; study details come from the STAG sync
     const payload = {
       name: form.name,
       username: form.username,
       email: form.email,
       password: form.password,
       password_confirmation: form.confirmPassword,
-      university_id: Number(form.university_id),
-      faculty_id: Number(form.faculty_id),
-      study_program_id: Number(form.study_program_id),
-      academic_year: form.academic_year,
     }
 
     setSubmitting(true)
     try {
+      // On success AuthContext opens the profile's integrations tab
       await register(payload)
+      toast.success(t('register.welcomeToast'))
     } catch (err) {
       if (err.errors) {
         setErrors(err.errors)
-        if (err.errors.username || err.errors.email || err.errors.name || err.errors.password) {
-          setCurrentStep(1)
-        }
       } else {
         setServerError(err.message)
       }
@@ -297,14 +177,7 @@ const RegisterPage = () => {
     'w-full pl-10 pr-4 py-2.5 bg-[#F8F9FB] rounded-lg border text-body-md text-gray-900 focus:outline-none focus:bg-white transition-colors'
   const inputOk = `${inputBase} border-[#E2E8F0] focus:border-[#004ac6]`
   const inputErr = `${inputBase} border-red-400 focus:border-red-500 bg-red-50`
-
-  const selectBase =
-    'w-full pl-10 pr-10 py-2.5 bg-[#F8F9FB] rounded-lg border text-body-md text-gray-900 focus:outline-none focus:bg-white transition-colors appearance-none cursor-pointer'
-  const selectOk = `${selectBase} border-[#E2E8F0] focus:border-[#004ac6]`
-  const selectErr = `${selectBase} border-red-400 focus:border-red-500 bg-red-50`
-
-  const meta = STEP_META[currentStep - 1]
-  const progressPercent = Math.round((currentStep / 3) * 100)
+  const busy = checking || submitting
 
   // ── JSX ──────────────────────────────────────────────────────────
   return (
@@ -371,33 +244,13 @@ const RegisterPage = () => {
             <span className="font-geist font-bold text-xl text-gray-900 tracking-tight">Eduvio</span>
           </div>
 
-          {/* ── Progress indicator ─────────────────────────────── */}
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">
-                {t('register.progress.step', { currentStep })}
-              </span>
-              <span className="text-[11px] font-bold text-[#004ac6]">{progressPercent}%</span>
-            </div>
-            <div className="flex gap-1.5">
-              {[1, 2, 3].map((n) => (
-                <div
-                  key={n}
-                  className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-                    n <= currentStep ? 'bg-[#004ac6]' : 'bg-[#E2E8F0]'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* ── Step title ─────────────────────────────────────── */}
+          {/* ── Title ──────────────────────────────────────────── */}
           <div className="flex flex-col gap-1.5">
             <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
-              {t(`register.stepMeta.${meta}.title`)}
+              {t('register.title')}
             </h2>
             <p className="text-body-md text-gray-500">
-              {t(`register.stepMeta.${meta}.subtitle`)}
+              {t('register.subtitle')}
             </p>
           </div>
 
@@ -412,359 +265,189 @@ const RegisterPage = () => {
           {/* ── Form ───────────────────────────────────────────── */}
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
 
-            {/* ═══════════════ STEP 1 — Account Creation ═══════════════ */}
-            {currentStep === 1 && (
-              <>
-                {/* Full name */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-name">
-                    {t('register.fields.name.label')}
-                  </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      id="reg-name"
-                      type="text"
-                      autoComplete="name"
-                      value={form.name}
-                      onChange={set('name')}
-                      placeholder={t('register.fields.name.placeholder')}
-                      className={errors.name ? inputErr : inputOk}
-                    />
-                  </div>
-                  {errors.name && (
-                    <p className="text-label-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {formatError(t, errors.name)}
-                    </p>
-                  )}
-                </div>
-
-                {/* Username */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-username">
-                    {t('register.fields.username.label')}
-                  </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      id="reg-username"
-                      type="text"
-                      autoComplete="username"
-                      value={form.username}
-                      onChange={set('username')}
-                      placeholder={t('register.fields.username.placeholder')}
-                      className={errors.username ? inputErr : inputOk}
-                    />
-                  </div>
-                  {errors.username && (
-                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {formatError(t, errors.username)}
-                    </p>
-                  )}
-                </div>
-
-                {/* Email */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-email">
-                    {t('register.fields.email.label')}
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      id="reg-email"
-                      type="email"
-                      autoComplete="email"
-                      value={form.email}
-                      onChange={set('email')}
-                      placeholder={t('register.fields.email.placeholder')}
-                      className={errors.email ? inputErr : inputOk}
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {formatError(t, errors.email)}
-                    </p>
-                  )}
-                </div>
-
-                {/* Password */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-password">
-                    {t('register.fields.password.label')}
-                  </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      id="reg-password"
-                      type={showPass ? 'text' : 'password'}
-                      autoComplete="new-password"
-                      value={form.password}
-                      onChange={set('password')}
-                      placeholder={t('register.fields.password.placeholder')}
-                      className={`${errors.password ? inputErr : inputOk} pr-10`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPass((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors"
-                      aria-label={showPass ? t('register.aria.hidePassword') : t('register.aria.showPassword')}
-                    >
-                      {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-
-                  {form.password && (
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <div className="flex gap-1 flex-1">
-                        {[1, 2, 3, 4].map((n) => (
-                          <div
-                            key={n}
-                            className={`h-1 flex-1 rounded-full transition-colors ${
-                              n <= strength.level ? strength.color : 'bg-[#E2E8F0]'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-[11px] font-semibold text-gray-500 shrink-0">
-                        {strengthLabelKey ? t(strengthLabelKey) : ''}
-                      </span>
-                    </div>
-                  )}
-
-                  {errors.password && (
-                    <p className="text-label-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {formatError(t, errors.password)}
-                    </p>
-                  )}
-                </div>
-
-                {/* Confirm password */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-confirm">
-                    {t('register.fields.confirmPassword.label')}
-                  </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      id="reg-confirm"
-                      type={showConfirm ? 'text' : 'password'}
-                      autoComplete="new-password"
-                      value={form.confirmPassword}
-                      onChange={set('confirmPassword')}
-                      placeholder={t('register.fields.confirmPassword.placeholder')}
-                      className={`${errors.confirmPassword ? inputErr : inputOk} pr-10`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirm((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors"
-                      aria-label={showConfirm ? t('register.aria.hidePassword') : t('register.aria.showPassword')}
-                    >
-                      {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-
-                    {form.confirmPassword && form.password === form.confirmPassword && (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 absolute right-9 top-1/2 -translate-y-1/2" />
-                    )}
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="text-label-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {formatError(t, errors.confirmPassword)}
-                    </p>
-                  )}
-                </div>
-              </>
-            )}
-
-            {/* ═══════════════ STEP 2 — Academic Profile ═══════════════ */}
-            {currentStep === 2 && (
-              <>
-                {/* University */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-university">
-                    {t('register.fields.university.label')}
-                  </label>
-                  <div className="relative">
-                    <Building2 className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <select
-                      id="reg-university"
-                      value={form.university_id}
-                      onChange={set('university_id')}
-                      className={errors.university_id ? selectErr : selectOk}
-                    >
-                      <option value="">{t('register.fields.university.placeholder')}</option>
-                      {universities.map((u) => (
-                        <option key={u.id} value={String(u.id)}>
-                          {u.name}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                  {errors.university_id && (
-                    <p className="text-label-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {formatError(t, errors.university_id)}
-                    </p>
-                  )}
-                </div>
-
-                {/* Faculty */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-faculty">
-                    {t('register.fields.faculty.label')}
-                  </label>
-                  <div className="relative">
-                    <CustomIcon name="book" className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <select
-                      id="reg-faculty"
-                      value={form.faculty_id}
-                      onChange={set('faculty_id')}
-                      disabled={!form.university_id}
-                      className={`${errors.faculty_id ? selectErr : selectOk} disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      <option value="">
-                        {form.university_id
-                          ? t('register.fields.faculty.placeholder')
-                          : t('register.fields.faculty.disabledPlaceholder')}
-                      </option>
-                      {faculties.map((f) => (
-                        <option key={f.id} value={String(f.id)}>
-                          {f.name}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                  {errors.faculty_id && (
-                    <p className="text-label-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {formatError(t, errors.faculty_id)}
-                    </p>
-                  )}
-                </div>
-
-                {/* Study Program */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-program">
-                    {t('register.fields.studyProgram.label')}
-                  </label>
-                  <div className="relative">
-                    <GraduationCap className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <select
-                      id="reg-program"
-                      value={form.study_program_id}
-                      onChange={set('study_program_id')}
-                      disabled={!form.faculty_id}
-                      className={`${errors.study_program_id ? selectErr : selectOk} disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      <option value="">
-                        {form.faculty_id
-                          ? t('register.fields.studyProgram.placeholder')
-                          : t('register.fields.studyProgram.disabledPlaceholder')}
-                      </option>
-                      {programs.map((p) => (
-                        <option key={p.id} value={String(p.id)}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                  {errors.study_program_id && (
-                    <p className="text-label-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {formatError(t, errors.study_program_id)}
-                    </p>
-                  )}
-                </div>
-
-                {/* Academic Year */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-year">
-                    {t('register.fields.academicYear.label')}
-                  </label>
-                  <div className="relative">
-                    <CalendarDays className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <select
-                      id="reg-year"
-                      value={form.academic_year}
-                      onChange={set('academic_year')}
-                      className={errors.academic_year ? selectErr : selectOk}
-                    >
-                      <option value="">{t('register.fields.academicYear.placeholder')}</option>
-                      {ACADEMIC_YEARS.map((y) => (
-                        <option key={y.value} value={y.value}>
-                          {t('register.academicYears', { count: Number(y.value), ordinal: true })}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                  {errors.academic_year && (
-                    <p className="text-label-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {formatError(t, errors.academic_year)}
-                    </p>
-                  )}
-                </div>
-              </>
-            )}
-
-            {/* ═══════════════ STEP 3 — University Sync ═══════════════ */}
-            {currentStep === 3 && (
-              <>
-                {/* STAG is connected after registration via the ticket login in the profile */}
-                <div className="rounded-2xl border border-[#E2E8F0] bg-slate-50/70 p-4 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <IdCard className="w-4 h-4 text-[#004ac6]" />
-                    <h3 className="text-label-md font-semibold text-gray-900">{t('register.info.stagConnectionTitle')}</h3>
-                  </div>
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    {t('register.info.stagConnectInProfile')}
-                  </p>
-                </div>
-              </>
-            )}
-
-            {/* ═══════════════ Navigation buttons ═══════════════ */}
-            <div className={`flex gap-3 mt-2 ${currentStep === 1 ? '' : 'justify-between'}`}>
-              {currentStep > 1 && (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="flex items-center justify-center gap-2 py-2.5 px-5 bg-[#F8F9FB] hover:bg-[#EEF1F5] border border-[#E2E8F0] text-gray-900 font-semibold rounded-lg text-label-md transition-all cursor-pointer"
-                >
-                  <ArrowLeft className="w-4 h-4" /> {t('register.actions.back')}
-                </button>
-              )}
-
-              {currentStep < 3 && (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={checking}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-[#004ac6] hover:bg-[#003ea8] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg text-label-md transition-all shadow-sm cursor-pointer"
-                >
-                  {checking ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> {t('register.actions.checking')}</>
-                  ) : (
-                    <>{t('register.actions.continue')} <ArrowRight className="w-4 h-4" /></>
-                  )}
-                </button>
-              )}
-
-              {currentStep === 3 && (
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-[#004ac6] hover:bg-[#003ea8] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg text-label-md transition-all shadow-sm cursor-pointer"
-                >
-                  {submitting ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> {t('register.actions.creatingAccount')}</>
-                  ) : (
-                    <>{t('register.actions.completeRegistration')} <Check className="w-4 h-4" /></>
-                  )}
-                </button>
+            {/* ═══════════════ Account details ═══════════════ */}
+            {/* Full name */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-name">
+                {t('register.fields.name.label')}
+              </label>
+              <div className="relative">
+                <User className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="reg-name"
+                  type="text"
+                  autoComplete="name"
+                  value={form.name}
+                  onChange={set('name')}
+                  placeholder={t('register.fields.name.placeholder')}
+                  className={errors.name ? inputErr : inputOk}
+                />
+              </div>
+              {errors.name && (
+                <p className="text-label-sm text-red-600 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> {formatError(t, errors.name)}
+                </p>
               )}
             </div>
+
+            {/* Username */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-username">
+                {t('register.fields.username.label')}
+              </label>
+              <div className="relative">
+                <User className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="reg-username"
+                  type="text"
+                  autoComplete="username"
+                  value={form.username}
+                  onChange={set('username')}
+                  placeholder={t('register.fields.username.placeholder')}
+                  className={errors.username ? inputErr : inputOk}
+                />
+              </div>
+              {errors.username && (
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> {formatError(t, errors.username)}
+                </p>
+              )}
+            </div>
+
+            {/* Email */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-email">
+                {t('register.fields.email.label')}
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="reg-email"
+                  type="email"
+                  autoComplete="email"
+                  value={form.email}
+                  onChange={set('email')}
+                  placeholder={t('register.fields.email.placeholder')}
+                  className={errors.email ? inputErr : inputOk}
+                />
+              </div>
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> {formatError(t, errors.email)}
+                </p>
+              )}
+            </div>
+
+            {/* Password */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-password">
+                {t('register.fields.password.label')}
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="reg-password"
+                  type={showPass ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={set('password')}
+                  placeholder={t('register.fields.password.placeholder')}
+                  className={`${errors.password ? inputErr : inputOk} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors"
+                  aria-label={showPass ? t('register.aria.hidePassword') : t('register.aria.showPassword')}
+                >
+                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+
+              {form.password && (
+                <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex gap-1 flex-1">
+                    {[1, 2, 3, 4].map((n) => (
+                      <div
+                        key={n}
+                        className={`h-1 flex-1 rounded-full transition-colors ${
+                          n <= strength.level ? strength.color : 'bg-[#E2E8F0]'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[11px] font-semibold text-gray-500 shrink-0">
+                    {strengthLabelKey ? t(strengthLabelKey) : ''}
+                  </span>
+                </div>
+              )}
+
+              {errors.password && (
+                <p className="text-label-sm text-red-600 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> {formatError(t, errors.password)}
+                </p>
+              )}
+            </div>
+
+            {/* Confirm password */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-confirm">
+                {t('register.fields.confirmPassword.label')}
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="reg-confirm"
+                  type={showConfirm ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  value={form.confirmPassword}
+                  onChange={set('confirmPassword')}
+                  placeholder={t('register.fields.confirmPassword.placeholder')}
+                  className={`${errors.confirmPassword ? inputErr : inputOk} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors"
+                  aria-label={showConfirm ? t('register.aria.hidePassword') : t('register.aria.showPassword')}
+                >
+                  {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+
+                {form.confirmPassword && form.password === form.confirmPassword && (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 absolute right-9 top-1/2 -translate-y-1/2" />
+                )}
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-label-sm text-red-600 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> {formatError(t, errors.confirmPassword)}
+                </p>
+              )}
+            </div>
+
+            {/* ═══════════════ Submit ═══════════════ */}
+            <div className="flex gap-3 mt-2">
+              <button
+                type="submit"
+                disabled={busy}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-[#004ac6] hover:bg-[#003ea8] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg text-label-md transition-all shadow-sm cursor-pointer"
+              >
+                {checking ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> {t('register.actions.checking')}</>
+                ) : submitting ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> {t('register.actions.creatingAccount')}</>
+                ) : (
+                  <>{t('register.actions.completeRegistration')} <Check className="w-4 h-4" /></>
+                )}
+              </button>
+            </div>
           </form>
+
+          {/* Study details are not entered by hand; they come from STAG */}
+          <p className="flex items-start gap-2 text-sm text-gray-500 leading-relaxed">
+            <Info className="w-4 h-4 text-[#004ac6] shrink-0 mt-0.5" />
+            <span>{t('register.stagNote')}</span>
+          </p>
 
           {/* Sign in link */}
           <p className="text-body-md text-gray-500 text-center">

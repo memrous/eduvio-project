@@ -1,16 +1,5 @@
 // Unified Mock Database and Entity Definitions for Eduvio
 
-export const INITIAL_USER = {
-  id: 1,
-  name: "Bořek Šarman",
-  email: "borek.sarman@upol.cz",
-  university: "Palacký University Olomouc",
-  faculty: "Faculty of Science",
-  program: "Applied Informatics",
-  year: "1st Year",
-  stagConnected: true
-};
-
 export const INITIAL_SUBJECTS = [
   {
     id: 1,
@@ -21,7 +10,34 @@ export const INITIAL_SUBJECTS = [
     completionType: 'Credit + Exam',
     isMandatory: true,
     semester: 'ZS 2024/2025',
-    description: 'Exploration of relational databases, SQL optimization, database normalization, transactions, and modern schema design. Essential for backend integration.'
+    description: 'Exploration of relational databases, SQL optimization, database normalization, transactions, and modern schema design. Essential for backend integration.',
+    // STAG details (snake_case, as sent by the backend) with a finished result
+    source: 'stag',
+    statut: 'A',
+    department: 'KMI',
+    guarantor: 'doc. RNDr. John Smith, Ph.D.',
+    lecturers: 'doc. RNDr. John Smith, Ph.D.',
+    tutors: 'Mgr. Jakub Baloun, RNDr. Marie Chodorová, Ph.D., Mgr. Eva Nováková, Ing. Petr Dvořák',
+    stag_annotation: 'The course introduces relational databases and their design.\r\n\r\nStudents learn SQL, normalization and transactions on practical examples.',
+    stag_requirements: 'Credit: two written tests during the semester, at least 50 % of points in total.\r\nExam: written part (SQL queries) and an oral part.',
+    stag_syllabus: '1. Relational model\r\n2. SQL: SELECT, joins\r\n3. Aggregation and grouping\r\n4. Subqueries\r\n5. Normal forms\r\n6. Transactions and isolation levels\r\n7. Indexes\r\n8. Query optimization\r\n9. Stored procedures and triggers\r\n10. NoSQL overview',
+    stag_literature: 'Date, C. J.: An Introduction to Database Systems. Addison-Wesley, 2003.\r\nGarcia-Molina, H.: Database Systems: The Complete Book. Pearson, 2008.',
+    stag_assessment: 'Written test, oral exam',
+    exam_form: 'Combined',
+    credit_before_exam: true,
+    stag_url: 'https://stag.example.edu/portal/predmet/KMI/DBS',
+    stag_completion_state: 'S',
+    credit_result: 'S',
+    credit_date: '2024-12-16',
+    credit_attempt: 1,
+    credit_examiner: 'Mgr. Jakub Baloun',
+    exam_result: '2',
+    exam_date: '2025-01-22',
+    exam_attempt: 2,
+    exam_points: 78.5,
+    exam_examiner: 'doc. RNDr. John Smith, Ph.D.',
+    final_grade: '2',
+    status: 'completed'
   },
   {
     id: 2,
@@ -32,7 +48,22 @@ export const INITIAL_SUBJECTS = [
     completionType: 'Credit',
     isMandatory: true,
     semester: 'ZS 2024/2025',
-    description: 'Building modern full-stack web applications using React, Node.js, and HTTP APIs. Emphasizes components, state management, and deployment.'
+    // Placeholder from the STAG import, must never be shown
+    description: 'Imported from IS/STAG',
+    // STAG details for a credit-only subject without a result yet
+    source: 'stag',
+    statut: 'B',
+    guarantor: 'Mgr. Jane Doe, Ph.D.',
+    lecturers: 'Mgr. Jane Doe, Ph.D.',
+    tutors: 'Mgr. Jane Doe, Ph.D., Bc. Tomáš Malý',
+    stag_annotation: 'Building modern full-stack web applications using React, Node.js, and HTTP APIs.',
+    stag_requirements: 'Working semester project presented at the last seminar.',
+    stag_assessment: 'Project',
+    credit_before_exam: false,
+    credit_result: null,
+    exam_result: null,
+    final_grade: null,
+    status: 'in_progress'
   },
   {
     id: 3,

@@ -16,13 +16,18 @@ import {
   ListChecks,
   Building2,
   Trash2,
+  ClipboardCheck,
+  Presentation,
+  Users,
 } from 'lucide-react'
 
 import SubjectSummaryStrip from './subject/SubjectSummaryStrip'
 import SubjectMoodleActivities from './subject/SubjectMoodleActivities'
-import SubjectStagResultCard from './subject/SubjectStagResultCard'
+import SubjectFulfillment from './subject/SubjectFulfillment'
 import SubjectSchedule from './subject/SubjectSchedule'
-import { formatSemesterLabel } from '../utils/semester'
+import ExpandableText from './common/ExpandableText'
+import { formatSemesterLabel, normalizeStatut, getStatutLabelKey } from '../utils/semester'
+import { getOwnDescription, getSafeHttpsUrl, normalizeText, summarizePeople } from '../utils/subjectDetails'
 
 // ─── Helpers ─────────────────────────────────────────────────
 
@@ -41,46 +46,59 @@ const renderCompletionType = (value, t) => {
 
 // ─── Meta Row ────────────────────────────────────────────────
 
-const MetaItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-center gap-2 rounded-xl bg-surface-container-low/60 px-3 py-2">
+const MetaItem = ({ icon: Icon, label, value, title, note }) => (
+  <div className="flex items-center gap-2 rounded-xl bg-surface-container-low/60 px-3 py-2 min-w-0">
     <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant">
       <Icon className="size-3.5" />
     </div>
     <div className="min-w-0">
       <p className="text-[10px] uppercase tracking-wide text-on-surface-variant font-semibold">{label}</p>
-      <p className="truncate text-xs font-semibold text-foreground">{value}</p>
+      <p className="truncate text-xs font-semibold text-foreground" title={title || undefined}>{value}</p>
+      {note && <p className="text-[11px] text-on-surface-variant">{note}</p>}
     </div>
   </div>
 )
 
+// Lecturer values that only mean "not known"
+const PLACEHOLDER_LECTURERS = new Set(['nespecifikováno', 'bude upřesněno', 'tba'])
+
 // ─── Header Section ──────────────────────────────────────────
 
-const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
+const SubjectHeader = ({ subject, requirements, onShowInfo, hasAbout }) => {
   const { t } = useTranslation(['academic', 'dashboard'])
 
-  const guarantor = subject.guarantor || subject.lecturer || '—'
-
-  const { totalGained, totalMax, hasPoints, allCompleted } = useMemo(() => {
-    if (!requirements || requirements.length === 0) {
-      return { totalGained: 0, totalMax: 0, hasPoints: false, allCompleted: false }
-    }
-    const gained = requirements.reduce((s, r) => s + (r.gainedPoints ?? r.gained_points ?? 0), 0)
-    const max = requirements.reduce((s, r) => s + (r.maxPoints ?? r.max_points ?? 0), 0)
-    const completed = requirements.every((r) => r.isCompleted || r.completed)
-    return { totalGained: gained, totalMax: max, hasPoints: max > 0, allCompleted: completed }
+  const { totalGained, totalMax, hasPoints } = useMemo(() => {
+    const gained = (requirements || []).reduce((s, r) => s + (r.gainedPoints ?? r.gained_points ?? 0), 0)
+    const max = (requirements || []).reduce((s, r) => s + (r.maxPoints ?? r.max_points ?? 0), 0)
+    return { totalGained: gained, totalMax: max, hasPoints: max > 0 }
   }, [requirements])
 
-  const completionType = subject.completionType || subject.completion_type
-  const isCreditOnly = completionType === 'Credit' && !hasPoints
+  const completionType = subject.completion_type || subject.completionType
+  const creditBeforeExam = subject.credit_before_exam === true && completionType === 'Credit + Exam'
 
-  const statusKey = subject.status || (allCompleted ? 'completed' : 'inProgress')
+  const statusKey = !subject.status || subject.status === 'in_progress' ? 'inProgress' : subject.status
   const statusLabel = t(`academic:subjectDetail.status.${statusKey}`, t('academic:subjectDetail.status.inProgress'))
+
+  const statut = normalizeStatut(subject.statut, subject.isMandatory ?? subject.is_mandatory)
+  const stagUrl = getSafeHttpsUrl(subject.stag_url)
+
+  // People from STAG; a manually entered lecturer only when STAG has none
+  const people = [
+    { key: 'guarantor', icon: UserCog, value: subject.guarantor },
+    { key: 'lecturers', icon: Presentation, value: subject.lecturers },
+    { key: 'tutors', icon: Users, value: subject.tutors },
+  ]
+    .map((p) => ({ ...p, summary: summarizePeople(p.value) }))
+    .filter((p) => p.summary)
+  if (people.length === 0 && subject.lecturer && !PLACEHOLDER_LECTURERS.has(subject.lecturer.trim().toLowerCase())) {
+    people.push({ key: 'lecturer', icon: UserCog, summary: summarizePeople(subject.lecturer) })
+  }
 
   return (
     <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm page-section">
       {/* TOP BAR: BADGES */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="rounded-lg bg-primary/15 px-2.5 py-1 font-mono text-xs font-bold text-primary">
             {subject.code}
           </span>
@@ -89,25 +107,13 @@ const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Points or binary status */}
-          {hasPoints ? (
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Points from continuous assessment */}
+          {hasPoints && (
             <span className="rounded-lg bg-surface-container px-3 py-1 font-mono text-xs font-bold text-foreground">
               {totalGained} / {totalMax} PTS
             </span>
-          ) : isCreditOnly ? (
-            <span
-              className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                allCompleted
-                  ? 'bg-success-container text-on-success-container'
-                  : 'bg-warning-container text-on-warning-container'
-              }`}
-            >
-              {allCompleted
-                ? t('academic:subjectDetail.status.completed')
-                : t('academic:subjectDetail.status.inProgress')}
-            </span>
-          ) : null}
+          )}
 
           {subject.stag_removed_at && (
             <span className="rounded-lg border border-outline-variant bg-surface-container-lowest px-2.5 py-1 text-xs font-bold text-on-surface-variant">
@@ -122,26 +128,39 @@ const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
         </div>
       </div>
 
-      {/* TITLE & INFO BUTTON */}
+      {/* TITLE, STAG LINK & ABOUT BUTTON */}
       <div className="mt-4 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground text-balance">
-            {subject.name}
-          </h1>
+        <h1 className="min-w-0 text-2xl font-extrabold tracking-tight text-foreground text-balance break-words">
+          {subject.name}
+        </h1>
+        <div className="flex shrink-0 items-center gap-2">
+          {stagUrl && (
+            <a
+              href={stagUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={t('academic:subjectDetail.openInStag')}
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-outline-variant px-3 text-sm font-medium text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary"
+            >
+              <ExternalLink className="size-4" />
+              <span className="hidden sm:inline">{t('academic:subjectDetail.openInStag')}</span>
+            </a>
+          )}
+          {hasAbout && (
+            <button
+              onClick={onShowInfo}
+              aria-label={t('academic:subjectDetail.showInfo')}
+              title={t('academic:subjectDetail.showInfo')}
+              className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-outline-variant text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary cursor-pointer"
+            >
+              <Info className="size-4" />
+            </button>
+          )}
         </div>
-        {subject.description && (
-          <button
-            onClick={onShowInfo}
-            aria-label={t('academic:subjectDetail.showInfo')}
-            className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-outline-variant text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary"
-          >
-            <Info className="size-4" />
-          </button>
-        )}
       </div>
 
       {/* META STRIP */}
-      <div className={`mt-5 grid gap-2.5 sm:grid-cols-2 ${subject.department ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
+      <div className="mt-5 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
         <MetaItem
           icon={GraduationCap}
           label={t('academic:subjectDetail.creditsLabel')}
@@ -151,11 +170,12 @@ const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
           icon={Award}
           label={t('academic:subjectDetail.completionLabel')}
           value={renderCompletionType(completionType, t)}
+          note={creditBeforeExam ? t('academic:subjectDetail.creditBeforeExam') : null}
         />
         <MetaItem
-          icon={UserCog}
-          label={t('academic:subjectDetail.guarantorLabel')}
-          value={guarantor}
+          icon={Layers}
+          label={t('academic:subjectDetail.typeLabel')}
+          value={t(getStatutLabelKey(statut))}
         />
         {subject.department && (
           <MetaItem
@@ -164,15 +184,15 @@ const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
             value={subject.department}
           />
         )}
-        <MetaItem
-          icon={Layers}
-          label={t('academic:subjectDetail.typeLabel')}
-          value={
-            subject.isMandatory || subject.is_mandatory
-              ? t('dashboard:subjectCard.mandatory')
-              : t('dashboard:subjectCard.elective')
-          }
-        />
+        {people.map((p) => (
+          <MetaItem
+            key={p.key}
+            icon={p.icon}
+            label={t(`academic:subjectDetail.people.${p.key}`, { count: p.summary.count })}
+            value={p.summary.short}
+            title={p.summary.full}
+          />
+        ))}
       </div>
     </div>
   )
@@ -323,7 +343,8 @@ const NotesTab = ({ note, onSaveNote }) => {
 // ─── Tab config ──────────────────────────────────────────────
 
 const TABS = [
-  { key: 'requirements', Icon: ListChecks },
+  { key: 'fulfillment', Icon: ClipboardCheck },
+  { key: 'tasks', Icon: ListChecks },
   { key: 'materials', Icon: FolderOpen },
   { key: 'notes', Icon: NotebookPen },
 ]
@@ -340,7 +361,7 @@ const SubjectDetailView = ({
   onDeleteSubject,
 }) => {
   const { t } = useTranslation(['academic', 'dashboard'])
-  const [activeTab, setActiveTab] = useState('requirements')
+  const [activeTab, setActiveTab] = useState('fulfillment')
   const [showInfo, setShowInfo] = useState(false)
 
   if (!subject) {
@@ -359,6 +380,16 @@ const SubjectDetailView = ({
     )
   }
 
+  // "About the subject": STAG texts and the user's own description (never the import placeholder)
+  const annotation = normalizeText(subject.stag_annotation)
+  const ownDescription = getOwnDescription(subject.description)
+  const aboutSections = [
+    { key: 'annotation', text: annotation },
+    { key: 'syllabus', text: normalizeText(subject.stag_syllabus) },
+    { key: 'literature', text: normalizeText(subject.stag_literature) },
+    { key: 'ownDescription', text: ownDescription !== annotation ? ownDescription : null },
+  ].filter((section) => section.text)
+
   return (
     <div className="w-full space-y-6 pb-16">
       {/* BACK BUTTON */}
@@ -373,7 +404,12 @@ const SubjectDetailView = ({
       )}
 
       {/* 1. HEADER SECTION */}
-      <SubjectHeader subject={subject} requirements={requirements} onShowInfo={() => setShowInfo(true)} />
+      <SubjectHeader
+        subject={subject}
+        requirements={requirements}
+        onShowInfo={() => setShowInfo(true)}
+        hasAbout={aboutSections.length > 0}
+      />
 
       {subject.stag_removed_at && <StagRemovedNotice subject={subject} onDelete={onDeleteSubject} />}
 
@@ -404,27 +440,33 @@ const SubjectDetailView = ({
       </div>
 
       {/* TAB CONTENTS */}
-      {activeTab === 'requirements' && (
-        <div className="space-y-8 page-section">
-          {/* 3. MOODLE CONTINUOUS EVALUATION SECTION */}
-          <SubjectMoodleActivities requirements={requirements} resources={resources} />
+      {activeTab === 'fulfillment' && (
+        <div className="page-section">
+          {/* 3. WHAT IS NEEDED TO PASS + OFFICIAL STAG RESULT */}
+          <SubjectFulfillment subject={subject} />
+        </div>
+      )}
 
-          {/* 4. STAG OFFICIAL RESULT SECTION (AT VERY BOTTOM) */}
-          <SubjectStagResultCard subject={subject} />
+      {activeTab === 'tasks' && (
+        <div className="page-section">
+          {/* 4. MOODLE CONTINUOUS EVALUATION SECTION */}
+          <SubjectMoodleActivities requirements={requirements} resources={resources} />
         </div>
       )}
 
       {activeTab === 'materials' && <div className="page-section"><MaterialsTab subject={subject} resources={resources} /></div>}
       {activeTab === 'notes' && <div className="page-section"><NotesTab note={note} onSaveNote={onSaveNote} /></div>}
 
-      {/* INFO DIALOG */}
-      {showInfo && subject.description && (
+      {/* ABOUT DIALOG */}
+      {showInfo && aboutSections.length > 0 && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           onClick={() => setShowInfo(false)}
         >
           <div
-            className="w-full max-w-lg rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4">
@@ -442,23 +484,18 @@ const SubjectDetailView = ({
                 <X className="size-4" />
               </button>
             </div>
-            <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">{subject.description}</p>
-            {(subject.lecturer || subject.department) && (
-              <p className="mt-4 text-xs text-on-surface-variant">
-                {subject.department && subject.lecturer
-                  ? t('academic:subjectDetail.infoDialog.importedFromStagWithDept', {
-                      department: subject.department,
-                      teacher: subject.lecturer,
-                    })
-                  : subject.department
-                    ? t('academic:subjectDetail.infoDialog.importedFromStagDeptOnly', {
-                        department: subject.department,
-                      })
-                    : t('academic:subjectDetail.infoDialog.importedFromStag', {
-                        teacher: subject.lecturer,
-                      })}
-              </p>
-            )}
+            <div className="mt-4 flex flex-col gap-5 overflow-y-auto pr-1">
+              {aboutSections.map(({ key, text }) => (
+                <section key={key}>
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">
+                    {t(`academic:subjectDetail.infoDialog.${key}`)}
+                  </h3>
+                  <div className="mt-1">
+                    <ExpandableText text={text} />
+                  </div>
+                </section>
+              ))}
+            </div>
           </div>
         </div>
       )}

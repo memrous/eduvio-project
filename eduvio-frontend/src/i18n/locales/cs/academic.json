@@ -121,7 +121,7 @@
     "deleteConfirm": "Opravdu chceš smazat předmět „{{name}}“? Smažou se i jeho poznámky, požadavky a materiály. Tuto akci nelze vrátit."
   },
   "subjectDetail": {
-    "showInfo": "Zobrazit popis předmětu",
+    "showInfo": "O předmětu",
     "backToSubjects": "Zpět na předměty",
     "noSubjectSelected": "Není vybrán žádný předmět. Klikněte zpět pro výběr předmětu.",
     "goBack": "Přejít zpět",
@@ -178,7 +178,9 @@
       "assignments": "Úkoly",
       "testsExams": "Testy a zkoušky",
       "requirements": "Požadavky",
-      "notes": "Moje poznámky"
+      "notes": "Moje poznámky",
+      "fulfillment": "Splnění",
+      "tasks": "Úkoly"
     },
     "requirements": {
       "noRequirements": "Zatím žádné požadavky.",
@@ -215,11 +217,12 @@
       "pts": "PTS"
     },
     "infoDialog": {
-      "title": "Popis předmětu",
+      "title": "O předmětu",
       "close": "Zavřít",
-      "importedFromStag": "Importováno z IS/STAG · Vyučující: {{teacher}}",
-      "importedFromStagWithDept": "Importováno z IS/STAG · Katedra: {{department}} · Vyučující: {{teacher}}",
-      "importedFromStagDeptOnly": "Importováno z IS/STAG · Katedra: {{department}}"
+      "annotation": "Anotace",
+      "syllabus": "Přehled látky",
+      "literature": "Literatura",
+      "ownDescription": "Vlastní popis"
     },
     "sections": {
       "moodleHeader": "Průběžné hodnocení",
@@ -228,25 +231,26 @@
       "stagBadge": "IS/STAG Oficiální"
     },
     "metrics": {
-      "successRate": "Procentuální úspěšnost",
-      "estimatedGrade": "Odhad výsledné známky",
-      "estimateNote": "Průběžný odhad",
       "remainingTasks": "Co chybí / k odevzdání",
       "remainingTasksCount_one": "{{count}} zbývající aktivita",
       "remainingTasksCount_few": "{{count}} zbývající aktivity",
       "remainingTasksCount_other": "{{count}} zbývajících aktivit",
-      "averageGrade": "Průměrná známka",
-      "creditGranted": "Nárok na zápočet",
-      "creditPending": "Zápočet v řešení",
-      "noPointsSubject": "Zápočtový předmět"
+      "points": "Body z průběžného hodnocení",
+      "noPoints": "Předmět nemá bodované úkoly",
+      "passThreshold": "Hranice úspěšnosti: {{value}} %",
+      "missingToThreshold": "chybí {{diff}} %"
     },
     "stagSection": {
       "title": "Oficiální stav z IS/STAG",
-      "pendingTitle": "Čeká na uzavření v IS/STAG",
-      "pendingDescription": "Vyučující zatím nezapsal finální známku ani udělení zápočtu do studijního systému.",
       "finalGrade": "Finální známka:",
-      "creditsAwarded": "Získané kredity:",
-      "closedDate": "Stav předmětu:"
+      "credit": "Zápočet",
+      "exam": "Zkouška",
+      "noResult": "Zatím bez výsledku",
+      "attempt": "{{count}}. pokus",
+      "examiner": "Zkoušející",
+      "points": "{{points}} b.",
+      "creditPassed": "Započteno",
+      "creditFailed": "Nezapočteno"
     },
     "moodleSection": {
       "checklistCompleted": "Splněno",
@@ -258,6 +262,24 @@
       "save": "Uložit poznámky",
       "saved": "Uloženo",
       "lastSaved": "Naposledy uloženo: {{time}}"
+    },
+    "openInStag": "Otevřít ve STAGu",
+    "creditBeforeExam": "Zápočet je podmínkou zkoušky",
+    "showMore": "Zobrazit víc",
+    "showLess": "Zobrazit méně",
+    "people": {
+      "guarantor_one": "Garant",
+      "guarantor_few": "Garanti",
+      "guarantor_other": "Garanti",
+      "lecturers": "Přednášející",
+      "tutors": "Cvičící",
+      "lecturer": "Vyučující"
+    },
+    "fulfillment": {
+      "requirements": "Požadavky na studenta",
+      "assessment": "Způsob hodnocení",
+      "examForm": "Forma zkoušky",
+      "empty": "STAG k tomuto předmětu neuvádí žádné požadavky."
     }
   },
   "calendarView": {

@@ -24,6 +24,21 @@ TOKEN = "12|AbCdEfGhIjKlMnOpQrStUvWxYz0123456789abcd"
 TICKET = "ticket-secret-0123456789"
 
 
+# getStudentInfo: whitelisted study fields ...
+STUDENT_INFO = {
+    "nazevSp": "Aplikovaná informatika", "kodSp": "B0613A140005", "fakultaSp": "PRF", "formaSp": "P",
+    "typSp": "B", "typSpKey": 7, "rocnik": "2", "stav": "S",
+    "studReferentkaPrijmeniJmeno": "Nováková Jana", "studReferentkaEmail": "jana.novakova@upol.cz",
+    "studReferentkaTelefon": "585 634 000",
+}
+# ... and fields that must never leave the agent (distinctive values to search for)
+SENSITIVE_STUDENT_INFO = {
+    "cisloKarty": "CARD-9876543210", "evidovanBankovniUcet": "BANK-123456789/0100",
+    "financovani": "FIN-SECRET-7", "pohlavi": "SEX-SECRET-Z", "email": "student-private@example.com",
+    "jmeno": "JMENO-SECRET", "prijmeni": "PRIJMENI-SECRET",
+}
+
+
 def encode_user_info(data) -> str:
     return base64.b64encode(json.dumps(data).encode("utf-8")).decode("ascii")
 
@@ -233,7 +248,7 @@ class RunSyncTest(unittest.TestCase):
         self.assertNotIn(TOKEN, output)
         self.assertNotIn(TICKET, output)
 
-    def stag_get(self, subjects_status=200, info_status=200):
+    def stag_get(self, subjects_status=200, info_status=200, student_status=200):
         def get(url, **kwargs):
             if url.endswith("/stag/agent/whoami"):
                 return FakeResponse(200, {"name": "Jana", "email": "jana@example.com"})
@@ -258,6 +273,10 @@ class RunSyncTest(unittest.TestCase):
                      "zppzk_hodnoceni": "S", "zppzk_datum": "18.12.2026", "zppzk_pokus": "1",
                      "zk_hodnoceni": "", "zk_pokus": "0", "zk_body": ""},
                 ]})
+            if "getStudentInfo" in url:
+                if student_status != 200:
+                    return FakeResponse(student_status, text=f"student denied {SENSITIVE_STUDENT_INFO['cisloKarty']}")
+                return FakeResponse(200, dict(STUDENT_INFO, **SENSITIVE_STUDENT_INFO))
             if "getRozvrhByStudent" in url:
                 return FakeResponse(200, {"rozvrhovaAkce": []})
             raise AssertionError(f"unexpected GET {url}")
@@ -355,6 +374,67 @@ class RunSyncTest(unittest.TestCase):
         self.assertEqual(code, stag_agent.EXIT_OK)
         post.assert_not_called()
         self.assertIn("1 předmětů (s info: 1, s výsledkem: 1)", self.out.getvalue())
+        self.assertIn("Studijní údaje: načteny", self.out.getvalue())
+        self.assert_no_sensitive_student_data(self.out.getvalue() + self.err.getvalue())
+        # Neither the whitelisted values are printed, only whether they were loaded
+        self.assertNotIn(STUDENT_INFO["studReferentkaEmail"], self.out.getvalue())
+
+    def assert_no_sensitive_student_data(self, text):
+        for value in SENSITIVE_STUDENT_INFO.values():
+            self.assertNotIn(value, text)
+
+    def test_sync_sends_only_whitelisted_student_info(self):
+        stag_agent.save_ticket(TICKET, "novakj", "R12345", self.home)
+        post = mock.Mock(return_value=FakeResponse(200, {"message": "ok"}))
+
+        code = self.run_agent([], self.stag_get(), post)
+
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        sent = [c.kwargs["json"] for c in post.call_args_list if c.args[0].endswith("/stag/sync-student")]
+        self.assertEqual(len(sent), 1)
+        self.assertEqual(set(sent[0]), set(test_import.INFO_STUDENTA_POLE))
+        self.assertEqual(sent[0]["typSpKey"], "7")
+        self.assertEqual(sent[0]["studReferentkaEmail"], "jana.novakova@upol.cz")
+        everything_posted = json.dumps([c.kwargs.get("json") for c in post.call_args_list], ensure_ascii=False)
+        self.assert_no_sensitive_student_data(everything_posted + self.out.getvalue() + self.err.getvalue())
+        self.assertEqual(self.reports(post), [{"status": "success"}])
+
+    def test_student_info_failure_does_not_stop_sync(self):
+        stag_agent.save_ticket(TICKET, "novakj", "R12345", self.home)
+        post = mock.Mock(return_value=FakeResponse(200, {"message": "ok"}))
+
+        code = self.run_agent([], self.stag_get(student_status=500), post)
+
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        urls = [c.args[0] for c in post.call_args_list]
+        self.assertIn("https://eduvio.example/api/stag/sync-subjects", urls)
+        self.assertNotIn("https://eduvio.example/api/stag/sync-student", urls)
+        self.assertEqual(self.reports(post), [{"status": "success"}])
+        self.assertIn("Status: 500", self.err.getvalue())
+        self.assert_no_sensitive_student_data(self.out.getvalue() + self.err.getvalue())
+
+    def test_student_info_rejected_by_api_does_not_stop_sync(self):
+        stag_agent.save_ticket(TICKET, "novakj", "R12345", self.home)
+
+        def post(url, **kwargs):
+            if url.endswith("/stag/sync-student"):
+                return FakeResponse(422, text="invalid")
+            return FakeResponse(200, {"message": "ok"})
+
+        post_mock = mock.Mock(side_effect=post)
+        code = self.run_agent([], self.stag_get(), post_mock)
+
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        self.assertEqual(self.reports(post_mock), [{"status": "success"}])
+        self.assertIn("Status: 422", self.err.getvalue())
+
+    def test_dry_run_reports_missing_student_info(self):
+        stag_agent.save_ticket(TICKET, "novakj", "R12345", self.home)
+
+        code = self.run_agent(["--dry-run"], self.stag_get(student_status=403), mock.Mock())
+
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        self.assertIn("Studijní údaje: nenačteny", self.out.getvalue())
 
     @staticmethod
     def sent_subjects(post_mock):
@@ -439,6 +519,39 @@ class TestImportCompatibilityTest(unittest.TestCase):
 
         self.assertEqual(ctx.exception.code, 0)
         self.assertEqual(posted, ["http://laravel.test/api/stag/sync-subjects"])
+
+
+class StudentInfoWhitelistTest(unittest.TestCase):
+    def test_only_whitelisted_fields_are_kept(self):
+        raw = dict(STUDENT_INFO, **SENSITIVE_STUDENT_INFO, osCislo="R12345", stav="S")
+        info = test_import.vyber_info_studenta(raw)
+
+        self.assertEqual(set(info), set(test_import.INFO_STUDENTA_POLE))
+        for key in SENSITIVE_STUDENT_INFO:
+            self.assertNotIn(key, info)
+        self.assertNotIn("osCislo", info)
+        self.assertNotIn("R12345", json.dumps(info))
+
+    def test_values_are_text_and_empty_becomes_none(self):
+        info = test_import.vyber_info_studenta({"rocnik": 2, "typSpKey": 7, "kodSp": "  ", "stav": {"value": "S"}})
+        self.assertEqual(info, {"rocnik": "2", "typSpKey": "7", "kodSp": None, "stav": "S"})
+
+    def test_missing_fields_are_not_sent(self):
+        self.assertEqual(test_import.vyber_info_studenta({"nazevSp": "X", "pohlavi": "Z"}), {"nazevSp": "X"})
+
+    def test_nested_or_unexpected_values_are_dropped(self):
+        info = test_import.vyber_info_studenta({"nazevSp": ["X"], "fakultaSp": {"other": 1}})
+        self.assertEqual(info, {"fakultaSp": None})
+
+    def test_non_object_response_is_rejected(self):
+        with self.assertRaises(ValueError):
+            test_import.vyber_info_studenta([STUDENT_INFO])
+
+    def test_error_response_body_is_not_kept(self):
+        with mock.patch("requests.get", return_value=FakeResponse(401, text="secret body CARD-9876543210")):
+            with self.assertRaises(test_import.StagWsError) as ctx:
+                test_import.nacti_info_studenta("t", "https://stag.example/ws", "R1")
+        self.assertNotIn("CARD-9876543210", str(ctx.exception))
 
 
 class HtmlToTextTest(unittest.TestCase):

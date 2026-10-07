@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { extractMoodleToken } from '../utils/moodleToken'
+import { clearMoodleLaunchPending } from '../utils/moodleLaunch'
 import * as api from '../services/api'
 
 // Backend error codes passed through to the profile page as ?reason=
@@ -18,16 +19,23 @@ const MoodleCallbackPage = () => {
     if (processedRef.current) return
     processedRef.current = true
 
+    // The callback ran (success or error): the launch is no longer pending. replace keeps
+    // the callback out of the history, so the Back button cannot open it again.
+    const finish = (target) => {
+      clearMoodleLaunchPending()
+      navigate(target, { replace: true })
+    }
+
     const processToken = async () => {
       const rawToken = searchParams.get('token')
       if (!rawToken) {
-        navigate('/profile?moodle=error&reason=missing_token', { replace: true })
+        finish('/profile?moodle=error&reason=missing_token')
         return
       }
 
       const decoded = extractMoodleToken(rawToken)
       if (!decoded) {
-        navigate('/profile?moodle=error&reason=decode_failed', { replace: true })
+        finish('/profile?moodle=error&reason=decode_failed')
         return
       }
 
@@ -35,12 +43,12 @@ const MoodleCallbackPage = () => {
         const response = await api.connectMoodleToken(decoded)
         if (response?.status === 'error') {
           const reason = LAUNCH_ERROR_REASONS.includes(response.error) ? response.error : 'token_rejected'
-          navigate(`/profile?moodle=error&reason=${reason}`, { replace: true })
+          finish(`/profile?moodle=error&reason=${reason}`)
           return
         }
-        navigate('/profile?moodle=connected', { replace: true })
+        finish('/profile?moodle=connected')
       } catch {
-        navigate('/profile?moodle=error&reason=token_rejected', { replace: true })
+        finish('/profile?moodle=error&reason=token_rejected')
       }
     }
 

@@ -22,6 +22,7 @@ class AuthController extends Controller
 
 
     // POST /api/register
+    // Jen údaje účtu; studijní údaje dodává STAG sync (POST /stag/sync-student)
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -29,10 +30,6 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'username' => 'required|string|alpha_dash|unique:users,username',
             'password' => 'required|string|min:8',
-            'university_id' => 'nullable|integer',
-            'faculty_id' => 'nullable|integer',
-            'study_program_id' => 'nullable|integer',
-            'academic_year' => 'nullable|integer',
         ]);
 
         $user = User::create([
@@ -40,10 +37,6 @@ class AuthController extends Controller
             'username' => $validated['username'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'university_id' => $validated['university_id'] ?? null,
-            'faculty_id' => $validated['faculty_id'] ?? null,
-            'study_program_id' => $validated['study_program_id'] ?? null,
-            'academic_year' => $validated['academic_year'] ?? null,
         ]);
 
         // Vygenerujeme token, aby byl uživatel po registraci rovnou přihlášen

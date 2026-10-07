@@ -1,212 +1,92 @@
 import ProgressBar from '../common/ProgressBar'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Percent, Award, CheckCircle2, AlertCircle } from 'lucide-react'
-
-const getPerformanceTier = (pct, passThreshold = 50) => {
-  if (pct === null || pct === undefined) {
-    return {
-      tier: 'neutral',
-      badgeClass: 'bg-surface-container text-on-surface-variant',
-      textClass: 'text-foreground',
-      iconClass: 'bg-surface-container text-on-surface-variant',
-      barClass: 'bg-outline-variant',
-    }
-  }
-
-  const threshold = Number(passThreshold) > 0 ? Number(passThreshold) : 50
-
-  if (pct >= 90) {
-    return {
-      tier: 'excellent',
-      badgeClass: 'bg-success text-on-success font-extrabold shadow-sm',
-      textClass: 'text-success font-extrabold',
-      iconClass: 'bg-success text-on-success shadow-sm',
-      barClass: 'bg-success',
-    }
-  }
-
-  if (pct >= 75) {
-    return {
-      tier: 'good',
-      badgeClass: 'bg-success-container text-on-success-container font-bold',
-      textClass: 'text-on-success-container font-bold',
-      iconClass: 'bg-success-container text-on-success-container',
-      barClass: 'bg-success',
-    }
-  }
-
-  if (pct >= threshold) {
-    return {
-      tier: 'warning',
-      badgeClass: 'bg-warning-container text-on-warning-container font-bold',
-      textClass: 'text-on-warning-container font-bold',
-      iconClass: 'bg-warning-container text-on-warning-container',
-      barClass: 'bg-warning',
-    }
-  }
-
-  return {
-    tier: 'danger',
-    badgeClass: 'bg-error-container text-on-error-container font-bold ring-1 ring-error/30',
-    textClass: 'text-error font-bold',
-    iconClass: 'bg-error-container text-on-error-container',
-    barClass: 'bg-error',
-  }
-}
+import { Percent, CheckCircle2, AlertCircle } from 'lucide-react'
 
 const SubjectSummaryStrip = ({ subject, requirements = [] }) => {
   const { t } = useTranslation(['academic', 'dashboard'])
 
-  const { totalGained, totalMax, remainingCount, hasPoints, hasGrades, avgGrade, allCompleted } = useMemo(() => {
-    if (!requirements || requirements.length === 0) {
-      return {
-        totalGained: 0,
-        totalMax: 0,
-        remainingCount: 0,
-        hasPoints: false,
-        hasGrades: false,
-        avgGrade: null,
-        allCompleted: false,
-      }
-    }
-
+  const { totalGained, totalMax, remainingCount } = useMemo(() => {
     let gained = 0
     let max = 0
     let remaining = 0
-    let completedCount = 0
-    const gradesList = []
 
-    requirements.forEach((r) => {
-      const isComp = r.isCompleted || r.completed
-      if (isComp) {
-        completedCount += 1
-      } else {
-        remaining += 1
-      }
+    ;(requirements || []).forEach((r) => {
+      if (!(r.isCompleted || r.completed)) remaining += 1
 
       const g = r.gainedPoints ?? r.gained_points
       const m = r.maxPoints ?? r.max_points
       if (m !== undefined && m !== null && m > 0) {
         max += m
-        if (g !== undefined && g !== null) {
-          gained += g
-        }
-      }
-
-      if (r.grade) {
-        const numericGrade = parseFloat(r.grade)
-        if (!isNaN(numericGrade)) {
-          gradesList.push(numericGrade)
-        }
+        if (g !== undefined && g !== null) gained += g
       }
     })
 
-    const ptsExist = max > 0
-    const gradesExist = !ptsExist && gradesList.length > 0
-    const averageG = gradesExist
-      ? (gradesList.reduce((a, b) => a + b, 0) / gradesList.length).toFixed(1)
-      : null
-
-    return {
-      totalGained: gained,
-      totalMax: max,
-      remainingCount: remaining,
-      hasPoints: ptsExist,
-      hasGrades: gradesExist,
-      avgGrade: averageG,
-      allCompleted: completedCount === requirements.length && requirements.length > 0,
-    }
+    return { totalGained: gained, totalMax: max, remainingCount: remaining }
   }, [requirements])
 
-  // Percentage & performance tier calculation
-  const percentage = hasPoints && totalMax > 0 ? Math.round((totalGained / totalMax) * 100) : null
-  const passThreshold = subject.passThreshold ?? subject.pass_threshold ?? 50
-  const tier = getPerformanceTier(percentage, passThreshold)
+  const hasPoints = totalMax > 0
+  const percentage = hasPoints ? Math.round((totalGained / totalMax) * 100) : null
 
-  const estimatedGradeData = useMemo(() => {
-    if (percentage !== null) {
-      if (percentage >= 90) return { label: '1 (A)', badgeClass: 'bg-success text-on-success shadow-sm' }
-      if (percentage >= 80) return { label: '2 (B)', badgeClass: 'bg-success-container text-on-success-container' }
-      if (percentage >= 70) return { label: '3 (C)', badgeClass: 'bg-warning-container text-on-warning-container' }
-      return { label: '4 (F)', badgeClass: 'bg-error-container text-on-error-container ring-1 ring-error/20' }
-    }
-    if (hasGrades && avgGrade) {
-      const num = parseFloat(avgGrade)
-      if (num <= 1.5) return { label: `${avgGrade} (A)`, badgeClass: 'bg-success text-on-success' }
-      if (num <= 2.5) return { label: `${avgGrade} (B)`, badgeClass: 'bg-success-container text-on-success-container' }
-      if (num <= 3.5) return { label: `${avgGrade} (C)`, badgeClass: 'bg-warning-container text-on-warning-container' }
-      return { label: `${avgGrade} (F)`, badgeClass: 'bg-error-container text-on-error-container' }
-    }
-    if (allCompleted) {
-      return { label: t('academic:subjectDetail.metrics.creditGranted'), badgeClass: 'bg-success-container text-on-success-container' }
-    }
-    return { label: '—', badgeClass: 'bg-surface-container text-on-surface-variant' }
-  }, [percentage, hasGrades, avgGrade, allCompleted, t])
-
-  const completionType = subject.completionType || subject.completion_type
-  const isCreditOnly = completionType === 'Credit' && !hasPoints
+  // Only a threshold the subject really has; no default
+  const rawThreshold = subject.passThreshold ?? subject.pass_threshold
+  const passThreshold = rawThreshold === null || rawThreshold === undefined || rawThreshold === ''
+    ? null
+    : Number(rawThreshold)
+  const hasThreshold = passThreshold !== null && !Number.isNaN(passThreshold)
+  const thresholdMet = hasThreshold && percentage !== null && percentage >= passThreshold
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {/* CARD 1: Success Rate / Average Grade / Credit Status */}
+    <div className="grid gap-4 sm:grid-cols-2">
+      {/* CARD 1: Points from continuous assessment */}
       <div className="flex flex-col justify-between rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className={`flex size-12 shrink-0 items-center justify-center rounded-xl transition-colors ${tier.iconClass}`}>
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-surface-container text-on-surface-variant">
             <Percent className="size-6" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-on-surface-variant">
-              {isCreditOnly
-                ? t('academic:subjectDetail.metrics.noPointsSubject')
-                : hasGrades
-                ? t('academic:subjectDetail.metrics.averageGrade')
-                : t('academic:subjectDetail.metrics.successRate')}
+              {t('academic:subjectDetail.metrics.points')}
             </p>
-            <div className="mt-0.5 flex items-baseline gap-2">
-              <span className={`font-mono text-2xl font-black ${tier.textClass}`}>
-                {hasPoints ? `${percentage}%` : hasGrades ? avgGrade : allCompleted ? '100%' : '—'}
-              </span>
-            </div>
+            {hasPoints ? (
+              <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2">
+                <span className="font-mono text-2xl font-black text-foreground">{percentage}%</span>
+                <span className="font-mono text-sm text-on-surface-variant">
+                  {totalGained} / {totalMax} {t('academic:subjectDetail.progress.pts')}
+                </span>
+              </p>
+            ) : (
+              <p className="mt-0.5 text-sm font-semibold text-on-surface-variant">
+                {t('academic:subjectDetail.metrics.noPoints')}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Dynamic Mini Progress Bar */}
         {hasPoints && (
           <ProgressBar
             value={percentage}
             className="mt-3.5 h-2 w-full overflow-hidden rounded-full bg-surface-container"
-            barClassName={`h-full rounded-full ${tier.barClass}`}
+            barClassName="h-full rounded-full bg-primary"
           />
+        )}
+
+        {hasThreshold && (
+          <p className="mt-2.5 text-xs text-on-surface-variant">
+            {t('academic:subjectDetail.metrics.passThreshold', { value: passThreshold })}
+            {hasPoints && (
+              <span className={`ml-1.5 font-semibold ${thresholdMet ? 'text-success' : 'text-error'}`}>
+                {thresholdMet
+                  ? t('academic:subjectDetail.progress.minimumMet')
+                  : t('academic:subjectDetail.metrics.missingToThreshold', { diff: passThreshold - percentage })}
+              </span>
+            )}
+          </p>
         )}
       </div>
 
-      {/* CARD 2: Estimated Grade */}
-      <div className="flex flex-col justify-between rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Award className="size-6" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <p className="text-xs font-medium text-on-surface-variant">
-                {t('academic:subjectDetail.metrics.estimatedGrade')}
-              </p>
-              <span className="rounded bg-surface-container-high px-1.5 py-0.5 text-[10px] font-semibold text-on-surface-variant">
-                {t('academic:subjectDetail.metrics.estimateNote')}
-              </span>
-            </div>
-            <div className="mt-1.5 flex items-center">
-              <span className={`inline-flex items-center rounded-lg px-2.5 py-1 font-mono text-lg font-bold ${estimatedGradeData.badgeClass}`}>
-                {estimatedGradeData.label}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CARD 3: Remaining / Unevaluated tasks */}
-      <div className="flex items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm sm:col-span-2 lg:col-span-1">
+      {/* CARD 2: Remaining tasks */}
+      <div className="flex items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
         <div
           className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${
             remainingCount > 0
@@ -214,11 +94,7 @@ const SubjectSummaryStrip = ({ subject, requirements = [] }) => {
               : 'bg-success-container text-on-success-container'
           }`}
         >
-          {remainingCount > 0 ? (
-            <AlertCircle className="size-6" />
-          ) : (
-            <CheckCircle2 className="size-6" />
-          )}
+          {remainingCount > 0 ? <AlertCircle className="size-6" /> : <CheckCircle2 className="size-6" />}
         </div>
         <div className="min-w-0">
           <p className="text-xs font-medium text-on-surface-variant">

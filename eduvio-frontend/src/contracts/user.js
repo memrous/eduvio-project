@@ -22,13 +22,25 @@
  * @property {number}   id            - Unique identifier
  * @property {string}   name          - Full display name
  * @property {string}   email         - Unique email address
- * @property {UserRole} role          - Access level
- * @property {string}   [program]     - e.g. "Computer Science, Bc."
+ * @property {string}   username      - Unique username
+ * @property {UserRole} [role]        - Access level
  * @property {string}   [avatarUrl]   - Profile photo URL
- * @property {string}   [university]  - University name
- * @property {string}   [faculty]     - Faculty name
- * @property {string}   [year]        - Study year, e.g. "1st Year"
- * @property {boolean}  [stagConnected] - Whether connected to STAG system
+ * @property {boolean}  stag_connected   - Whether STAG is connected
+ * @property {boolean}  moodle_connected - Whether Moodle is connected
+ *
+ * Study details are never entered by the user; they come from the STAG sync
+ * (POST /api/stag/sync-student) and are null until the first sync:
+ * @property {string|null} [study_program]
+ * @property {string|null} [study_program_code]
+ * @property {string|null} [faculty]          - Faculty code from STAG, e.g. "PRF"
+ * @property {string|null} [study_form]       - e.g. "P" (full-time)
+ * @property {string|null} [study_type]       - e.g. "B" (bachelor)
+ * @property {number|null} [study_year]
+ * @property {string|null} [study_status]
+ * @property {string|null} [study_officer_name]
+ * @property {string|null} [study_officer_email]
+ * @property {string|null} [study_officer_phone]
+ * @property {string|null} [study_info_synced_at]
  */
 
 export {} // keeps this a proper ES module

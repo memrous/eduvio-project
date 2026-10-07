@@ -109,6 +109,10 @@ export const getUser = async () => {
   return request(() => httpClient.get('/user').then((res) => res.data))
 }
 
+export const getStudyProgress = async () => {
+  return request(() => httpClient.get('/user/study-progress').then((res) => res.data))
+}
+
 export const getStagRedirectUrl = async () => {
   return request(() => httpClient.get('/user/stag/redirect').then((res) => res.data))
 }

@@ -17,10 +17,19 @@ const MOCK_USER_DB = [
     username: 'boreksarman',
     email: 'borek.sarman@upol.cz',
     password: 'password',
-    university: 'Palacký University Olomouc',
-    faculty: 'Faculty of Science',
-    program: 'Applied Informatics',
-    year: '1st Year',
+    // Study info as stored by POST /stag/sync-student (whitelisted getStudentInfo fields)
+    study_program: 'Aplikovaná informatika',
+    study_program_code: 'B0613A140005',
+    faculty: 'PRF',
+    study_form: 'P',
+    study_type: 'B',
+    study_type_key: '7',
+    study_year: 2,
+    study_status: 'S',
+    study_officer_name: 'Nováková Jana',
+    study_officer_email: 'jana.novakova@example.edu',
+    study_officer_phone: '+420 585 634 000',
+    study_info_synced_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     stag_student_id: null,
     stag_ticket: null,
     stag_ticket_expires_at: null,
@@ -146,10 +155,7 @@ export const register = async (...args) => {
     username: payload.username,
     email: payload.email,
     password: payload.password,
-    university: 'Palacký University Olomouc',
-    faculty: 'Faculty of Science',
-    program: 'Student',
-    year: '1st Year',
+    // A freshly registered user has no study info until the first STAG sync
     stag_student_id: null,
     stag_ticket: null,
     stag_ticket_expires_at: null,
@@ -214,6 +220,62 @@ export const getUser = async (token) => {
   }
 
   return success({ user: sanitizeUser(found) })
+}
+
+// Mirrors StudyProgressController on the backend
+const MOCK_LETTER_GRADES = { A: 1, B: 1.5, C: 2, D: 2.5, E: 3, F: 4 }
+const MOCK_REQUIRED_CREDITS = { B: 180, N: 120, M: 300 }
+
+const mockNumericGrade = (value) => {
+  const normalized = String(value ?? '').trim().toUpperCase()
+  if (!normalized) return null
+  if (normalized in MOCK_LETTER_GRADES) return MOCK_LETTER_GRADES[normalized]
+  const grade = Number(normalized.replace(',', '.'))
+  return Number.isFinite(grade) && grade >= 1 && grade <= 4 ? grade : null
+}
+
+const mockCurrentSemester = (now = new Date()) => {
+  const month = now.getMonth() + 1
+  const startYear = month >= 9 ? now.getFullYear() : now.getFullYear() - 1
+  return `${month >= 9 || month === 1 ? 'ZS' : 'LS'} ${startYear}`
+}
+
+const mockSemesterKey = (semester) => {
+  const match = String(semester ?? '').match(/^\s*(ZS|LS)\s+(\d{4})/i)
+  return match ? `${match[1].toUpperCase()} ${match[2]}` : null
+}
+
+export const getStudyProgress = async () => {
+  await delay(MOCK_DELAY)
+  const user = getCurrentMockUser()
+  if (!user) return failure('unauthorized')
+
+  const saved = localStorage.getItem(getNamespacedKey(user.id, 'subjects'))
+  const subjects = saved ? JSON.parse(saved) : INITIAL_SUBJECTS
+  const completed = subjects.filter((s) => s.status === 'completed')
+
+  let weightedSum = 0
+  let weightTotal = 0
+  subjects.forEach((s) => {
+    const grade = mockNumericGrade(s.final_grade ?? s.finalGrade)
+    const credits = Number(s.credits) || 0
+    if (grade === null || credits <= 0) return
+    weightedSum += grade * credits
+    weightTotal += credits
+  })
+
+  const currentSemester = mockCurrentSemester()
+  return success({
+    earned_credits: completed.reduce((sum, s) => sum + (Number(s.credits) || 0), 0),
+    completed_subjects: completed.length,
+    weighted_average: weightTotal > 0 ? Math.round((weightedSum / weightTotal) * 100) / 100 : null,
+    required_credits: MOCK_REQUIRED_CREDITS[String(user.study_type ?? '').toUpperCase()] ?? null,
+    required_credits_estimated: true,
+    current_semester: currentSemester,
+    current_semester_credits: subjects
+      .filter((s) => !s.stag_removed_at && mockSemesterKey(s.semester) === currentSemester)
+      .reduce((sum, s) => sum + (Number(s.credits) || 0), 0),
+  })
 }
 
 export const getStagRedirectUrl = async () => {

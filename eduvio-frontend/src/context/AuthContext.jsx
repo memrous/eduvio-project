@@ -209,7 +209,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem(LS_AUTH, JSON.stringify({ token, user: userData }))
     setAuthToken(token)
     setUser(userData)
-    navigate('/dashboard', { replace: true })
+    // A new account has no study data yet: open the profile tab with STAG and Moodle
+    navigate('/profile', { replace: true, state: { profileTab: 'account', justRegistered: true } })
   }, [navigate])
 
   useEffect(() => {

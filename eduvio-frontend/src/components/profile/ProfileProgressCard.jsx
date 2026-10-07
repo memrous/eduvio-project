@@ -1,50 +1,85 @@
+import { useTranslation } from 'react-i18next'
 import ProgressBar from '../common/ProgressBar'
-﻿// MOCK: vizuální placeholder, zatím bez API napojení
+import { useStudyProgress } from '../../hooks/useStudyProgress'
+import { getLocaleFromLanguage } from '../../utils/locale'
 
+/**
+ * Study progress computed by the backend from the user's subjects
+ * (GET /user/study-progress). No numbers are shown that we do not have.
+ */
 const ProfileProgressCard = () => {
+  const { t, i18n } = useTranslation('profile')
+  const { data, isLoading, error } = useStudyProgress()
+  const locale = getLocaleFromLanguage(i18n.language)
+
+  // Nothing to show while loading or on error (no placeholder numbers)
+  if (isLoading || error || !data) return null
+
+  const {
+    earned_credits: earned,
+    required_credits: required,
+    required_credits_estimated: estimated,
+    weighted_average: average,
+    completed_subjects: completedCount,
+    current_semester_credits: semesterCredits,
+  } = data
+
+  const percentage = required ? Math.min(100, Math.round((earned / required) * 100)) : null
+
   return (
-    <div className="rounded-2xl border border-outline-variant bg-surface-container-low p-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-on-surface">Průběh studia</h3>
-        <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-bold">
-          62 %
-        </span>
+    <section className="bg-surface border border-outline-variant rounded-2xl p-6 shadow-ambient space-y-3">
+      <div className="flex justify-between items-center gap-2 text-xs">
+        <span className="font-bold tracking-wider text-on-surface-variant uppercase">{t('progress.title')}</span>
+        {percentage !== null && completedCount > 0 && (
+          <strong className="text-sm font-bold text-on-surface">{percentage} %</strong>
+        )}
       </div>
 
-      <div className="space-y-2">
-        <div className="flex justify-between text-xs text-on-surface-variant font-medium">
-          <span>Celkový postup</span>
-          <span>62 %</span>
-        </div>
-        <ProgressBar
-          value={62}
-          className="w-full bg-surface rounded-full h-2.5 overflow-hidden border border-outline-variant/30"
-          barClassName="bg-primary h-2.5 rounded-full"
-        />
-      </div>
+      {completedCount === 0 ? (
+        <p className="text-sm text-on-surface-variant">{t('progress.empty')}</p>
+      ) : (
+        <>
+          <div className="space-y-1.5">
+            <p className="text-sm text-on-surface">
+              {required
+                ? t('progress.creditsOf', { earned, required })
+                : t('progress.creditsEarned', { earned })}
+            </p>
+            {required && (
+              <>
+                <ProgressBar
+                  value={percentage}
+                  className="w-full h-2 bg-surface-container rounded-full overflow-hidden"
+                  barClassName="h-full bg-primary rounded-full"
+                />
+                {estimated && (
+                  <p className="text-[11px] text-on-surface-variant">{t('progress.requiredEstimated')}</p>
+                )}
+              </>
+            )}
+          </div>
 
-      <div className="grid grid-cols-2 gap-3 pt-2 border-t border-outline-variant">
-        <div className="rounded-lg bg-surface border border-outline-variant/40 p-3">
-          <p className="text-xs text-on-surface-variant uppercase font-bold tracking-wider">Kredity</p>
-          <p className="mt-1 text-sm font-semibold text-on-surface">74 z 120 kreditů</p>
-        </div>
-
-        <div className="rounded-lg bg-surface border border-outline-variant/40 p-3">
-          <p className="text-xs text-on-surface-variant uppercase font-bold tracking-wider">Průměr</p>
-          <p className="mt-1 text-sm font-semibold text-on-surface">1.48</p>
-        </div>
-
-        <div className="rounded-lg bg-surface border border-outline-variant/40 p-3">
-          <p className="text-xs text-on-surface-variant uppercase font-bold tracking-wider">Semestr</p>
-          <p className="mt-1 text-sm font-semibold text-on-surface">4. semestr</p>
-        </div>
-
-        <div className="rounded-lg bg-surface border border-outline-variant/40 p-3">
-          <p className="text-xs text-on-surface-variant uppercase font-bold tracking-wider">Předměty</p>
-          <p className="mt-1 text-sm font-semibold text-on-surface">28 splněných</p>
-        </div>
-      </div>
-    </div>
+          <dl className="grid grid-cols-3 gap-3 border-t border-outline-variant/60 pt-3 text-center">
+            {[
+              {
+                key: 'weightedAverage',
+                value: average !== null && average !== undefined
+                  ? average.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : '—',
+              },
+              { key: 'completedSubjects', value: completedCount },
+              { key: 'semesterCredits', value: semesterCredits },
+            ].map((stat) => (
+              // Label first in the DOM, value shown on top
+              <div key={stat.key} className="flex flex-col-reverse min-w-0">
+                <dt className="text-[11px] text-on-surface-variant break-words">{t(`progress.${stat.key}`)}</dt>
+                <dd className="text-lg font-bold text-on-surface">{stat.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </>
+      )}
+    </section>
   )
 }
 

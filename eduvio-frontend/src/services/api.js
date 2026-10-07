@@ -9,6 +9,7 @@ export const register = activeApi.register
 export const checkAvailability = activeApi.checkAvailability
 export const logout = activeApi.logout
 export const getUser = activeApi.getUser
+export const getStudyProgress = activeApi.getStudyProgress
 export const getStagRedirectUrl = activeApi.getStagRedirectUrl
 export const disconnectStag = activeApi.disconnectStag
 export const createStagAgentToken = activeApi.createStagAgentToken

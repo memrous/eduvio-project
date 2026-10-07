@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   AlertCircle,
+  ChevronDown,
   ExternalLink,
   Loader2,
   ShieldCheck,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react'
 import * as api from '../../services/api'
 import { extractMoodleToken } from '../../utils/moodleToken'
+import { clearMoodleLaunchPending, isMoodleLaunchPending, markMoodleLaunchPending } from '../../utils/moodleLaunch'
 import { RESOURCES_KEY } from '../../hooks/useResources'
 import { REQUIREMENTS_KEY } from '../../hooks/useRequirements'
 
@@ -43,8 +45,33 @@ const MoodleIntegrationCard = ({
   // eslint-disable-next-line no-unused-vars
   const [moodleSyncPolling, setMoodleSyncPolling] = useState(false)
 
+  // Came back from Moodle (Back button) without the callback: offer the manual paste
+  const [launchReturnFailed, setLaunchReturnFailed] = useState(
+    () => !isMoodleConnected && isMoodleLaunchPending()
+  )
+  const [manualOpen, setManualOpen] = useState(launchReturnFailed)
+
   const supportsMoodleHandler =
     typeof navigator !== 'undefined' && 'registerProtocolHandler' in navigator && window.isSecureContext
+
+  // Connected by any route: a pending launch flag is obsolete
+  useEffect(() => {
+    if (isMoodleConnected) clearMoodleLaunchPending()
+  }, [isMoodleConnected])
+
+  // bfcache restores the page with its old state: stop the spinner and re-check the flag
+  useEffect(() => {
+    const handlePageShow = (event) => {
+      if (!event.persisted) return
+      setLaunchStarting(false)
+      if (!isMoodleConnected && isMoodleLaunchPending()) {
+        setLaunchReturnFailed(true)
+        setManualOpen(true)
+      }
+    }
+    window.addEventListener('pageshow', handlePageShow)
+    return () => window.removeEventListener('pageshow', handlePageShow)
+  }, [isMoodleConnected])
 
   // Fetch Moodle status on mount
   useEffect(() => {
@@ -159,32 +186,23 @@ const MoodleIntegrationCard = ({
       }
     }
 
-    // Open the window synchronously inside the click handler so it isn't treated as a popup,
-    // then point it at the launch URL once the backend has issued the passport.
-    // 'noopener' can't be used here (window.open would return null), so the opener is cut manually.
-    const launchWindow = window.open('about:blank', '_blank')
-    if (launchWindow) launchWindow.opener = null
-
     setLaunchStarting(true)
     try {
       const response = await api.startMoodleLaunch()
       const launchUrl = response?.data?.launch_url
       if (response?.status === 'error' || !launchUrl) {
-        launchWindow?.close()
         toast.error(t('toast.moodleConnectFailed'))
+        setLaunchStarting(false)
         return
       }
 
-      if (launchWindow && !launchWindow.closed) {
-        launchWindow.location.href = launchUrl
-      } else {
-        // Popup was blocked or closed — continue in the current tab instead.
-        window.location.assign(launchUrl)
-      }
+      // Whole flow in this tab: profile → Moodle → /moodle/callback → profile.
+      // The flag lets the profile notice a return without the callback (Back button).
+      markMoodleLaunchPending()
+      window.location.assign(launchUrl)
+      // The spinner stays until the browser leaves the page (reset on a bfcache return)
     } catch {
-      launchWindow?.close()
       toast.error(t('toast.moodleConnectFailed'))
-    } finally {
       setLaunchStarting(false)
     }
   }
@@ -221,6 +239,8 @@ const MoodleIntegrationCard = ({
       if (updatedUser && onUserUpdate) {
         onUserUpdate(updatedUser)
       }
+      clearMoodleLaunchPending()
+      setLaunchReturnFailed(false)
       setManualToken('')
       setMoodleSyncStatus('pending')
       toast.success(t('moodle.syncing.background'))
@@ -290,6 +310,45 @@ const MoodleIntegrationCard = ({
     }
   }
 
+  // Manual paste of the token / final address; shared by both connect variants
+  const manualForm = (
+    <form onSubmit={handleManualSubmit} className="space-y-3 rounded-xl border border-outline-variant bg-surface p-4 shadow-sm">
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-semibold text-on-surface" htmlFor="profile-moodle-manual-token">
+          {t('moodle.card.manualPasteLabel')}
+        </label>
+        <p className="text-xs text-on-surface-variant">
+          {t('moodle.card.manualPasteHint')}
+        </p>
+        <input
+          id="profile-moodle-manual-token"
+          type="text"
+          value={manualToken}
+          onChange={(e) => {
+            setManualToken(e.target.value)
+            if (manualError) setManualError('')
+          }}
+          placeholder={t('moodle.card.manualPastePlaceholder')}
+          className={`w-full rounded-lg border px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+            manualError ? 'border-error bg-error-container/20' : 'border-outline-variant bg-surface'
+          }`}
+        />
+        {manualError && (
+          <p className="text-xs text-error">{manualError}</p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        disabled={manualSubmitting || !manualToken.trim()}
+        className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {manualSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+        {t('moodle.actions.connectManual')}
+      </button>
+    </form>
+  )
+
   return (
     <div className="space-y-4">
       {isMoodleConnected && moodleSyncStatus === 'pending' && (
@@ -334,6 +393,13 @@ const MoodleIntegrationCard = ({
 
         {!isMoodleConnected ? (
           <div className="space-y-4">
+            {launchReturnFailed && (
+              <div role="status" className="flex items-start gap-2.5 px-4 py-3 bg-warning-container border border-warning/30 rounded-lg">
+                <AlertCircle className="w-4 h-4 text-on-warning-container shrink-0 mt-0.5" />
+                <p className="text-label-sm text-on-warning-container">{t('moodle.card.returnFailed')}</p>
+              </div>
+            )}
+
             {supportsMoodleHandler ? (
               <div className="space-y-4">
                 <p className="text-sm text-on-surface-variant">
@@ -344,11 +410,27 @@ const MoodleIntegrationCard = ({
                   type="button"
                   onClick={handleConnectMoodle}
                   disabled={launchStarting}
+                  aria-busy={launchStarting}
                   className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
                   {t('moodle.actions.connect')}
                 </button>
+
+                {/* Fallback when the return from Moodle does not reach the app */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setManualOpen((open) => !open)}
+                    aria-expanded={manualOpen}
+                    aria-controls="profile-moodle-manual"
+                    className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                  >
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${manualOpen ? 'rotate-180' : ''}`} />
+                    {t('moodle.card.manualToggle')}
+                  </button>
+                  {manualOpen && <div id="profile-moodle-manual" className="mt-3">{manualForm}</div>}
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -361,6 +443,7 @@ const MoodleIntegrationCard = ({
                     type="button"
                     onClick={handleConnectMoodle}
                     disabled={launchStarting}
+                    aria-busy={launchStarting}
                     className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-3.5 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
@@ -368,41 +451,7 @@ const MoodleIntegrationCard = ({
                   </button>
                 </div>
 
-                <form onSubmit={handleManualSubmit} className="space-y-3 rounded-xl border border-outline-variant bg-surface p-4 shadow-sm">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-semibold text-on-surface" htmlFor="profile-moodle-manual-token">
-                      {t('moodle.card.manualPasteLabel')}
-                    </label>
-                    <p className="text-xs text-on-surface-variant">
-                      {t('moodle.card.manualPasteHint')}
-                    </p>
-                    <input
-                      id="profile-moodle-manual-token"
-                      type="text"
-                      value={manualToken}
-                      onChange={(e) => {
-                        setManualToken(e.target.value)
-                        if (manualError) setManualError('')
-                      }}
-                      placeholder={t('moodle.card.manualPastePlaceholder')}
-                      className={`w-full rounded-lg border px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-                        manualError ? 'border-error bg-error-container/20' : 'border-outline-variant bg-surface'
-                      }`}
-                    />
-                    {manualError && (
-                      <p className="text-xs text-error">{manualError}</p>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={manualSubmitting || !manualToken.trim()}
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {manualSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
-                    {t('moodle.actions.connectManual')}
-                  </button>
-                </form>
+                {manualForm}
               </div>
             )}
           </div>

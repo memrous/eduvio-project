@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AcademicController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\EventController;
@@ -9,6 +8,8 @@ use App\Http\Controllers\StagAgentController;
 use App\Http\Controllers\StagController;
 use App\Http\Controllers\StagConnectController;
 use App\Http\Controllers\StagAuthController;
+use App\Http\Controllers\StagStudentController;
+use App\Http\Controllers\StudyProgressController;
 use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\DashboardController;
@@ -21,16 +22,12 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/check-availability', [AuthController::class, 'checkAvailability']);
 
-// Academic Dropdowns
-Route::get('/academic/universities', [AcademicController::class, 'getUniversities']);
-Route::get('/academic/universities/{universityId}/faculties', [AcademicController::class, 'getFaculties']);
-Route::get('/academic/faculties/{facultyId}/programs', [AcademicController::class, 'getPrograms']);
-
 // Endpointy STAG agenta: projde token s ability "stag:sync" (stag-agent) i plný token "*"
 // (StagSyncJob v režimu server). Jediné routy, kam smí omezený token agenta.
 Route::middleware(['auth:sanctum', 'ability:stag:sync', 'throttle:30,1'])->group(function () {
     Route::post('/stag/sync-schedule', [StagController::class, 'syncSchedule']);
     Route::post('/stag/sync-subjects', [StagController::class, 'syncSubjects']);
+    Route::post('/stag/sync-student',  [StagStudentController::class, 'sync']);
     Route::post('/stag/agent/report',  [StagAgentController::class, 'report']);
     Route::get('/stag/agent/whoami',   [StagAgentController::class, 'whoami']);
 });
@@ -38,6 +35,7 @@ Route::middleware(['auth:sanctum', 'ability:stag:sync', 'throttle:30,1'])->group
 // Chráněné endpointy (vyžadují v hlavičce: Authorization: Bearer <token> s plným přístupem)
 Route::middleware(['auth:sanctum', 'full-access'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/user/study-progress', [StudyProgressController::class, 'show']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Subjects

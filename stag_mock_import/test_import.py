@@ -163,6 +163,81 @@ def nacti_doplnky(ticket: str, base_url: str, student_id: str, surova_predmety: 
     return info_predmetu, znamky
 
 
+# ── Studijní údaje studenta ─────────────────────────────────────────
+
+# Jediná pole z getStudentInfo, která se smí dál posílat. Odpověď obsahuje i citlivé
+# údaje (číslo karty, bankovní účet, financování, pohlaví...), ty se nikdy nepoužijí.
+INFO_STUDENTA_POLE = (
+    "nazevSp", "kodSp", "fakultaSp", "formaSp", "typSp", "typSpKey", "rocnik", "stav",
+    "studReferentkaPrijmeniJmeno", "studReferentkaEmail", "studReferentkaTelefon",
+)
+
+
+def vyber_info_studenta(data) -> dict:
+    """Z odpovědi getStudentInfo vybere jen whitelist polí (hodnoty jako text, prázdné → None)."""
+    if not isinstance(data, dict):
+        raise ValueError("getStudentInfo nevrátilo objekt")
+    vysledek = {}
+    for pole in INFO_STUDENTA_POLE:
+        if pole not in data:
+            continue
+        hodnota = data[pole]
+        if isinstance(hodnota, dict):  # STAG občas balí hodnotu do {"value": ...}
+            hodnota = hodnota.get("value")
+        if hodnota is not None and not isinstance(hodnota, (str, int, float)):
+            continue
+        hodnota = None if hodnota is None else str(hodnota).strip()
+        vysledek[pole] = hodnota or None
+    return vysledek
+
+
+def nacti_info_studenta(ticket: str, base_url: str, student_id: str) -> dict:
+    """Načte studijní údaje z student/getStudentInfo a vrátí jen whitelist polí.
+
+    Vyhazuje StagWsError (stav != 200), ValueError (neočekávaná odpověď)
+    nebo requests.RequestException (síť). Obsah odpovědi se nikdy nevypisuje.
+    """
+    url = f"{base_url.rstrip('/')}/services/rest2/student/getStudentInfo"
+    params = {"osCislo": student_id, "outputFormat": "JSON"}
+    response = requests.get(url, params=params, auth=(ticket, ""), timeout=15)
+    if response.status_code != 200:
+        # Tělo odpovědi může obsahovat osobní údaje, do chyby jde jen stav
+        raise StagWsError(response.status_code, "")
+    return vyber_info_studenta(response.json())
+
+
+def posli_info_studenta(api_url: str, bearer_token: str, info: dict):
+    """Odešle studijní údaje na /api/stag/sync-student. Vyhazuje ApiError nebo requests.RequestException."""
+    response = requests.post(f"{api_url}/stag/sync-student", json=info,
+                             headers=_api_headers(bearer_token), timeout=10)
+    if response.status_code != 200:
+        raise ApiError("Chyba při synchronizaci studijních údajů", response.status_code, "")
+
+
+def nacti_info_studenta_bezpecne(ticket: str, base_url: str, student_id: str):
+    """Jako nacti_info_studenta, ale při chybě jen vypíše varování a vrátí None."""
+    print("📡 Načítám studijní údaje ze STAG WS...")
+    try:
+        return nacti_info_studenta(ticket, base_url, student_id)
+    except (StagWsError, ValueError, requests.RequestException) as e:
+        print(f"⚠️ Studijní údaje se nepodařilo načíst ({_popis_chyby(e)}), přeskakuji.", file=sys.stderr)
+        return None
+
+
+def odesli_info_studenta_bezpecne(api_url: str, bearer_token: str, info) -> bool:
+    """Odešle studijní údaje; selhání sync předmětů a rozvrhu neshodí (jen varování)."""
+    if not info:
+        return False
+    try:
+        posli_info_studenta(api_url, bearer_token, info)
+    except (ApiError, requests.RequestException) as e:
+        status = f"Status: {e.status_code}" if isinstance(e, ApiError) else type(e).__name__
+        print(f"⚠️ Studijní údaje se nepodařilo odeslat ({status}), přeskakuji.", file=sys.stderr)
+        return False
+    print("🎓 Studijní údaje odeslány.")
+    return True
+
+
 # ── Převody hodnot ze STAGu ─────────────────────────────────────────
 
 _BLOK_KONEC_RE = re.compile(r"(?i)</(p|div|h[1-6]|ul|ol|table|tr|blockquote)\s*>")
@@ -615,6 +690,10 @@ def main():
     except Exception as e:
         # Selhání synchronizace rozvrhu nesmí shodit celý proces, pokud byly předměty v pořádku
         print(f"⚠️ Synchronizace rozvrhu selhala: {e}", file=sys.stderr)
+
+    # 5. Studijní údaje (jen whitelist polí); selhání se jen přeskočí
+    info_studenta = nacti_info_studenta_bezpecne(STAG_TICKET, STAG_WS_BASE_URL, STAG_STUDENT_ID)
+    odesli_info_studenta_bezpecne(LARAVEL_API_URL, BEARER_TOKEN, info_studenta)
 
     sys.exit(0)
 
