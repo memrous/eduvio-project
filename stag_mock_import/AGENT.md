@@ -76,6 +76,13 @@ python3 stag_agent.py --api-url http://localhost/api   # jednorázově jiné API
 `--dry-run` nekontaktuje Eduvio API vůbec (ani `whoami`, ani report). Stačí mu
 VPN a STAG ticket.
 
+Kromě předmětů a rozvrhu agent stahuje i podrobnosti předmětů
+(`predmety/getPredmetInfo`: garanti, vyučující, sylabus) a výsledky
+(`znamky/getZnamkyByStudent`). Když se info o předmětu nebo výsledky nepodaří
+načíst, sync pokračuje a předmět se pošle bez těchto údajů (Eduvio nechá
+dříve uložené hodnoty). `--dry-run` vypíše, u kolika předmětů se info
+a výsledek načetly.
+
 ## 4. Pravidelné spouštění (Plánovač úloh ve Windows)
 
 Plánovač nemůže otevřít prohlížeč, proto se agent spouští s `--non-interactive`.

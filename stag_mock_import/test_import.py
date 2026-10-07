@@ -1,5 +1,8 @@
+import html
 import os
+import re
 import sys
+import unicodedata
 from datetime import date, datetime
 import requests
 
@@ -81,21 +84,322 @@ def nacti_predmety_ze_stagu(ticket: str, student_id: str, base_url: str, semestr
         sys.exit(1)
 
 
-def transformuj_predmety_pro_laravel(surova_data: list, semestr: str) -> list:
-    """Transformuje surová data předmětů ze STAGu do formátu pro Laravel."""
+def nacti_info_predmetu(ticket: str, base_url: str, zkratka: str, katedra: str, rok) -> dict:
+    """Načte podrobnosti předmětu (garanti, vyučující, sylabus) z predmety/getPredmetInfo.
+
+    Vyhazuje StagWsError (stav != 200), ValueError (neočekávaná odpověď)
+    nebo requests.RequestException (síť).
+    """
+    url = f"{base_url.rstrip('/')}/services/rest2/predmety/getPredmetInfo"
+    params = {"zkratka": zkratka, "katedra": katedra, "rok": rok, "outputFormat": "JSON"}
+    response = requests.get(url, params=params, auth=(ticket, ""), timeout=15)
+    if response.status_code != 200:
+        raise StagWsError(response.status_code, response.text)
+    data = response.json()
+    if not isinstance(data, dict):
+        raise ValueError("getPredmetInfo nevrátilo objekt")
+    return data
+
+
+def nacti_znamky(ticket: str, base_url: str, student_id: str) -> list:
+    """Načte výsledky studenta (zápočty, zkoušky) ze znamky/getZnamkyByStudent.
+
+    Vyhazuje StagWsError (stav != 200), ValueError (neočekávaná odpověď)
+    nebo requests.RequestException (síť).
+    """
+    url = f"{base_url.rstrip('/')}/services/rest2/znamky/getZnamkyByStudent"
+    params = {"osCislo": student_id, "outputFormat": "JSON"}
+    print("📡 Načítám výsledky ze STAG WS...")
+    response = requests.get(url, params=params, auth=(ticket, ""), timeout=15)
+    if response.status_code != 200:
+        raise StagWsError(response.status_code, response.text)
+    data = response.json()
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict) and isinstance(data.get("student_na_predmetu", []), list):
+        return data.get("student_na_predmetu", [])
+    raise ValueError("getZnamkyByStudent vrátilo neočekávaná data")
+
+
+def _klic_predmetu(zkratka, katedra, rok) -> tuple:
+    return (str(zkratka or ""), str(katedra or ""), str(rok or ""))
+
+
+def _popis_chyby(e: Exception) -> str:
+    # Tělo odpovědi STAGu do výpisu nepatří, stačí stav
+    if isinstance(e, StagWsError):
+        return f"Status: {e.status_code}"
+    return type(e).__name__
+
+
+def nacti_doplnky(ticket: str, base_url: str, student_id: str, surova_predmety: list):
+    """Načte info o předmětech a výsledky studenta.
+
+    Vrací (info_predmetu, znamky):
+      - info_predmetu: {(zkratka, katedra, rok): dict} jen pro předměty, u kterých se info načetlo
+      - znamky: seznam řádků, nebo None, pokud se výsledky načíst nepodařilo
+    Žádné selhání sync neshodí; předmět se pak pošle bez příslušných klíčů.
+    """
+    chyby = (StagWsError, ValueError, requests.RequestException)
+    info_predmetu = {}
+    print(f"📡 Načítám podrobnosti {len(surova_predmety)} předmětů ze STAG WS...")
+    for item in surova_predmety:
+        zkratka, katedra, rok = item.get("zkratka"), item.get("katedra"), item.get("rok")
+        if not (zkratka and katedra and rok):
+            continue
+        try:
+            info_predmetu[_klic_predmetu(zkratka, katedra, rok)] = nacti_info_predmetu(
+                ticket, base_url, zkratka, katedra, rok
+            )
+        except chyby as e:
+            print(f"⚠️ Info o předmětu {katedra}/{zkratka} se nepodařilo načíst ({_popis_chyby(e)}).", file=sys.stderr)
+
+    try:
+        znamky = nacti_znamky(ticket, base_url, student_id)
+    except chyby as e:
+        print(f"⚠️ Výsledky se nepodařilo načíst ({_popis_chyby(e)}).", file=sys.stderr)
+        znamky = None
+
+    return info_predmetu, znamky
+
+
+# ── Převody hodnot ze STAGu ─────────────────────────────────────────
+
+_BLOK_KONEC_RE = re.compile(r"(?i)</(p|div|h[1-6]|ul|ol|table|tr|blockquote)\s*>")
+_TAG_RE = re.compile(r"</?[a-zA-Z][^>]*>")
+
+
+def html_na_text(hodnota):
+    """Převede text ze STAGu (případně s HTML) na prostý text.
+
+    HTML tagy pryč, odstavce jako prázdné řádky, normalizované mezery.
+    Prázdný výsledek vrací jako None.
+    """
+    if hodnota is None:
+        return None
+    text = str(hodnota).replace("\r\n", "\n").replace("\r", "\n")
+    text = re.sub(r"(?i)<br\s*/?>", "\n", text)
+    text = re.sub(r"(?i)<li[^>]*>", "\n- ", text)
+    text = _BLOK_KONEC_RE.sub("\n\n", text)
+    text = _TAG_RE.sub("", text)
+    text = html.unescape(text).replace("\xa0", " ")
+
+    radky = [re.sub(r"[ \t\f\v]+", " ", radek).strip() for radek in text.split("\n")]
+    text = re.sub(r"\n{3,}", "\n\n", "\n".join(radky)).strip()
+    return text or None
+
+
+def _rozdel_seznam(hodnota):
+    """STAG vrací seznamy jako "'A', 'B'"; vrátí ['A', 'B'], nebo None, když to seznam není."""
+    if isinstance(hodnota, list):
+        return [str(x).strip() for x in hodnota if str(x).strip()]
+    if not isinstance(hodnota, str):
+        return None
+    s = hodnota.strip()
+    if len(s) < 2 or s[0] != "'" or s[-1] != "'":
+        return None
+    return [x.strip() for x in re.split(r"'\s*,\s*'", s[1:-1]) if x.strip()]
+
+
+def osoby_na_text(*hodnoty):
+    """Jména s tituly oddělená čárkou (bez duplicit); prázdné → None."""
+    jmena = []
+    for hodnota in hodnoty:
+        if hodnota is None:
+            continue
+        polozky = _rozdel_seznam(hodnota)
+        if polozky is None:
+            polozky = [str(hodnota).strip()] if str(hodnota).strip() else []
+        for jmeno in polozky:
+            jmeno = re.sub(r"\s+", " ", jmeno)
+            if jmeno not in jmena:
+                jmena.append(jmeno)
+    return ", ".join(jmena) or None
+
+
+def literatura_na_text(hodnota):
+    """Seznam literatury v uvozovkách → jedna položka na řádek."""
+    polozky = _rozdel_seznam(hodnota)
+    if polozky is not None:
+        hodnota = "\n".join(polozky)
+    return html_na_text(hodnota)
+
+
+def zkrat(text, max_delka: int = 255):
+    """Zkrátí text na max_delka (backend má u těchto polí limit 255 znaků)."""
+    if text is None or len(text) <= max_delka:
+        return text
+    oriznuto = text[: max_delka - 1]
+    if ", " in oriznuto:
+        oriznuto = oriznuto[: oriznuto.rfind(", ")]
+    return oriznuto.rstrip(", ") + "…"
+
+
+def _bez_diakritiky(text: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFKD", text) if not unicodedata.combining(c))
+
+
+def _typ_zakonceni(hodnota):
+    if not hodnota or not str(hodnota).strip():
+        return None
+    tokeny = set(re.split(r"[^a-z]+", _bez_diakritiky(str(hodnota)).lower())) - {""}
+    zapocet = bool(tokeny & {"credit", "zp", "zapocet", "kz", "ko", "kolokvium"})
+    zkouska = bool(tokeny & {"exam", "zk", "zkouska"})
+    if zapocet and zkouska:
+        return "Credit + Exam"
+    if zkouska:
+        return "Exam"
+    if zapocet:
+        return "Credit"
+    return None
+
+
+def mapuj_typ_zakonceni(typ_zk, typ_zkousky=None, zapocet_pred_zk=None):
+    """typZk (getPredmetyByStudent), případně typZkousky + maZapocetPredZk (getPredmetInfo)
+    na hodnoty frontendu: 'Credit', 'Exam', 'Credit + Exam'. Neznámé → None."""
+    typ = _typ_zakonceni(typ_zk) or _typ_zakonceni(typ_zkousky)
+    if typ == "Exam" and _ano_ne(zapocet_pred_zk):
+        return "Credit + Exam"
+    return typ
+
+
+def _ano_ne(hodnota):
+    if isinstance(hodnota, bool):
+        return hodnota
+    s = str(hodnota or "").strip().upper()
+    if s in ("ANO", "A", "TRUE", "1"):
+        return True
+    if s in ("NE", "N", "FALSE", "0"):
+        return False
+    return None
+
+
+def _text_nebo_none(hodnota):
+    if hodnota is None:
+        return None
+    s = re.sub(r"\s+", " ", str(hodnota)).strip()
+    return s or None
+
+
+def datum_na_iso(hodnota):
+    """'20.1.2027', '20.01.2027 10:00', {'value': ...} nebo ISO → '2027-01-20'; jinak None."""
+    if isinstance(hodnota, dict):
+        hodnota = hodnota.get("value")
+    s = _text_nebo_none(hodnota)
+    if not s:
+        return None
+    m = re.match(r"^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})", s)
+    try:
+        if m:
+            return date(int(m.group(3)), int(m.group(2)), int(m.group(1))).isoformat()
+        m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", s)
+        if m:
+            return date(int(m.group(1)), int(m.group(2)), int(m.group(3))).isoformat()
+    except ValueError:
+        pass
+    return None
+
+
+def _cislo(hodnota, typ=int):
+    s = _text_nebo_none(hodnota)
+    if not s:
+        return None
+    try:
+        return typ(s.replace(",", "."))
+    except ValueError:
+        return None
+
+
+def sparuj_znamku(predmet: dict, znamky: list, semestr: str = ""):
+    """Najde výsledek předmětu podle zkratka + katedra + rok (+ semestr, je-li u známky vyplněný)."""
+    for radek in znamky or []:
+        if str(radek.get("zkratka") or "") != str(predmet.get("zkratka") or ""):
+            continue
+        if predmet.get("katedra") and str(radek.get("katedra") or "") != str(predmet["katedra"]):
+            continue
+        if predmet.get("rok") and radek.get("rok") and str(radek["rok"]) != str(predmet["rok"]):
+            continue
+        if semestr and radek.get("semestr") and str(radek["semestr"]).upper() != semestr.upper():
+            continue
+        return radek
+    return None
+
+
+def _vysledky(radek) -> dict:
+    """Výsledkové klíče pro Laravel; bez řádku jsou všechny None (výsledek ve STAGu není)."""
+    radek = radek or {}
+    zapocet = _text_nebo_none(radek.get("zppzk_hodnoceni"))
+    zkouska = _text_nebo_none(radek.get("zk_hodnoceni"))
+    return {
+        "creditResult": zkrat(zapocet),
+        "creditDate": datum_na_iso(radek.get("zppzk_datum")),
+        "creditAttempt": _cislo(radek.get("zppzk_pokus")) if zapocet else None,
+        "creditExaminer": zkrat(_text_nebo_none(radek.get("zppzk_ucit_jmeno"))),
+        "examResult": zkrat(zkouska),
+        "examDate": datum_na_iso(radek.get("zk_datum")),
+        "examAttempt": _cislo(radek.get("zk_pokus")) if zkouska else None,
+        "examPoints": _cislo(radek.get("zk_body"), float),
+        "examExaminer": zkrat(_text_nebo_none(radek.get("zk_ucit_jmeno"))),
+    }
+
+
+def transformuj_predmety_pro_laravel(surova_data: list, semestr: str, info_predmetu: dict = None,
+                                     znamky: list = None) -> list:
+    """Transformuje surová data předmětů ze STAGu do formátu pro Laravel.
+
+    info_predmetu a znamky jsou volitelné (viz nacti_doplnky). Klíče, pro které
+    data nejsou, se vůbec nepošlou, takže je backend nepřepíše.
+    """
+    info_predmetu = info_predmetu or {}
     vysledek = []
     for item in surova_data:
-        vysledek.append({
+        info = info_predmetu.get(_klic_predmetu(item.get("zkratka"), item.get("katedra"), item.get("rok")))
+        predmet = {
             "code": item["zkratka"],
             "name": item["nazev"],
             "credits": item.get("kredity", 0),
             "department": item.get("katedra"),
             "semester": f"{semestr} {item.get('rok', '')}".strip(),
-            "completionType": "Credit",
             "statut": item.get("statut"),
             "isMandatory": item.get("statut") == "A",
-            "lecturer": "Nespecifikováno"
-        })
+        }
+
+        typ = mapuj_typ_zakonceni(
+            item.get("typZk"),
+            info.get("typZkousky") if info else None,
+            info.get("maZapocetPredZk") if info else None,
+        )
+        if typ:
+            predmet["completionType"] = typ
+
+        if info is not None:
+            garanti = osoby_na_text(info.get("garanti"))
+            prednasejici = osoby_na_text(info.get("prednasejici"))
+            predmet["lecturer"] = zkrat(prednasejici or garanti) or "Nespecifikováno"
+            stag_url = _text_nebo_none(info.get("predmetUrl"))
+            predmet.update({
+                "guarantor": zkrat(garanti),
+                "lecturers": prednasejici,
+                "tutors": osoby_na_text(info.get("cvicici"), info.get("seminarici")),
+                "stagAnnotation": html_na_text(info.get("anotace")),
+                "stagRequirements": html_na_text(info.get("pozadavky")),
+                "stagSyllabus": html_na_text(info.get("prehledLatky")),
+                "stagLiterature": literatura_na_text(info.get("literatura")),
+                "stagAssessment": html_na_text(info.get("metodyHodnotici")),
+                "examForm": zkrat(_text_nebo_none(info.get("formaZkousky"))),
+                "creditBeforeExam": _ano_ne(info.get("maZapocetPredZk")),
+                "stagUrl": stag_url if stag_url and len(stag_url) <= 255 else None,
+            })
+
+        if znamky is not None:
+            radek = sparuj_znamku(item, znamky, semestr)
+            predmet.update(_vysledky(radek))
+            stav = radek.get("stavAbsolvovani") if radek else item.get("stavAbsolvovani")
+            predmet["stagCompletionState"] = zkrat(_text_nebo_none(stav))
+        elif "stavAbsolvovani" in item:
+            predmet["stagCompletionState"] = zkrat(_text_nebo_none(item.get("stavAbsolvovani")))
+
+        vysledek.append(predmet)
     return vysledek
 
 
@@ -286,8 +590,9 @@ def main():
     semestr = zjisti_aktualni_semestr()
     surova_predmety = nacti_predmety_ze_stagu(STAG_TICKET, STAG_STUDENT_ID, STAG_WS_BASE_URL, semestr)
 
-    # 3. Transformace a odeslání předmětů
-    pripravene_predmety = transformuj_predmety_pro_laravel(surova_predmety, semestr)
+    # 3. Podrobnosti a výsledky (selhání sync neshodí), transformace a odeslání předmětů
+    info_predmetu, znamky = nacti_doplnky(STAG_TICKET, STAG_WS_BASE_URL, STAG_STUDENT_ID, surova_predmety)
+    pripravene_predmety = transformuj_predmety_pro_laravel(surova_predmety, semestr, info_predmetu, znamky)
 
     if pripravene_predmety:
         odesli_predmety_do_laravelu(LARAVEL_API_URL, BEARER_TOKEN, pripravene_predmety)

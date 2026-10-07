@@ -233,7 +233,7 @@ class RunSyncTest(unittest.TestCase):
         self.assertNotIn(TOKEN, output)
         self.assertNotIn(TICKET, output)
 
-    def stag_get(self, subjects_status=200):
+    def stag_get(self, subjects_status=200, info_status=200):
         def get(url, **kwargs):
             if url.endswith("/stag/agent/whoami"):
                 return FakeResponse(200, {"name": "Jana", "email": "jana@example.com"})
@@ -243,7 +243,20 @@ class RunSyncTest(unittest.TestCase):
                 if subjects_status != 200:
                     return FakeResponse(subjects_status, text=f"denied {TICKET}")
                 return FakeResponse(200, {"predmetStudenta": [
-                    {"zkratka": "KMI/AGT", "nazev": "Agent", "kredity": 5, "rok": "2026", "statut": "A"},
+                    {"zkratka": "AGT", "katedra": "KMI", "nazev": "Agent", "kredity": 5, "rok": "2026",
+                     "statut": "A"},
+                ]})
+            if "getPredmetInfo" in url:
+                if info_status != 200:
+                    return FakeResponse(info_status, text=f"info denied {TICKET}")
+                return FakeResponse(200, {"garanti": "'doc. Jan Garant, Ph.D.'", "prednasejici": "",
+                                          "cvicici": "'Mgr. Eva Cvičící'", "typZkousky": "Zkouška",
+                                          "maZapocetPredZk": "ANO", "anotace": "Anotace.\r\n\r\n"})
+            if "getZnamkyByStudent" in url:
+                return FakeResponse(200, {"student_na_predmetu": [
+                    {"zkratka": "AGT", "katedra": "KMI", "rok": "2026", "semestr": "ZS",
+                     "zppzk_hodnoceni": "S", "zppzk_datum": "18.12.2026", "zppzk_pokus": "1",
+                     "zk_hodnoceni": "", "zk_pokus": "0", "zk_body": ""},
                 ]})
             if "getRozvrhByStudent" in url:
                 return FakeResponse(200, {"rozvrhovaAkce": []})
@@ -341,7 +354,46 @@ class RunSyncTest(unittest.TestCase):
 
         self.assertEqual(code, stag_agent.EXIT_OK)
         post.assert_not_called()
-        self.assertIn("1 předmětů", self.out.getvalue())
+        self.assertIn("1 předmětů (s info: 1, s výsledkem: 1)", self.out.getvalue())
+
+    @staticmethod
+    def sent_subjects(post_mock):
+        return next(c.kwargs["json"] for c in post_mock.call_args_list if c.args[0].endswith("/stag/sync-subjects"))
+
+    def test_sync_sends_subject_details_and_results(self):
+        stag_agent.save_ticket(TICKET, "novakj", "R12345", self.home)
+        post = mock.Mock(return_value=FakeResponse(200, {"message": "ok"}))
+
+        code = self.run_agent([], self.stag_get(), post)
+
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        subject = self.sent_subjects(post)[0]
+        self.assertEqual(subject["completionType"], "Credit + Exam")
+        self.assertEqual(subject["guarantor"], "doc. Jan Garant, Ph.D.")
+        self.assertEqual(subject["lecturer"], "doc. Jan Garant, Ph.D.")
+        self.assertEqual(subject["tutors"], "Mgr. Eva Cvičící")
+        self.assertEqual(subject["stagAnnotation"], "Anotace.")
+        self.assertEqual(subject["creditResult"], "S")
+        self.assertEqual(subject["creditDate"], "2026-12-18")
+        self.assertIsNone(subject["examResult"])
+
+    def test_subject_info_failure_does_not_stop_sync(self):
+        stag_agent.save_ticket(TICKET, "novakj", "R12345", self.home)
+        post = mock.Mock(return_value=FakeResponse(200, {"message": "ok"}))
+
+        code = self.run_agent([], self.stag_get(info_status=500), post)
+
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        self.assertEqual(self.reports(post), [{"status": "success"}])
+        subject = self.sent_subjects(post)[0]
+        # Bez info se klíče nepošlou, backend existující hodnoty nepřepíše
+        for key in ("guarantor", "lecturers", "tutors", "stagAnnotation", "completionType"):
+            self.assertNotIn(key, subject)
+        self.assertNotIn("lecturer", subject)
+        self.assertEqual(subject["creditResult"], "S")
+        self.assertIn("Status: 500", self.err.getvalue())
+        self.assertNotIn("info denied", self.err.getvalue())
+        self.assert_no_secret_leaked(post)
 
     def test_api_url_override_must_be_https(self):
         with self.assertRaises(stag_agent.AgentError):
@@ -387,6 +439,159 @@ class TestImportCompatibilityTest(unittest.TestCase):
 
         self.assertEqual(ctx.exception.code, 0)
         self.assertEqual(posted, ["http://laravel.test/api/stag/sync-subjects"])
+
+
+class HtmlToTextTest(unittest.TestCase):
+    def test_tags_removed_and_paragraphs_kept_as_blank_lines(self):
+        raw = "<p>První&nbsp;odstavec  s   <b>tučným</b> textem.</p><p>Druhý<br>řádek</p>"
+        self.assertEqual(test_import.html_na_text(raw), "První odstavec s tučným textem.\n\nDruhý\nřádek")
+
+    def test_list_items_and_entities(self):
+        raw = "<ul><li>a &amp; b</li><li>c</li></ul>"
+        self.assertEqual(test_import.html_na_text(raw), "- a & b\n- c")
+
+    def test_plain_stag_text_with_crlf_is_normalized(self):
+        raw = "Doplnění  znalostí.\r\n\r\n\r\n\r\nDruhý odstavec. \r\n"
+        self.assertEqual(test_import.html_na_text(raw), "Doplnění znalostí.\n\nDruhý odstavec.")
+
+    def test_comparison_sign_is_not_treated_as_tag(self):
+        self.assertEqual(test_import.html_na_text("a < b a b > c"), "a < b a b > c")
+
+    def test_empty_values_become_none(self):
+        for raw in (None, "", "  \r\n ", "<p></p>"):
+            self.assertIsNone(test_import.html_na_text(raw))
+
+    def test_literature_list_is_split_into_lines(self):
+        raw = "'Kubát J.: Počet. Praha, 1997.',\n'Calda E.: Matematika.'"
+        self.assertEqual(test_import.literatura_na_text(raw), "Kubát J.: Počet. Praha, 1997.\nCalda E.: Matematika.")
+
+
+class PeopleFormattingTest(unittest.TestCase):
+    def test_quoted_list_with_titles(self):
+        raw = "'Mgr. Jakub Baloun', 'RNDr. Marie Chodorová, Ph.D.'"
+        self.assertEqual(test_import.osoby_na_text(raw), "Mgr. Jakub Baloun, RNDr. Marie Chodorová, Ph.D.")
+
+    def test_single_person_and_plain_string(self):
+        self.assertEqual(test_import.osoby_na_text("'prof. RNDr. Josef Molnár, CSc.'"), "prof. RNDr. Josef Molnár, CSc.")
+        self.assertEqual(test_import.osoby_na_text("Doc. Jan Novák"), "Doc. Jan Novák")
+
+    def test_multiple_sources_without_duplicates(self):
+        self.assertEqual(test_import.osoby_na_text("'A', 'B'", "'B', 'C'"), "A, B, C")
+
+    def test_empty_values(self):
+        self.assertIsNone(test_import.osoby_na_text("", None, "''"))
+
+    def test_long_list_is_truncated_on_name_boundary(self):
+        text = ", ".join(f"Mgr. Učitel Číslo{i}" for i in range(30))
+        short = test_import.zkrat(text)
+        self.assertLessEqual(len(short), 255)
+        self.assertTrue(short.endswith("…"))
+        self.assertNotIn(", …", short)
+
+
+class CompletionTypeMappingTest(unittest.TestCase):
+    def test_typ_zk_values(self):
+        cases = {
+            "Zk": "Exam", "Zkouška": "Exam", "Zp": "Credit", "Zápočet": "Credit",
+            "Kz": "Credit", "Klasifikovaný zápočet": "Credit", "Kolokvium": "Credit",
+            "Zp+Zk": "Credit + Exam", "Zápočet a zkouška": "Credit + Exam",
+        }
+        for raw, expected in cases.items():
+            with self.subTest(raw=raw):
+                self.assertEqual(test_import.mapuj_typ_zakonceni(raw), expected)
+
+    def test_falls_back_to_predmet_info(self):
+        self.assertEqual(test_import.mapuj_typ_zakonceni(None, "Zkouška", "ANO"), "Credit + Exam")
+        self.assertEqual(test_import.mapuj_typ_zakonceni(None, "Zkouška", "NE"), "Exam")
+        self.assertEqual(test_import.mapuj_typ_zakonceni("", "Zápočet", "NE"), "Credit")
+
+    def test_unknown_is_none(self):
+        self.assertIsNone(test_import.mapuj_typ_zakonceni(None))
+        self.assertIsNone(test_import.mapuj_typ_zakonceni("Něco", "Jiného"))
+
+
+class GradePairingTest(unittest.TestCase):
+    SUBJECTS = [
+        {"zkratka": "MR", "katedra": "KMI", "nazev": "Repetitorium", "kredity": 3, "rok": "2026", "statut": "A",
+         "typZk": None, "stavAbsolvovani": None},
+        {"zkratka": "MR", "katedra": "KAG", "nazev": "Jiná katedra", "kredity": 3, "rok": "2026", "statut": "C"},
+        {"zkratka": "ZP", "katedra": "KMI", "nazev": "Bez známky", "kredity": 5, "rok": "2026", "statut": "A"},
+    ]
+    GRADES = [
+        {"zkratka": "MR", "katedra": "KMI", "rok": "2025", "semestr": "ZS", "zk_hodnoceni": "4"},
+        {"zkratka": "MR", "katedra": "KMI", "rok": "2026", "semestr": "LS", "zk_hodnoceni": "3"},
+        {"zkratka": "MR", "katedra": "KMI", "rok": "2026", "semestr": "ZS", "stavAbsolvovani": "U",
+         "zppzk_hodnoceni": "S", "zppzk_datum": {"value": "18.12.2026"}, "zppzk_pokus": "1",
+         "zppzk_ucit_jmeno": "Mgr. Jakub Baloun",
+         "zk_hodnoceni": "1", "zk_datum": "20.1.2027", "zk_pokus": "2", "zk_body": "78,5",
+         "zk_ucit_jmeno": "prof. RNDr. Josef Molnár, CSc."},
+        {"zkratka": "MR", "katedra": "KAG", "rok": "2026", "semestr": "", "zk_hodnoceni": "B"},
+    ]
+
+    def test_pairs_by_code_department_year_and_semester(self):
+        self.assertEqual(test_import.sparuj_znamku(self.SUBJECTS[0], self.GRADES, "ZS"), self.GRADES[2])
+        # Prázdný semestr u známky se nekontroluje
+        self.assertEqual(test_import.sparuj_znamku(self.SUBJECTS[1], self.GRADES, "ZS"), self.GRADES[3])
+        self.assertIsNone(test_import.sparuj_znamku(self.SUBJECTS[2], self.GRADES, "ZS"))
+
+    def test_transform_adds_results_and_converts_values(self):
+        out = test_import.transformuj_predmety_pro_laravel(self.SUBJECTS, "ZS", {}, self.GRADES)
+
+        first = out[0]
+        self.assertEqual(first["creditResult"], "S")
+        self.assertEqual(first["creditDate"], "2026-12-18")
+        self.assertEqual(first["creditAttempt"], 1)
+        self.assertEqual(first["creditExaminer"], "Mgr. Jakub Baloun")
+        self.assertEqual(first["examResult"], "1")
+        self.assertEqual(first["examDate"], "2027-01-20")
+        self.assertEqual(first["examAttempt"], 2)
+        self.assertEqual(first["examPoints"], 78.5)
+        self.assertEqual(first["stagCompletionState"], "U")
+        self.assertEqual(out[1]["examResult"], "B")
+
+        # Předmět bez známky: výsledky explicitně null (ve STAGu nic není)
+        self.assertIsNone(out[2]["examResult"])
+        self.assertIsNone(out[2]["creditResult"])
+        self.assertIsNone(out[2]["examAttempt"])
+
+    def test_without_grades_result_keys_are_not_sent(self):
+        out = test_import.transformuj_predmety_pro_laravel(self.SUBJECTS, "ZS", {}, None)
+        for key in ("creditResult", "examResult", "examDate"):
+            self.assertNotIn(key, out[0])
+        self.assertNotIn("completionType", out[0])
+        self.assertNotIn("lecturer", out[0])
+
+    def test_transform_adds_subject_info(self):
+        info = {("MR", "KMI", "2026"): {
+            "garanti": "'prof. RNDr. Josef Molnár, CSc.'", "prednasejici": "",
+            "cvicici": "'Mgr. Jakub Baloun', 'RNDr. Marie Chodorová, Ph.D.'", "seminarici": None,
+            "anotace": "Doplnění.\r\n\r\n", "pozadavky": "<p>Písemka</p>", "prehledLatky": "1. výrazy\r\n2. funkce",
+            "literatura": "'Kniha A',\n'Kniha B'", "metodyHodnotici": "Didaktický test",
+            "formaZkousky": "Kombinovaná", "typZkousky": "Zkouška", "maZapocetPredZk": "ANO", "predmetUrl": None,
+        }}
+        first = test_import.transformuj_predmety_pro_laravel(self.SUBJECTS, "ZS", info, None)[0]
+
+        self.assertEqual(first["completionType"], "Credit + Exam")
+        self.assertEqual(first["guarantor"], "prof. RNDr. Josef Molnár, CSc.")
+        self.assertIsNone(first["lecturers"])
+        self.assertEqual(first["lecturer"], "prof. RNDr. Josef Molnár, CSc.")
+        self.assertEqual(first["tutors"], "Mgr. Jakub Baloun, RNDr. Marie Chodorová, Ph.D.")
+        self.assertEqual(first["stagAnnotation"], "Doplnění.")
+        self.assertEqual(first["stagRequirements"], "Písemka")
+        self.assertEqual(first["stagSyllabus"], "1. výrazy\n2. funkce")
+        self.assertEqual(first["stagLiterature"], "Kniha A\nKniha B")
+        self.assertEqual(first["examForm"], "Kombinovaná")
+        self.assertTrue(first["creditBeforeExam"])
+        self.assertIsNone(first["stagUrl"])
+        # Druhý předmět (jiná katedra) info nemá → klíče chybí
+        self.assertNotIn("guarantor", test_import.transformuj_predmety_pro_laravel(self.SUBJECTS, "ZS", info)[1])
+
+    def test_dates_in_various_formats(self):
+        self.assertEqual(test_import.datum_na_iso("5.2.2027 10:30"), "2027-02-05")
+        self.assertEqual(test_import.datum_na_iso("2027-02-05T10:30:00"), "2027-02-05")
+        self.assertEqual(test_import.datum_na_iso({"value": "05.02.2027"}), "2027-02-05")
+        for raw in (None, "", "31.2.2027", "zítra"):
+            self.assertIsNone(test_import.datum_na_iso(raw))
 
 
 if __name__ == "__main__":

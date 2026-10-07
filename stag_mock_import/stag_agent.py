@@ -408,15 +408,18 @@ def run_sync(args, config: dict, home: Path) -> int:
             secrets.append(ticket["ticket"])
             raw_subjects = fetch_subjects(ticket, ws_base_url, semestr)
 
-        # 4. Předměty, pak rozvrh
-        subjects = stag.transformuj_predmety_pro_laravel(raw_subjects, semestr)
+        # 4. Podrobnosti a výsledky předmětů (selhání sync neshodí), předměty, pak rozvrh
+        subject_info, grades = stag.nacti_doplnky(ticket["ticket"], ws_base_url, ticket["student_id"], raw_subjects)
+        subjects = stag.transformuj_predmety_pro_laravel(raw_subjects, semestr, subject_info, grades)
         credits_by_code = {p["zkratka"]: p.get("kredity", 0) for p in raw_subjects}
         raw_schedule = stag.nacti_rozvrh_ze_stagu(ticket["ticket"], ticket["student_id"], ws_base_url, semestr)
         schedule = stag.transformuj_rozvrh_pro_laravel(raw_schedule, credits_by_code, semestr) if raw_schedule else []
 
         if args.dry_run:
-            print(f"🧪 Dry run: {len(subjects)} předmětů, {len(raw_schedule)} rozvrhových akcí "
-                  f"→ {len(schedule)} událostí. Nic se neodesílá.")
+            with_info = sum(1 for s in subjects if "lecturers" in s)
+            with_result = sum(1 for s in subjects if s.get("creditResult") or s.get("examResult"))
+            print(f"🧪 Dry run: {len(subjects)} předmětů (s info: {with_info}, s výsledkem: {with_result}), "
+                  f"{len(raw_schedule)} rozvrhových akcí → {len(schedule)} událostí. Nic se neodesílá.")
             return EXIT_OK
 
         if subjects:

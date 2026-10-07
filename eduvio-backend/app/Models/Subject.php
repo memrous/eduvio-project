@@ -27,6 +27,26 @@ class Subject extends Model
         'final_grade',
         'source',
         'stag_removed_at',
+        'lecturers',
+        'tutors',
+        'stag_annotation',
+        'stag_requirements',
+        'stag_syllabus',
+        'stag_literature',
+        'stag_assessment',
+        'exam_form',
+        'credit_before_exam',
+        'stag_url',
+        'stag_completion_state',
+        'credit_result',
+        'credit_date',
+        'credit_attempt',
+        'credit_examiner',
+        'exam_result',
+        'exam_date',
+        'exam_attempt',
+        'exam_points',
+        'exam_examiner',
     ];
 
     // Výchozí hodnoty, aby byly v JSON odpovědi i u čerstvě založeného předmětu
@@ -39,6 +59,12 @@ class Subject extends Model
         'is_mandatory' => 'boolean',
         'credits' => 'integer',
         'stag_removed_at' => 'datetime',
+        'credit_before_exam' => 'boolean',
+        'credit_date' => 'date:Y-m-d',
+        'credit_attempt' => 'integer',
+        'exam_date' => 'date:Y-m-d',
+        'exam_attempt' => 'integer',
+        'exam_points' => 'float',
     ];
 
     protected $appends = [
