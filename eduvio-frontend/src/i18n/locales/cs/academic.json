@@ -91,6 +91,12 @@
       "elective": "Volitelné předměty"
     }
   },
+  "stagRemoved": {
+    "badge": "Odebráno ze STAGu",
+    "description": "Tento předmět už ve STAGu není, ale obsahuje tvoje data (poznámky, vlastní požadavky nebo materiály), proto zůstal zachován. Pokud ho už nepotřebuješ, můžeš ho smazat.",
+    "delete": "Smazat předmět",
+    "deleteConfirm": "Opravdu chceš smazat předmět „{{name}}“? Smažou se i jeho poznámky, požadavky a materiály. Tuto akci nelze vrátit."
+  },
   "subjectDetail": {
     "showInfo": "Zobrazit popis předmětu",
     "backToSubjects": "Zpět na předměty",

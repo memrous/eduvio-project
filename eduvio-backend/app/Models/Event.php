@@ -21,6 +21,11 @@ class Event extends Model
         'teacher_name',
         'teacher_email',
         'requirement_id',
+        'source',
+    ];
+
+    protected $attributes = [
+        'source' => 'manual',
     ];
 
     protected $casts = [

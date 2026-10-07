@@ -68,6 +68,11 @@ const SubjectOverviewCard = ({ subject, onSelect }) => {
               {semesterShort}
             </span>
           )}
+          {subject.stag_removed_at && (
+            <span className="rounded-md px-2 py-1 text-xs font-semibold bg-surface-container-high text-on-surface-variant">
+              {t('academic:stagRemoved.badge')}
+            </span>
+          )}
           <span
             className={`rounded-md px-2 py-1 text-xs font-medium ${statutStyle.bg} ${statutStyle.text}`}
           >

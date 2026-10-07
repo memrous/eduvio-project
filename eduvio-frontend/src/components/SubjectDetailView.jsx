@@ -15,6 +15,7 @@ import {
   X,
   ListChecks,
   Building2,
+  Trash2,
 } from 'lucide-react'
 
 import SubjectSummaryStrip from './subject/SubjectSummaryStrip'
@@ -108,6 +109,12 @@ const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
             </span>
           ) : null}
 
+          {subject.stag_removed_at && (
+            <span className="rounded-lg border border-outline-variant bg-surface-container-lowest px-2.5 py-1 text-xs font-bold text-on-surface-variant">
+              {t('academic:stagRemoved.badge')}
+            </span>
+          )}
+
           {/* Status badge */}
           <span className="rounded-lg border border-outline-variant bg-surface-container-lowest px-2.5 py-1 text-xs font-bold text-on-surface-variant">
             {statusLabel}
@@ -167,6 +174,36 @@ const SubjectHeader = ({ subject, requirements, onShowInfo }) => {
           }
         />
       </div>
+    </div>
+  )
+}
+
+// ─── Removed from STAG notice ────────────────────────────────
+
+const StagRemovedNotice = ({ subject, onDelete }) => {
+  const { t } = useTranslation('academic')
+
+  const handleDelete = () => {
+    if (window.confirm(t('academic:stagRemoved.deleteConfirm', { name: subject.name }))) {
+      onDelete(subject.id)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface-container-low/60 p-4 sm:flex-row sm:items-center sm:justify-between page-section">
+      <div className="flex items-start gap-3">
+        <Info className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
+        <p className="text-sm text-on-surface-variant">{t('academic:stagRemoved.description')}</p>
+      </div>
+      {onDelete && (
+        <button
+          onClick={handleDelete}
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-on-surface-variant transition-colors hover:border-error-container/50 hover:bg-error-container/40 hover:text-error cursor-pointer"
+        >
+          <Trash2 className="size-3.5" />
+          {t('academic:stagRemoved.delete')}
+        </button>
+      )}
     </div>
   )
 }
@@ -300,6 +337,7 @@ const SubjectDetailView = ({
   resources = [],
   onBack,
   onSaveNote,
+  onDeleteSubject,
 }) => {
   const { t } = useTranslation(['academic', 'dashboard'])
   const [activeTab, setActiveTab] = useState('requirements')
@@ -336,6 +374,8 @@ const SubjectDetailView = ({
 
       {/* 1. HEADER SECTION */}
       <SubjectHeader subject={subject} requirements={requirements} onShowInfo={() => setShowInfo(true)} />
+
+      {subject.stag_removed_at && <StagRemovedNotice subject={subject} onDelete={onDeleteSubject} />}
 
       {/* 2. SUMMARY STRIP (2-3 METRIC CARDS) */}
       <div className="page-section"><SubjectSummaryStrip subject={subject} requirements={requirements} /></div>

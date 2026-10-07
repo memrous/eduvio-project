@@ -88,6 +88,12 @@
       "elective": "Elective Subjects"
     }
   },
+  "stagRemoved": {
+    "badge": "Removed from STAG",
+    "description": "This subject is no longer in STAG, but it contains your data (notes, your own requirements or materials), so it was kept. If you no longer need it, you can delete it.",
+    "delete": "Delete subject",
+    "deleteConfirm": "Are you sure you want to delete the subject \"{{name}}\"? Its notes, requirements and materials will be deleted as well. This cannot be undone."
+  },
   "subjectDetail": {
     "backToSubjects": "Back to Subjects",
     "noSubjectSelected": "No subject selected. Click back to select a subject.",

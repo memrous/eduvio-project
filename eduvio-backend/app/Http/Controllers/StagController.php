@@ -38,9 +38,14 @@ class StagController extends Controller
 
         $user = $request->user();
         $importedCount = 0;
+        $updatedCount = 0;
+        $deletedCount = 0;
 
         // Vše zabalíme do DB transakce, kdyby uprostřed nastala chyba, nic se neuloží napůl
-        DB::transaction(function () use ($request, $user, &$importedCount) {
+        DB::transaction(function () use ($request, $user, &$importedCount, &$updatedCount, &$deletedCount) {
+            // Klíče (datum + čas začátku) akcí, které v datech přišly, podle předmětu
+            $seenKeys = [];
+
             foreach ($request->all() as $item) {
                 $subjectData = $item['subject'];
                 $eventData = $item['event'];
@@ -63,9 +68,14 @@ class StagController extends Controller
                         'is_mandatory' => !empty($subjectData['statut'])
                             ? (strtoupper($subjectData['statut']) === 'A')
                             : ($subjectData['isMandatory'] ?? true),
-                        'description' => 'Imported from IS/STAG'
+                        'description' => 'Imported from IS/STAG',
+                        'source' => 'stag',
                     ]
                 );
+
+                // Předmět je ve STAGu, takže ho vedeme jako STAG předmět a případně odznačíme
+                $subject->source = 'stag';
+                $subject->stag_removed_at = null;
 
                 if (!empty($subjectData['lecturer']) && $subjectData['lecturer'] !== 'Nespecifikováno') {
                     $subject->lecturer = $subjectData['lecturer'];
@@ -85,14 +95,17 @@ class StagController extends Controller
                     $subject->save();
                 }
 
-                // 3. Kontrola duplicity rozvrhové akce (Event)
-                // Nechceme stejný rozvrh naimportovat dvakrát při opakovaném spuštění
-                $eventExists = Event::where('subject_id', $subject->id)
+                $seenKeys[$subject->id][$this->eventKey($eventData['date'], $eventData['startTime'])] = true;
+
+                // 3. Kontrola duplicity rozvrhové akce (Event) podle data a času začátku.
+                // Shodnou STAG akci aktualizujeme, ruční akci necháme být.
+                $existing = Event::where('subject_id', $subject->id)
                     ->where('date', $eventData['date'])
                     ->where('time', $eventData['startTime'])
-                    ->exists();
+                    ->orderByRaw("CASE WHEN source = 'stag' THEN 0 ELSE 1 END")
+                    ->first();
 
-                if (!$eventExists) {
+                if ($existing === null) {
                     $event = new Event();
                     $event->subject_id = $subject->id;
                     $event->title = $eventData['title'];
@@ -103,9 +116,36 @@ class StagController extends Controller
                     $event->status = $eventData['status'] ?? 'Not Started';
                     $event->room = $eventData['room'] ?? null;
                     $event->teacher_name = $eventData['teacherName'] ?? null;
+                    $event->source = 'stag';
                     $event->save();
 
                     $importedCount++;
+                } elseif ($existing->source === 'stag') {
+                    // Status si nastavuje uživatel, ten nepřepisujeme
+                    $existing->title = $eventData['title'];
+                    $existing->end_time = $eventData['endTime'] ?? null;
+                    $existing->type = $eventData['type'];
+                    $existing->room = $eventData['room'] ?? null;
+                    $existing->teacher_name = $eventData['teacherName'] ?? null;
+
+                    if ($existing->isDirty()) {
+                        $existing->save();
+                        $updatedCount++;
+                    }
+                }
+            }
+
+            // 4. STAG akce předmětů z dat, které v datech nepřišly, smažeme (např. změna času).
+            // Prázdný seznam sem nic nepřinese, takže se nic nesmaže.
+            foreach ($seenKeys as $subjectId => $keys) {
+                $staleIds = Event::where('subject_id', $subjectId)
+                    ->where('source', 'stag')
+                    ->get(['id', 'date', 'time'])
+                    ->reject(fn (Event $event) => isset($keys[$this->eventKey($event->date, $event->time)]))
+                    ->pluck('id');
+
+                if ($staleIds->isNotEmpty()) {
+                    $deletedCount += Event::whereIn('id', $staleIds)->delete();
                 }
             }
         });
@@ -113,6 +153,8 @@ class StagController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Sync successful. {$importedCount} new schedule events were created.",
+            'updated' => $updatedCount,
+            'deleted' => $deletedCount,
         ], 200);
     }
 
@@ -135,10 +177,13 @@ class StagController extends Controller
         ]);
 
         $user = $request->user();
+        $items = $request->all();
         $processedCount = 0;
+        $deletedCount = 0;
+        $markedRemovedCount = 0;
 
-        DB::transaction(function () use ($request, $user, &$processedCount) {
-            foreach ($request->all() as $item) {
+        DB::transaction(function () use ($items, $user, &$processedCount, &$deletedCount, &$markedRemovedCount) {
+            foreach ($items as $item) {
                 $subject = Subject::firstOrNew(
                     [
                         'user_id' => $user->id,
@@ -160,15 +205,80 @@ class StagController extends Controller
                     : ($item['isMandatory'] ?? true);
                 $subject->lecturer        = $item['lecturer'] ?? 'Nespecifikováno';
                 $subject->department      = $item['department'] ?? null;
+                $subject->source          = 'stag';
+                $subject->stag_removed_at = null;
 
                 $subject->save();
                 $processedCount++;
+            }
+
+            // Prázdný seznam může znamenat chybu STAGu, v tom případě nic nemažeme
+            if (empty($items)) {
+                return;
+            }
+
+            // Předměty, které ze STAGu zmizely (jen semestry, které v datech přišly)
+            $removed = Subject::where('user_id', $user->id)
+                ->where('source', 'stag')
+                ->whereIn('semester', array_unique(array_column($items, 'semester')))
+                ->whereNotIn('code', array_column($items, 'code'))
+                ->get();
+
+            $toDelete = [];
+            foreach ($removed as $subject) {
+                if (!$this->hasUserData($subject)) {
+                    $toDelete[] = $subject->id;
+                } elseif ($subject->stag_removed_at === null) {
+                    $subject->stag_removed_at = now();
+                    $subject->save();
+                    $markedRemovedCount++;
+                }
+            }
+
+            if (!empty($toDelete)) {
+                // Events, requirements, materiály a poznámky smaže kaskáda v DB
+                $deletedCount = Subject::whereIn('id', $toDelete)->delete();
             }
         });
 
         return response()->json([
             'success' => true,
             'message' => "Sync successful. {$processedCount} subjects processed.",
+            'deleted' => $deletedCount,
+            'marked_removed' => $markedRemovedCount,
         ], 200);
+    }
+
+    /**
+     * Má předmět data, která zadal uživatel? Data importovaná z Moodlu se
+     * nepočítají, Moodle sync je po případném smazání obnoví.
+     */
+    private function hasUserData(Subject $subject): bool
+    {
+        $noteContent = $subject->note()->value('content');
+        if ($noteContent !== null && trim($noteContent) !== '') {
+            return true;
+        }
+
+        $hasUserRequirement = $subject->requirements()
+            ->where(function ($q) {
+                $q->whereNull('moodle_assignment_id')
+                    ->orWhereNotNull('gained_points')
+                    ->orWhereNotNull('grade');
+            })
+            ->exists();
+        if ($hasUserRequirement) {
+            return true;
+        }
+
+        return $subject->materials()
+            ->whereNull('moodle_cmid')
+            ->whereNull('moodle_section_id')
+            ->exists();
+    }
+
+    private function eventKey(string $date, ?string $time): string
+    {
+        return substr($date, 0, 10) . ' ' . $time;
     }
 }

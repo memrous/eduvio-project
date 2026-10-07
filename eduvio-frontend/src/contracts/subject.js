@@ -24,6 +24,9 @@
  * @property {boolean} isMandatory     - Whether this subject is mandatory
  * @property {string}  [completionType]- e.g. "Exam", "Credit", "Classified Credit"
  * @property {string}  [description]   - Optional syllabus description
+ * @property {'stag'|'manual'} [source] - Where the subject came from
+ * @property {string|null} [stag_removed_at] - ISO timestamp when the subject disappeared
+ *                                     from STAG but was kept because it holds user data
  */
 
 export {} // keeps this a proper ES module

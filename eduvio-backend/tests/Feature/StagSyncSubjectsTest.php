@@ -2,6 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Event;
+use App\Models\Material;
+use App\Models\Note;
+use App\Models\Requirement;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -203,4 +207,253 @@ class StagSyncSubjectsTest extends TestCase
             'is_mandatory' => false,
         ]);
     }
+
+    private function stagSubject(User $user, string $code, string $semester = 'ZS 2026', array $attrs = []): Subject
+    {
+        return Subject::create(array_merge([
+            'user_id'         => $user->id,
+            'code'            => $code,
+            'name'            => "Předmět {$code}",
+            'credits'         => 5,
+            'semester'        => $semester,
+            'completion_type' => 'Credit',
+            'is_mandatory'    => true,
+            'lecturer'        => 'Nespecifikováno',
+            'description'     => 'Imported from IS/STAG',
+            'source'          => 'stag',
+        ], $attrs));
+    }
+
+    private function syncPayload(array $codes, string $semester = 'ZS 2026'): array
+    {
+        return array_map(fn ($code) => [
+            'code'     => $code,
+            'name'     => "Předmět {$code}",
+            'credits'  => 5,
+            'semester' => $semester,
+        ], $codes);
+    }
+
+    public function test_subject_removed_from_stag_without_user_data_is_deleted(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $this->stagSubject($user, 'KIV/PRO');
+        $removed = $this->stagSubject($user, 'KIV/OLD');
+        Event::create([
+            'subject_id' => $removed->id,
+            'title'      => 'Předmět KIV/OLD (Přednáška)',
+            'date'       => '2026-10-05',
+            'time'       => '08:00',
+            'type'       => 'Přednáška',
+            'source'     => 'stag',
+        ]);
+        // Poznámka jen s mezerami se za uživatelská data nepočítá
+        Note::create(['subject_id' => $removed->id, 'content' => '   ']);
+
+        $response = $this->postJson('/api/stag/sync-subjects', $this->syncPayload(['KIV/PRO']));
+
+        $response->assertStatus(200)
+            ->assertJson(['success' => true, 'deleted' => 1, 'marked_removed' => 0]);
+
+        $this->assertDatabaseMissing('subjects', ['id' => $removed->id]);
+        $this->assertDatabaseMissing('events', ['subject_id' => $removed->id]);
+        $this->assertDatabaseHas('subjects', ['user_id' => $user->id, 'code' => 'KIV/PRO']);
+    }
+
+    public function test_subject_removed_from_stag_with_note_is_only_marked(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $removed = $this->stagSubject($user, 'KIV/OLD');
+        Note::create(['subject_id' => $removed->id, 'content' => 'Moje poznámka']);
+
+        $this->postJson('/api/stag/sync-subjects', $this->syncPayload(['KIV/PRO']))
+            ->assertStatus(200)
+            ->assertJson(['deleted' => 0, 'marked_removed' => 1]);
+
+        $this->assertNotNull($removed->fresh()->stag_removed_at);
+        $this->assertDatabaseHas('notes', ['subject_id' => $removed->id]);
+    }
+
+    public function test_subject_removed_from_stag_with_manual_requirement_is_only_marked(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $removed = $this->stagSubject($user, 'KIV/OLD');
+        Requirement::create(['subject_id' => $removed->id, 'type' => 'homework', 'title' => 'Ruční úkol']);
+
+        $this->postJson('/api/stag/sync-subjects', $this->syncPayload(['KIV/PRO']))
+            ->assertStatus(200)
+            ->assertJson(['deleted' => 0, 'marked_removed' => 1]);
+
+        $this->assertNotNull($removed->fresh()->stag_removed_at);
+    }
+
+    public function test_subject_removed_from_stag_with_graded_moodle_requirement_is_only_marked(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $removed = $this->stagSubject($user, 'KIV/OLD');
+        Requirement::create([
+            'subject_id'           => $removed->id,
+            'moodle_assignment_id' => 42,
+            'type'                 => 'homework',
+            'title'                => 'Úkol z Moodlu',
+            'gained_points'        => 8,
+        ]);
+
+        $this->postJson('/api/stag/sync-subjects', $this->syncPayload(['KIV/PRO']))
+            ->assertStatus(200)
+            ->assertJson(['deleted' => 0, 'marked_removed' => 1]);
+
+        $this->assertNotNull($removed->fresh()->stag_removed_at);
+    }
+
+    public function test_subject_removed_from_stag_with_manual_material_is_only_marked(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $removed = $this->stagSubject($user, 'KIV/OLD');
+        Material::create([
+            'subject_id' => $removed->id,
+            'user_id'    => $user->id,
+            'title'      => 'Moje skripta',
+            'type'       => 'PDF',
+            'url'        => 'https://example.com/skripta.pdf',
+        ]);
+
+        $this->postJson('/api/stag/sync-subjects', $this->syncPayload(['KIV/PRO']))
+            ->assertStatus(200)
+            ->assertJson(['deleted' => 0, 'marked_removed' => 1]);
+
+        $this->assertNotNull($removed->fresh()->stag_removed_at);
+    }
+
+    public function test_subject_removed_from_stag_with_only_moodle_data_is_deleted(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $removed = $this->stagSubject($user, 'KIV/OLD');
+        Requirement::create([
+            'subject_id'           => $removed->id,
+            'moodle_assignment_id' => 42,
+            'type'                 => 'homework',
+            'title'                => 'Úkol z Moodlu',
+        ]);
+        Material::create([
+            'subject_id'  => $removed->id,
+            'user_id'     => $user->id,
+            'title'       => 'Soubor z Moodlu',
+            'type'        => 'LINK',
+            'url'         => 'https://moodle.example.com/mod/resource/view.php?id=7',
+            'category'    => 'platform',
+            'moodle_cmid' => 7,
+        ]);
+        Material::create([
+            'subject_id'        => $removed->id,
+            'user_id'           => $user->id,
+            'title'             => 'Zamčená sekce',
+            'type'              => 'LINK',
+            'url'               => 'https://moodle.example.com/course/view.php?id=1#section-2',
+            'category'          => 'platform',
+            'moodle_section_id' => 2,
+        ]);
+
+        $this->postJson('/api/stag/sync-subjects', $this->syncPayload(['KIV/PRO']))
+            ->assertStatus(200)
+            ->assertJson(['deleted' => 1, 'marked_removed' => 0]);
+
+        $this->assertDatabaseMissing('subjects', ['id' => $removed->id]);
+        $this->assertDatabaseMissing('requirements', ['subject_id' => $removed->id]);
+        $this->assertDatabaseMissing('resources', ['subject_id' => $removed->id]);
+    }
+
+    public function test_manually_created_subject_is_never_removed(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $this->postJson('/api/subjects', [
+            'code'     => 'MY/OWN',
+            'name'     => 'Vlastní předmět',
+            'credits'  => 3,
+            'lecturer' => 'Já',
+            'semester' => 'ZS 2026',
+        ])->assertStatus(201)->assertJson(['source' => 'manual', 'stag_removed_at' => null]);
+
+        $this->postJson('/api/stag/sync-subjects', $this->syncPayload(['KIV/PRO']))
+            ->assertStatus(200)
+            ->assertJson(['deleted' => 0, 'marked_removed' => 0]);
+
+        $this->assertDatabaseHas('subjects', [
+            'user_id'         => $user->id,
+            'code'            => 'MY/OWN',
+            'source'          => 'manual',
+            'stag_removed_at' => null,
+        ]);
+    }
+
+    public function test_subject_from_other_semester_is_kept(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $old = $this->stagSubject($user, 'KIV/OLD', 'LS 2026');
+
+        $this->postJson('/api/stag/sync-subjects', $this->syncPayload(['KIV/PRO'], 'ZS 2026'))
+            ->assertStatus(200)
+            ->assertJson(['deleted' => 0, 'marked_removed' => 0]);
+
+        $this->assertDatabaseHas('subjects', ['id' => $old->id, 'stag_removed_at' => null]);
+    }
+
+    public function test_empty_subject_list_removes_nothing(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $subject = $this->stagSubject($user, 'KIV/OLD');
+
+        $this->postJson('/api/stag/sync-subjects', [])
+            ->assertStatus(200)
+            ->assertJson(['deleted' => 0, 'marked_removed' => 0]);
+
+        $this->assertDatabaseHas('subjects', ['id' => $subject->id, 'stag_removed_at' => null]);
+    }
+
+    public function test_subject_returning_to_stag_is_unmarked(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $subject = $this->stagSubject($user, 'KIV/OLD', 'ZS 2026', ['stag_removed_at' => now()->subDay()]);
+
+        $this->postJson('/api/stag/sync-subjects', $this->syncPayload(['KIV/OLD']))
+            ->assertStatus(200);
+
+        $subject->refresh();
+        $this->assertNull($subject->stag_removed_at);
+        $this->assertEquals('stag', $subject->source);
+    }
+
+    public function test_synced_subject_json_contains_source_and_removal_flag(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $this->postJson('/api/stag/sync-subjects', $this->syncPayload(['KIV/PRO']))->assertStatus(200);
+
+        $this->getJson('/api/subjects')
+            ->assertStatus(200)
+            ->assertJsonPath('0.source', 'stag')
+            ->assertJsonPath('0.stag_removed_at', null);
+    }
+
 }

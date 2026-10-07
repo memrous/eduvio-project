@@ -99,6 +99,6 @@ export const useSubjects = () => {
     error: query.error?.message ?? null,
     refetch: query.refetch,
     addSubject: (subject) => addSubjectMutation.mutate(subject),
-    deleteSubject: (subjectId) => deleteSubjectMutation.mutate(subjectId),
+    deleteSubject: (subjectId, options) => deleteSubjectMutation.mutate(subjectId, options),
   }
 }

@@ -25,11 +25,20 @@ class Subject extends Model
         'pass_threshold',
         'status',
         'final_grade',
+        'source',
+        'stag_removed_at',
+    ];
+
+    // Výchozí hodnoty, aby byly v JSON odpovědi i u čerstvě založeného předmětu
+    protected $attributes = [
+        'source' => 'manual',
+        'stag_removed_at' => null,
     ];
 
     protected $casts = [
         'is_mandatory' => 'boolean',
         'credits' => 'integer',
+        'stag_removed_at' => 'datetime',
     ];
 
     protected $appends = [

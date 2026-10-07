@@ -1,19 +1,19 @@
 import { SubjectDetailSkeleton } from '../components/common/Skeleton'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { useSubjectDetail } from '../hooks/useSubjectDetail'
+import { useSubjects } from '../hooks/useSubjects'
+import { useToast } from '../context/ToastContext'
 import { useRequirements } from '../hooks/useRequirements'
 import { useNote } from '../hooks/useNote'
 import { useResources } from '../hooks/useResources'
 import SubjectDetailView from '../components/SubjectDetailView'
-import PageState from '../components/PageState'
 
 const SubjectDetailPage = () => {
-  const { t } = useTranslation('common')
   const { subjectId } = useParams()
   const navigate = useNavigate()
-
+  const toast = useToast()
   const { data: subject, isLoading: subjectLoading } = useSubjectDetail(subjectId)
+  const { deleteSubject } = useSubjects()
   const {
     data: requirements,
     isLoading: requirementsLoading,
@@ -46,6 +46,12 @@ const SubjectDetailPage = () => {
       onUpdateRequirement={updateRequirement}
       onDeleteRequirement={deleteRequirement}
       onSaveNote={saveNote}
+      onDeleteSubject={(id) =>
+        deleteSubject(id, {
+          onSuccess: () => navigate('/subjects', { replace: true }),
+          onError: (err) => toast.error(err.message),
+        })
+      }
       onUploadResource={handleUploadResource}
     />
   )

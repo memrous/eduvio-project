@@ -77,6 +77,19 @@ export const INITIAL_SUBJECTS = [
     isMandatory: false,
     semester: 'ZS 2024/2025',
     description: 'Study of computer networking protocols, OSI model, IP routing, transport controls (TCP/UDP), and basic network security.'
+  },
+  {
+    id: 7,
+    code: 'KMI/UML',
+    name: 'UML Modelling',
+    credits: 3,
+    lecturer: 'Peter Black',
+    completionType: 'Credit',
+    isMandatory: false,
+    semester: 'ZS 2024/2025',
+    description: 'Imported from IS/STAG',
+    source: 'stag',
+    stag_removed_at: '2026-10-01T08:00:00.000000Z'
   }
 ];
 

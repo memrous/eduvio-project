@@ -248,7 +248,13 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
     const semiElective = []
     const elective = []
 
-    list.forEach(s => {
+    // Subjects removed from STAG go last within their subsection; the stable split keeps the chosen order otherwise
+    const ordered = [
+      ...list.filter(s => !s.stag_removed_at),
+      ...list.filter(s => s.stag_removed_at),
+    ]
+
+    ordered.forEach(s => {
       const st = normalizeStatut(s.statut, s.isMandatory)
       if (st === 'A') mandatory.push(s)
       else if (st === 'B') semiElective.push(s)
