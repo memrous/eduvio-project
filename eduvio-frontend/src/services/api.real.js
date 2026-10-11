@@ -214,6 +214,57 @@ export const createResource = async (userId, newResource) => {
   return request(() => httpClient.post('/materials', newResource).then((res) => res.data))
 }
 
+export const updateResource = async (userId, resourceId, updates) => {
+  return request(() => httpClient.put(`/materials/${resourceId}`, updates).then((res) => res.data))
+}
+
+export const deleteResource = async (userId, resourceId) => {
+  return request(() => httpClient.delete(`/materials/${resourceId}`).then((res) => res.data))
+}
+
+/**
+ * Change a material (PATCH). A new file goes as multipart POST with
+ * _method=PATCH, because PHP does not parse multipart PATCH bodies.
+ */
+export const updateMaterial = async (userId, resourceId, fields) => {
+  if (fields.file) {
+    const formData = new FormData()
+    formData.append('_method', 'PATCH')
+    Object.entries(fields).forEach(([key, value]) => {
+      // FormData has no null: an empty value clears a nullable field
+      formData.append(key, value === null || value === undefined ? '' : value)
+    })
+    return request(() =>
+      httpClient.post(`/materials/${resourceId}`, formData, { headers: { 'Content-Type': undefined } }).then((res) => res.data)
+    )
+  }
+  return request(() => httpClient.patch(`/materials/${resourceId}`, fields).then((res) => res.data))
+}
+
+export const hideResource = async (userId, resourceId) => {
+  return request(() => httpClient.post(`/materials/${resourceId}/hide`).then((res) => res.data))
+}
+
+export const unhideResource = async (userId, resourceId) => {
+  return request(() => httpClient.post(`/materials/${resourceId}/unhide`).then((res) => res.data))
+}
+
+export const assignResourceEvent = async (userId, resourceId, eventId) => {
+  return request(() => httpClient.patch(`/materials/${resourceId}`, { eventId }).then((res) => res.data))
+}
+
+export const markResourceSeen = async (userId, resourceId) => {
+  return request(() => httpClient.post(`/materials/${resourceId}/seen`).then((res) => res.data))
+}
+
+export const getDepartmentLinksStatus = async () => {
+  return request(() => httpClient.get('/user/department-links/status').then((res) => res.data))
+}
+
+export const refreshDepartmentLinks = async () => {
+  return request(() => httpClient.post('/user/department-links/refresh').then((res) => res.data))
+}
+
 export const getDashboardSummary = async () => {
   return request(() => httpClient.get('/dashboard/summary').then((res) => res.data))
 }

@@ -381,5 +381,19 @@ export const INITIAL_RESOURCES = [
     url: 'https://example.com/vpn',
     uploadedAt: getRelativeDate(-6),
     size: 'External Link'
+  },
+  {
+    // Semester link found on the department website: no stored title, the app shows the subject name
+    id: 20,
+    subjectId: 1,
+    title: null,
+    type: 'LINK',
+    category: 'platform',
+    link_source: 'auto',
+    source_person: 'Jan Outrata',
+    source_role: 'guarantor',
+    url: 'https://example.com/teacher/courses/dbs/',
+    uploadedAt: getRelativeDate(-3),
+    size: 'External Link'
   }
 ];

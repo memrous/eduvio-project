@@ -20,7 +20,9 @@
     "greetingEvening": "Good evening, {{name}}!",
     "todayDeadlines_zero": "You have no events today.",
     "todayDeadlines_one": "You have <strong>{{count}} event</strong> today. Time to dive in!",
-    "todayDeadlines_other": "You have <strong>{{count}} events</strong> today. Time to dive in!"
+    "todayDeadlines_other": "You have <strong>{{count}} events</strong> today. Time to dive in!",
+    "newMaterials_one": "New materials in {{count}} subject",
+    "newMaterials_other": "New materials in {{count}} subjects"
   },
   "stats": {
     "activeSubjects": "Active Subjects",
@@ -105,8 +107,8 @@
     "ongoing": "Ongoing",
     "startsInHours_one": "Starts in {{hours}} hour",
     "startsInHours_other": "Starts in {{hours}} hours",
-    "startsInDays_one": "Starts in {{days}} day",
-    "startsInDays_other": "Starts in {{days}} days",
+    "tomorrowAt": "Tomorrow at {{time}}",
+    "onDateAt": "{{date}} at {{time}}",
     "openMaterials": "Open materials",
     "addToCalendar": "Add to calendar",
     "noUpcoming": "No more classes today."
@@ -115,7 +117,10 @@
     "title": "Today's Schedule",
     "freeTime": "Free time — {{duration}}",
     "noClassesTitle": "No classes today!",
-    "noClassesSubtitle": "Time to rest, or catch up on projects. Enjoy it!. 🎉"
+    "noClassesSubtitle": "Time to rest, or catch up on projects. Enjoy it!. 🎉",
+    "statusDone": "finished",
+    "statusLive": "in progress",
+    "allDone": "All done for today"
   },
   "quickProgress": {
     "title": "Quick Progress",

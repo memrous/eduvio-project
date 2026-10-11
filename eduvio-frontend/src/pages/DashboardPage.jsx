@@ -5,8 +5,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useDashboardSummary } from '../hooks/useDashboardSummary'
 import { useSubjects } from '../hooks/useSubjects'
 import { useStagStatus } from '../hooks/useStagStatus'
+import { useResources } from '../hooks/useResources'
 import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
+import { Sparkles } from 'lucide-react'
 import CustomIcon from '../components/CustomIcon'
 import PageState from '../components/PageState'
 import { DashboardSkeleton } from '../components/common/Skeleton'
@@ -142,6 +144,17 @@ const DashboardPage = () => {
     })
   }, [summary?.subjects, allSubjects])
 
+  // Subjects whose linked course pages have new files or subpages
+  const { data: resources } = useResources()
+  const subjectsWithNewMaterials = useMemo(() => {
+    const ids = new Set(
+      resources
+        .filter((r) => r.category === 'platform' && !r.hidden_at && r.page_links_new?.length > 0)
+        .map((r) => r.subjectId ?? r.subject_id ?? `link-${r.id}`)
+    )
+    return ids.size
+  }, [resources])
+
   const todayDeadlinesCount = useMemo(() => {
     return (summary?.todaySchedule || []).length
   }, [summary?.todaySchedule])
@@ -239,6 +252,18 @@ const DashboardPage = () => {
                 />
               </span>
             </div>
+            {subjectsWithNewMaterials > 0 && (
+              <button
+                type="button"
+                onClick={() => navigate('/materials')}
+                className="flex w-fit items-center gap-2 text-body-md text-on-surface-variant font-medium bg-transparent border-0 p-0 cursor-pointer transition-colors hover:text-primary"
+              >
+                <span className="w-5 h-5 bg-primary/10 text-primary flex items-center justify-center rounded-sm">
+                  <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+                </span>
+                <span>{t('dashboardPage.newMaterials', { count: subjectsWithNewMaterials })}</span>
+              </button>
+            )}
           </div>
         </div>
 

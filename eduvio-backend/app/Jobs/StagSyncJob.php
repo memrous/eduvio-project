@@ -82,6 +82,8 @@ class StagSyncJob implements ShouldQueue
                     'stag_synced_at'   => now(),
                 ]);
                 Log::info("STAG sync success for user {$this->user->id}");
+
+                DepartmentLinksSyncJob::dispatchForUser($this->user);
             } else {
                 // Capture stderr but strip any token/password fragments before logging
                 $rawError = $process->getErrorOutput() ?: $process->getOutput();

@@ -506,4 +506,77 @@ class MoodleMaterialSyncTest extends TestCase
 
         $this->assertSame(1, Material::where('moodle_section_id', 3001)->count());
     }
+
+    public function test_manual_lesson_assignment_survives_next_sync(): void
+    {
+        $user = $this->createUser();
+        $subject = $this->createSubject($user);
+        $lesson = \App\Models\Event::create([
+            'subject_id' => $subject->id,
+            'title'      => 'Matematická analýza (Cvičení)',
+            'date'       => '2026-10-07',
+            'time'       => '09:45',
+            'type'       => 'Cvičení',
+            'source'     => 'stag',
+        ]);
+        $contents = [10 => [$this->section('Týden 3', [$this->module(500, 'page', 'Sylabus')])]];
+        $this->fakeMoodle([self::MATCHED_COURSE], $contents);
+        $this->runSync($user);
+
+        $this->actingAs($user, 'sanctum')
+            ->patchJson('/api/materials/' . $this->material(500)->id, ['eventId' => $lesson->id])
+            ->assertOk();
+
+        // Module renamed and moved to another section in Moodle
+        $this->fakeMoodle([self::MATCHED_COURSE], [
+            10 => [$this->section('Týden 4', [$this->module(500, 'page', 'Sylabus 2026')])],
+        ]);
+        $this->runSync($user);
+
+        $material = $this->material(500);
+        $this->assertSame('Sylabus 2026', $material->title);
+        $this->assertSame($lesson->id, $material->event_id);
+        $this->assertTrue($material->event_manually_set);
+    }
+
+    public function test_hidden_material_stays_hidden_after_next_sync(): void
+    {
+        $user = $this->createUser();
+        $this->createSubject($user);
+        $this->fakeMoodle([self::MATCHED_COURSE], [
+            10 => [$this->section('Týden 3', [$this->module(500, 'page', 'Sylabus')])],
+        ]);
+        $this->runSync($user);
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/materials/' . $this->material(500)->id . '/hide')
+            ->assertOk();
+
+        $this->fakeMoodle([self::MATCHED_COURSE], [
+            10 => [$this->section('Týden 3', [$this->module(500, 'page', 'Sylabus 2026')])],
+        ]);
+        $this->runSync($user);
+
+        $material = $this->material(500);
+        $this->assertSame('Sylabus 2026', $material->title);
+        $this->assertNotNull($material->hidden_at);
+        $this->assertSame(1, Material::where('moodle_cmid', 500)->count());
+    }
+
+    public function test_manual_general_choice_survives_next_sync(): void
+    {
+        $user = $this->createUser();
+        $this->createSubject($user);
+        $contents = [10 => [$this->section('Týden 3', [$this->module(500, 'page', 'Sylabus')])]];
+        $this->fakeMoodle([self::MATCHED_COURSE], $contents);
+        $this->runSync($user);
+
+        $this->actingAs($user, 'sanctum')
+            ->patchJson('/api/materials/' . $this->material(500)->id, ['eventId' => null])
+            ->assertOk();
+        $this->runSync($user);
+
+        $this->assertNull($this->material(500)->event_id);
+        $this->assertTrue($this->material(500)->event_manually_set);
+    }
 }

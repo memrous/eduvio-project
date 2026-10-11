@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\DepartmentLinksSyncJob;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,6 +59,8 @@ class StagAgentController extends Controller
                 'stag_sync_error'  => null,
                 'stag_synced_at'   => now(),
             ]);
+
+            DepartmentLinksSyncJob::dispatchForUser($user);
         } else {
             $error = $validated['error'] ?? null;
 

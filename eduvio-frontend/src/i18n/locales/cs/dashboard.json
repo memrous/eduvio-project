@@ -21,7 +21,10 @@
     "todayDeadlines_zero": "Dnes nemáte žádné termíny.",
     "todayDeadlines_one": "Na dnešek máte <strong>{{count}} termín</strong>. Jdeme na to!",
     "todayDeadlines_few": "Na dnešek máte <strong>{{count}} termíny</strong>. Jdeme na to!",
-    "todayDeadlines_other": "Na dnešek máte <strong>{{count}} termínů</strong>. Jdeme na to!"
+    "todayDeadlines_other": "Na dnešek máte <strong>{{count}} termínů</strong>. Jdeme na to!",
+    "newMaterials_one": "Nové materiály u {{count}} předmětu",
+    "newMaterials_few": "Nové materiály u {{count}} předmětů",
+    "newMaterials_other": "Nové materiály u {{count}} předmětů"
   },
   "stats": {
     "activeSubjects": "Aktivní předměty",
@@ -110,9 +113,8 @@
     "startsInHours_one": "Začíná za {{hours}} hodinu",
     "startsInHours_few": "Začíná za {{hours}} hodiny",
     "startsInHours_other": "Začíná za {{hours}} hodin",
-    "startsInDays_one": "Začíná za {{days}} den",
-    "startsInDays_few": "Začíná za {{days}} dny",
-    "startsInDays_other": "Začíná za {{days}} dní",
+    "tomorrowAt": "Zítra v {{time}}",
+    "onDateAt": "{{date}} v {{time}}",
     "openMaterials": "Otevřít materiály k přednášce",
     "addToCalendar": "Přidat do kalendáře",
     "noUpcoming": "Žádná další výuka dnes."
@@ -121,7 +123,10 @@
     "title": "Dnešní rozvrh",
     "freeTime": "Volno — {{duration}}",
     "noClassesTitle": "Dnes žádná výuka!",
-    "noClassesSubtitle": "Čas na odpočinek, nebo doháníš projekty. Užij si to! 🎉"
+    "noClassesSubtitle": "Čas na odpočinek, nebo doháníš projekty. Užij si to! 🎉",
+    "statusDone": "proběhlo",
+    "statusLive": "právě probíhá",
+    "allDone": "Hotovo na dnes"
   },
   "quickProgress": {
     "title": "Rychlý přehled",

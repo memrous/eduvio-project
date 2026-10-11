@@ -13,6 +13,7 @@ use App\Http\Controllers\StudyProgressController;
 use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentLinksController;
 use App\Http\Controllers\MoodleConnectController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -62,6 +63,11 @@ Route::middleware(['auth:sanctum', 'full-access'])->group(function () {
     // Materials (Resources)
     Route::get('/materials', [MaterialController::class, 'index']);
     Route::post('/materials', [MaterialController::class, 'store']);
+    Route::put('/materials/{material}', [MaterialController::class, 'update']);
+    Route::patch('/materials/{material}', [MaterialController::class, 'patch']);
+    Route::post('/materials/{material}/hide', [MaterialController::class, 'hide']);
+    Route::post('/materials/{material}/unhide', [MaterialController::class, 'unhide']);
+    Route::post('/materials/{material}/seen', [MaterialController::class, 'seen']);
     Route::delete('/materials/{material}', [MaterialController::class, 'destroy']);
 
     // Dashboard
@@ -81,4 +87,8 @@ Route::middleware(['auth:sanctum', 'full-access'])->group(function () {
     Route::delete('/user/moodle',        [MoodleConnectController::class, 'disconnect']);
     Route::get('/user/moodle/status',    [MoodleConnectController::class, 'status']);
     Route::post('/user/moodle/resync',   [MoodleConnectController::class, 'resync']);
+
+    // Odkazy na stránky předmětů z webů kateder
+    Route::get('/user/department-links/status',   [DepartmentLinksController::class, 'status']);
+    Route::post('/user/department-links/refresh', [DepartmentLinksController::class, 'refresh']);
 });

@@ -67,6 +67,22 @@ export function summarizePeople(value, max = 2) {
 }
 
 /**
+ * Absolute http(s) URL or null (teachers' course pages are often plain http).
+ * @param {string|null|undefined} url
+ * @returns {string|null}
+ */
+export function getSafeHttpUrl(url) {
+  const text = normalizeText(url)
+  if (!text) return null
+  try {
+    const parsed = new URL(text)
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.href : null
+  } catch {
+    return null
+  }
+}
+
+/**
  * Only absolute https URLs are rendered as links.
  * @param {string|null|undefined} url
  * @returns {string|null}

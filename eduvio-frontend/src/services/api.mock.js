@@ -3,6 +3,7 @@ import {
   INITIAL_EVENTS,
   INITIAL_RESOURCES,
 } from '../data/mockData'
+import { isSameId } from '../utils/ids'
 
 const MOCK_DELAY = 600 // ms
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -594,9 +595,123 @@ export const createResource = async (userId, newResource) => {
   const key = getNamespacedKey(userId, 'materials')
   const saved = localStorage.getItem(key)
   const list = saved ? JSON.parse(saved) : INITIAL_RESOURCES
-  const updatedList = [...list, newResource]
+  // Like the backend: an ID, default category, no File object in storage
+  const { file, ...fields } = newResource
+  const created = {
+    ...fields,
+    id: Math.max(0, ...list.map((r) => Number(r.id) || 0)) + 1,
+    category: fields.category ?? 'file',
+    fileName: file?.name ?? null,
+    size: file ? `${Math.max(1, Math.round(file.size / 1024))} KB` : fields.size ?? 'External Link',
+    uploadedAt: new Date().toISOString(),
+  }
+  const updatedList = [...list, created]
   localStorage.setItem(key, JSON.stringify(updatedList))
-  return success(newResource)
+  return success(created)
+}
+
+export const updateResource = async (userId, resourceId, updates) => {
+  await delay(100)
+  const key = getNamespacedKey(userId, 'materials')
+  const saved = localStorage.getItem(key)
+  const list = saved ? JSON.parse(saved) : INITIAL_RESOURCES
+  let updated = null
+  const updatedList = list.map((r) => {
+    if (!isSameId(r.id, resourceId)) return r
+    updated = { ...r, ...updates, link_source: 'manual' }
+    return updated
+  })
+  if (!updated) return failure('not_found')
+  localStorage.setItem(key, JSON.stringify(updatedList))
+  return success(updated)
+}
+
+export const deleteResource = async (userId, resourceId) => {
+  await delay(100)
+  const key = getNamespacedKey(userId, 'materials')
+  const saved = localStorage.getItem(key)
+  const list = saved ? JSON.parse(saved) : INITIAL_RESOURCES
+  localStorage.setItem(key, JSON.stringify(list.filter((r) => !isSameId(r.id, resourceId))))
+  return success({ id: resourceId })
+}
+
+const updateStoredResource = (userId, resourceId, change) => {
+  const key = getNamespacedKey(userId, 'materials')
+  const saved = localStorage.getItem(key)
+  const list = saved ? JSON.parse(saved) : INITIAL_RESOURCES
+  let updated = null
+  const updatedList = list.map((r) => {
+    if (!isSameId(r.id, resourceId)) return r
+    updated = { ...r, ...change(r) }
+    return updated
+  })
+  if (!updated) return failure('not_found')
+  localStorage.setItem(key, JSON.stringify(updatedList))
+  return success(updated)
+}
+
+export const updateMaterial = async (userId, resourceId, fields) => {
+  await delay(100)
+  const { file, ...rest } = fields
+  return updateStoredResource(userId, resourceId, () => ({
+    ...rest,
+    ...('eventId' in rest ? { event_id: rest.eventId, event_manually_set: true } : {}),
+    ...('subjectId' in rest ? { subject_id: rest.subjectId } : {}),
+    ...(file ? { fileName: file.name, size: `${Math.max(1, Math.round(file.size / 1024))} KB` } : {}),
+  }))
+}
+
+export const hideResource = async (userId, resourceId) => {
+  await delay(100)
+  return updateStoredResource(userId, resourceId, () => ({ hidden_at: new Date().toISOString() }))
+}
+
+export const unhideResource = async (userId, resourceId) => {
+  await delay(100)
+  return updateStoredResource(userId, resourceId, () => ({ hidden_at: null }))
+}
+
+export const assignResourceEvent = async (userId, resourceId, eventId) => {
+  await delay(100)
+  const key = getNamespacedKey(userId, 'materials')
+  const saved = localStorage.getItem(key)
+  const list = saved ? JSON.parse(saved) : INITIAL_RESOURCES
+  let updated = null
+  const updatedList = list.map((r) => {
+    if (!isSameId(r.id, resourceId)) return r
+    updated = { ...r, eventId, event_id: eventId, event_manually_set: true }
+    return updated
+  })
+  if (!updated) return failure('not_found')
+  localStorage.setItem(key, JSON.stringify(updatedList))
+  return success(updated)
+}
+
+export const markResourceSeen = async (userId, resourceId) => {
+  await delay(100)
+  const key = getNamespacedKey(userId, 'materials')
+  const saved = localStorage.getItem(key)
+  const list = saved ? JSON.parse(saved) : INITIAL_RESOURCES
+  let updated = null
+  const updatedList = list.map((r) => {
+    if (!isSameId(r.id, resourceId)) return r
+    updated = { ...r, page_links_new: null, seen_at: new Date().toISOString() }
+    return updated
+  })
+  if (!updated) return failure('not_found')
+  localStorage.setItem(key, JSON.stringify(updatedList))
+  return success(updated)
+}
+
+// Department websites are not crawled in mock mode
+export const getDepartmentLinksStatus = async () => {
+  await delay(MOCK_DELAY)
+  return success({ supported: false, status: 'idle', finished_at: null, next_allowed_at: null, retry_after_seconds: 0 })
+}
+
+export const refreshDepartmentLinks = async () => {
+  await delay(MOCK_DELAY)
+  return failure('validation_error')
 }
 
 const INITIAL_DASHBOARD_SUMMARY = {

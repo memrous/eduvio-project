@@ -27,7 +27,13 @@ import SubjectFulfillment from './subject/SubjectFulfillment'
 import SubjectSchedule from './subject/SubjectSchedule'
 import ExpandableText from './common/ExpandableText'
 import { formatSemesterLabel, normalizeStatut, getStatutLabelKey } from '../utils/semester'
-import { getOwnDescription, getSafeHttpsUrl, normalizeText, summarizePeople } from '../utils/subjectDetails'
+import { getOwnDescription, getSafeHttpUrl, getSafeHttpsUrl, normalizeText, summarizePeople } from '../utils/subjectDetails'
+import { getSemesterLinkSourceLabel, getSemesterLinkTitle, isAutoSemesterLink } from '../utils/semesterLinks'
+import { getSubjectIdOf, isSameId } from '../utils/ids'
+import { isHidden } from '../utils/materialKinds'
+import { buildSemesterStarts } from '../utils/lessons'
+import MaterialActionsMenu from './materials/MaterialActionsMenu'
+import { useMaterialActions } from './materials/useMaterialActions'
 
 // ─── Helpers ─────────────────────────────────────────────────
 
@@ -64,7 +70,7 @@ const PLACEHOLDER_LECTURERS = new Set(['nespecifikováno', 'bude upřesněno', '
 
 // ─── Header Section ──────────────────────────────────────────
 
-const SubjectHeader = ({ subject, requirements, onShowInfo, hasAbout }) => {
+const SubjectHeader = ({ subject, requirements, onShowInfo, hasAbout, semesterLinks = [] }) => {
   const { t } = useTranslation(['academic', 'dashboard'])
 
   const { totalGained, totalMax, hasPoints } = useMemo(() => {
@@ -159,6 +165,30 @@ const SubjectHeader = ({ subject, requirements, onShowInfo, hasAbout }) => {
         </div>
       </div>
 
+      {/* WHERE TO FIND MORE: semester links of the subject (e.g. teacher's course page) */}
+      {semesterLinks.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-on-surface-variant">{t('academic:subjectDetail.moreInfo')}</span>
+          {semesterLinks.map((link) => {
+            // The subject is already in the heading: automatic links show only the label and person
+            const label = getSemesterLinkSourceLabel(link, t) ?? getSemesterLinkTitle(link, subject, t)
+            return (
+              <a
+                key={link.id ?? link.url}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={isAutoSemesterLink(link) ? `${t('resources:semesterLinks.departmentBadge')}: ${label}` : label}
+                className="inline-flex h-8 max-w-full items-center gap-1.5 rounded-xl border border-outline-variant px-3 text-sm font-medium text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary"
+              >
+                <ExternalLink className="size-3.5 shrink-0" aria-hidden="true" />
+                <span className="truncate">{label}</span>
+              </a>
+            )
+          })}
+        </div>
+      )}
+
       {/* META STRIP */}
       <div className="mt-5 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
         <MetaItem
@@ -230,15 +260,24 @@ const StagRemovedNotice = ({ subject, onDelete }) => {
 
 // ─── TAB 2: Materials ────────────────────────────────────────
 
-const MaterialsTab = ({ subject, resources }) => {
+const MaterialsTab = ({ subject, resources, menuFor }) => {
   const { t } = useTranslation('academic')
 
-  const subjectMaterials = (resources || []).filter(
-    (r) =>
-      (r.subjectId === subject.id || r.subject_id === subject.id) &&
-      !r.requirementId &&
-      !r.requirement_id
-  )
+  // Everything of the subject, as on the Materials page: own files and links,
+  // Moodle imports, materials of lessons or requirements, semester links
+  const subjectMaterials = (resources || []).filter((r) => isSameId(getSubjectIdOf(r), subject.id))
+
+  // Same labels as the Materials page
+  const badgesOf = (res) => {
+    const badges = []
+    if (res.moodle_cmid != null || res.moodle_section_id != null) badges.push(t('resources:moodleBadge'))
+    if (res.category === 'platform') {
+      badges.push(isAutoSemesterLink(res) ? t('resources:semesterLinks.departmentBadge') : t('resources:library.semesterMaterials'))
+    } else {
+      badges.push(t(`resources:typeShort.${res.type}`, res.type))
+    }
+    return badges
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -255,10 +294,17 @@ const MaterialsTab = ({ subject, resources }) => {
           {subjectMaterials.map((res) => {
             const isLink = res.type === 'LINK'
             const Icon = isLink ? ExternalLink : FileText
+            // Semester links: automatic ones have no stored title (subject is the page itself)
+            const isSemesterLink = res.category === 'platform'
+            const heading = isSemesterLink
+              ? getSemesterLinkSourceLabel(res, t) ?? getSemesterLinkTitle(res, subject, t)
+              : res.title
+            const caption = isSemesterLink ? null : res.description
+            const menu = menuFor?.(res)
 
             return (
               <div
-                key={res.id}
+                key={res.id ?? res.url}
                 className="flex items-center justify-between gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 transition-shadow hover:shadow-md"
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -266,21 +312,31 @@ const MaterialsTab = ({ subject, resources }) => {
                     <Icon className="size-5" />
                   </div>
                   <div className="min-w-0">
-                    <h4 className="truncate text-sm font-semibold leading-tight text-foreground">{res.title}</h4>
-                    {res.description && (
-                      <p className="mt-0.5 truncate text-[11px] text-on-surface-variant">{res.description}</p>
-                    )}
+                    <h4 className="truncate text-sm font-semibold leading-tight text-foreground">{heading}</h4>
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      {badgesOf(res).map((badge) => (
+                        <span key={badge} className="inline-flex items-center rounded-full bg-surface-container-low px-2 py-0.5 text-[11px] font-semibold text-on-surface-variant">
+                          {badge}
+                        </span>
+                      ))}
+                      {caption && (
+                        <span className="min-w-0 truncate text-[11px] text-on-surface-variant">{caption}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <a
-                  href={res.url || '#'}
-                  target={isLink ? '_blank' : '_self'}
-                  rel="noreferrer"
-                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container"
-                >
-                  {isLink ? <ExternalLink className="size-3.5" /> : <Download className="size-3.5" />}
-                  <span>{isLink ? t('academic:subjectDetail.preview') : t('academic:subjectDetail.download')}</span>
-                </a>
+                <div className="flex shrink-0 items-center gap-1">
+                  <a
+                    href={res.url || '#'}
+                    target={isLink ? '_blank' : '_self'}
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container"
+                  >
+                    {isLink ? <ExternalLink className="size-3.5" /> : <Download className="size-3.5" />}
+                    <span>{isLink ? t('academic:subjectDetail.preview') : t('academic:subjectDetail.download')}</span>
+                  </a>
+                  {menu && <MaterialActionsMenu label={menu.label} items={menu.items} />}
+                </div>
               </div>
             )
           })}
@@ -351,11 +407,16 @@ const TABS = [
 
 // ─── Main SubjectDetailView Component ───────────────────────
 
+const NO_ACTIONS = {}
+
 const SubjectDetailView = ({
   subject,
   requirements = [],
   note,
   resources = [],
+  subjects = [],
+  events = [],
+  materialActions = NO_ACTIONS,
   onBack,
   onSaveNote,
   onDeleteSubject,
@@ -363,6 +424,18 @@ const SubjectDetailView = ({
   const { t } = useTranslation(['academic', 'dashboard'])
   const [activeTab, setActiveTab] = useState('fulfillment')
   const [showInfo, setShowInfo] = useState(false)
+
+  // Same material actions as on the Materials page (edit, move, delete, hide)
+  const semesterStarts = useMemo(() => buildSemesterStarts(events, subjects), [events, subjects])
+  const actions = useMaterialActions({ subjects, events, semesterStarts, actions: materialActions })
+  const menuFor = (resource) => {
+    if (materialActions === NO_ACTIONS) return null
+    const items = actions.getMenuItems(resource)
+    return items.length > 0 ? { label: actions.getMenuLabel(resource), items } : null
+  }
+
+  // Hidden Moodle / automatic materials are only listed on the Materials page
+  const visibleResources = resources.filter((r) => !isHidden(r))
 
   if (!subject) {
     return (
@@ -390,6 +463,12 @@ const SubjectDetailView = ({
     { key: 'ownDescription', text: ownDescription !== annotation ? ownDescription : null },
   ].filter((section) => section.text)
 
+  // Semester links of this subject (course pages found on department websites or added by hand)
+  const semesterLinks = visibleResources
+    .filter((r) => r.category === 'platform' && isSameId(getSubjectIdOf(r), subject.id))
+    .map((r) => ({ ...r, url: getSafeHttpUrl(r.url) }))
+    .filter((r) => r.url)
+
   return (
     <div className="w-full space-y-6 pb-16">
       {/* BACK BUTTON */}
@@ -409,6 +488,7 @@ const SubjectDetailView = ({
         requirements={requirements}
         onShowInfo={() => setShowInfo(true)}
         hasAbout={aboutSections.length > 0}
+        semesterLinks={semesterLinks}
       />
 
       {subject.stag_removed_at && <StagRemovedNotice subject={subject} onDelete={onDeleteSubject} />}
@@ -454,10 +534,12 @@ const SubjectDetailView = ({
         </div>
       )}
 
-      {activeTab === 'materials' && <div className="page-section"><MaterialsTab subject={subject} resources={resources} /></div>}
+      {activeTab === 'materials' && <div className="page-section"><MaterialsTab subject={subject} resources={visibleResources} menuFor={menuFor} /></div>}
       {activeTab === 'notes' && <div className="page-section"><NotesTab note={note} onSaveNote={onSaveNote} /></div>}
 
       {/* ABOUT DIALOG */}
+      {actions.modals}
+
       {showInfo && aboutSections.length > 0 && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"

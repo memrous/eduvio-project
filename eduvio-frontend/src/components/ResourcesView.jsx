@@ -2,6 +2,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { renderAsync } from 'docx-preview'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import {
   Download,
   ExternalLink,
@@ -15,6 +16,15 @@ import {
   CalendarDays,
   File,
   SlidersHorizontal,
+  Pencil,
+  Trash2,
+  RefreshCw,
+  Loader2,
+  Globe,
+  Sparkles,
+  ChevronDown,
+  CalendarClock,
+  EyeOff,
 } from "lucide-react"
 import pdfIcon from '../assets/icons/pdf.png'
 import bookIcon from '../assets/icons/book.png'
@@ -25,6 +35,23 @@ import Dropdown from './common/Dropdown'
 import CustomIcon from './CustomIcon'
 import { getSubjectColor } from '../utils/subjectColors'
 import { getLocaleFromLanguage } from '../utils/locale'
+import LessonSelect from './materials/LessonSelect'
+import MaterialActionsMenu from './materials/MaterialActionsMenu'
+import { useMaterialActions } from './materials/useMaterialActions'
+import { getMaterialKind, isHidden } from '../utils/materialKinds'
+import SemesterLinkModal from './materials/SemesterLinkModal'
+import { getSemesterLinkSourceLabel, getSemesterLinkTitle, isAutoSemesterLink } from '../utils/semesterLinks'
+import { getEventIdOf, getSubjectIdOf, isPersistedId, isSameId } from '../utils/ids'
+import {
+  GENERAL_LESSON,
+  buildSemesterStarts,
+  getLastStartedLesson,
+  getMaterialWeek,
+  getSemesterWeekInfo,
+  getLessonTypeKey,
+  getSemesterWeek,
+  getSubjectLessons,
+} from '../utils/lessons'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:80/api"
 
@@ -139,14 +166,16 @@ const RecentCard = ({ resource, subjectName, t }) => {
 }
 
 // ─── Resource Row (used inside session/event cards) ───────────
-const ResourceRow = ({ resource, onOpen }) => {
+const ResourceRow = ({ resource, onOpen, menu }) => {
+  const { t } = useTranslation('resources')
   const cfg = getTypeConfig(resource.type)
   const isLink = resource.type === 'LINK'
+  const hidden = isHidden(resource)
 
   return (
     <div
       onClick={onOpen}
-      className="group flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 transition-colors hover:border-outline-variant hover:bg-surface-container-low/50 cursor-pointer"
+      className={`group flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 transition-colors hover:border-outline-variant hover:bg-surface-container-low/50 cursor-pointer ${hidden ? 'opacity-60' : ''}`}
     >
       <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${cfg.iconBg} ${cfg.iconColor}`}>
         <MaterialTypeIcon type={resource.type} />
@@ -155,10 +184,12 @@ const ResourceRow = ({ resource, onOpen }) => {
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-on-surface">{resource.title}</p>
         <p className="text-[11px] text-on-surface-variant/70">
-          {isLink ? 'Externí odkaz' : resource.size || 'Soubor'}
+          {hidden && <>{t('resources:materialActions.hiddenBadge')} · </>}
+          {isLink ? t('resources:library.externalLink') : resource.size || t('resources:defaults.attachment')}
         </p>
       </div>
 
+      {menu && <MaterialActionsMenu label={menu.label} items={menu.items} />}
       <span className="flex size-8 shrink-0 items-center justify-center rounded-lg text-on-surface-variant opacity-100 transition-all hover:bg-primary/15 hover:text-primary md:opacity-0 md:group-hover:opacity-100">
         {isLink ? <ExternalLink className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
       </span>
@@ -167,7 +198,7 @@ const ResourceRow = ({ resource, onOpen }) => {
 }
 
 // ─── Full Resource Card (grid, "Other materials" section) ────
-const ResourceCard = ({ resource, subjectName, onPreview, t }) => {
+const ResourceCard = ({ resource, subjectName, onPreview, menu, t }) => {
   const cfg = getTypeConfig(resource.type)
   const { Icon } = cfg
   const isLink = resource.type === "LINK"
@@ -183,16 +214,18 @@ const ResourceCard = ({ resource, subjectName, onPreview, t }) => {
   }
 
   const displayDate = resource.uploadDate || (resource.uploadedAt ? resource.uploadedAt.split('T')[0] : '')
+  const hidden = isHidden(resource)
 
   return (
-    <div className="rounded-2xl border border-outline-variant bg-surface transition-colors hover:border-outline-variant/70 font-inter">
+    <div className={`rounded-2xl border border-outline-variant bg-surface transition-colors hover:border-outline-variant/70 font-inter ${hidden ? 'opacity-60' : ''}`}>
       {/* Header */}
       <div className="flex items-start justify-between gap-2 p-4 pb-3">
         <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${cfg.iconBg} ${cfg.iconColor}`}>
           <Icon className="w-4.5 h-4.5" />
         </span>
         <div className="flex flex-wrap gap-1.5 justify-end">
-          {resource.moodle_cmid != null && <TagChip label={t('resources:moodleBadge')} />}
+          {hidden && <TagChip label={t('resources:materialActions.hiddenBadge')} />}
+          {getMaterialKind(resource) === 'moodle' && <TagChip label={t('resources:moodleBadge')} />}
           <TagChip label={t(`resources:typeShort.${resource.type}`, resource.type)} />
           {subCode(subjectName) && <TagChip label={subCode(subjectName)} />}
         </div>
@@ -227,6 +260,7 @@ const ResourceCard = ({ resource, subjectName, onPreview, t }) => {
           >
             {isLink || !previewInfo.canPreview ? <ExternalLink className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
           </button>
+          {menu && <MaterialActionsMenu label={menu.label} items={menu.items} />}
         </div>
       </div>
     </div>
@@ -245,11 +279,12 @@ const subCode = (subjName) => {
 };
 
 // ─── Upload Modal ────────────────────────────────────────────
-const UploadModal = ({ onClose, onSave, subjects, presetEventId, presetSubjectId }) => {
+const UploadModal = ({ onClose, onSave, subjects, events, semesterStarts, presetEventId, presetSubjectId }) => {
   const { t } = useTranslation('resources')
+  const initialSubjectId = presetSubjectId ? String(presetSubjectId) : String(subjects[0]?.id ?? OTHER_SUBJECT)
   const [form, setForm] = useState({
     title: '',
-    subjectId: presetSubjectId ? String(presetSubjectId) : String(subjects[0]?.id ?? OTHER_SUBJECT),
+    subjectId: initialSubjectId,
     type: 'PDF',
     description: ''
   })
@@ -259,7 +294,36 @@ const UploadModal = ({ onClose, onSave, subjects, presetEventId, presetSubjectId
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(null)
 
+  // Lesson: preset from a lesson card, otherwise the last started lesson is only suggested
+  const suggestLesson = (subjectId) => {
+    if (subjectId === OTHER_SUBJECT) return null
+    return getLastStartedLesson(getSubjectLessons(events, Number(subjectId)))
+  }
+  const [suggestedLessonId, setSuggestedLessonId] = useState(() =>
+    presetEventId ? null : suggestLesson(initialSubjectId)?.id ?? null
+  )
+  const [lessonId, setLessonId] = useState(() =>
+    presetEventId ? String(presetEventId) : String(suggestedLessonId ?? GENERAL_LESSON)
+  )
+
+  const selectedSubject = subjects.find((s) => String(s.id) === form.subjectId)
+  const subjectLessons = selectedSubject ? getSubjectLessons(events, selectedSubject.id) : []
+  const showSuggestion = suggestedLessonId != null && lessonId === String(suggestedLessonId)
+
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
+
+  const changeSubject = (e) => {
+    const subjectId = e.target.value
+    setForm(f => ({ ...f, subjectId }))
+    const suggestion = suggestLesson(subjectId)
+    setSuggestedLessonId(suggestion?.id ?? null)
+    setLessonId(String(suggestion?.id ?? GENERAL_LESSON))
+  }
+
+  const changeLesson = (value) => {
+    setLessonId(value)
+    setSuggestedLessonId(null) // the user decided; no longer a suggestion
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -272,8 +336,8 @@ const UploadModal = ({ onClose, onSave, subjects, presetEventId, presetSubjectId
       type: sourceType === 'local' ? getTypeFromFileName(file.name) : form.type,
       description: form.description || (sourceType === 'local' ? t('resources:defaults.localDescription') : t('resources:defaults.urlDescription')),
     }
-    if (presetEventId) {
-      payload.eventId = Number(presetEventId);
+    if (lessonId !== GENERAL_LESSON && payload.subjectId) {
+      payload.eventId = Number(lessonId);
     }
 
     if (sourceType === 'local') {
@@ -325,7 +389,7 @@ const UploadModal = ({ onClose, onSave, subjects, presetEventId, presetSubjectId
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className={labelCls}>{t('resources:modal.fields.subject')}</label>
-              <select value={form.subjectId} onChange={set('subjectId')} disabled={isSubmitting} className={inputCls}>
+              <select value={form.subjectId} onChange={changeSubject} disabled={isSubmitting} className={inputCls}>
                 {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 <option value={OTHER_SUBJECT}>{t('resources:otherSubject')}</option>
               </select>
@@ -339,6 +403,29 @@ const UploadModal = ({ onClose, onSave, subjects, presetEventId, presetSubjectId
               </select>
             </div>
           </div>
+
+          {selectedSubject && (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="upload-lesson" className={labelCls}>{t('resources:lessons.field')}</label>
+              <LessonSelect
+                id="upload-lesson"
+                value={lessonId}
+                onChange={changeLesson}
+                lessons={subjectLessons}
+                semester={selectedSubject.semester}
+                semesterStarts={semesterStarts}
+                suggestedId={showSuggestion ? suggestedLessonId : null}
+                disabled={isSubmitting}
+                className={inputCls}
+              />
+              {showSuggestion && (
+                <p className="flex items-center gap-1.5 text-xs text-primary">
+                  <Sparkles className="size-3.5 shrink-0" aria-hidden="true" />
+                  {t('resources:lessons.suggestionNote')}
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="flex flex-col gap-1.5">
             <label className={labelCls}>{t('resources:modal.fields.description')}</label>
@@ -416,6 +503,169 @@ const UploadModal = ({ onClose, onSave, subjects, presetEventId, presetSubjectId
           </div>
         </form>
       </div>
+    </div>
+  )
+}
+
+// ─── Semester Link Item (pinned link + new files on its page) ─
+const SemesterLinkItem = ({ resource: res, subject, menu, onSeen }) => {
+  const { t, i18n } = useTranslation('resources')
+  // New links stay listed after "seen" clears them on the server
+  const [expandedLinks, setExpandedLinks] = useState(null)
+
+  const cfg = getTypeConfig(res.type)
+  const isLink = res.type === 'LINK'
+  const isAuto = isAutoSemesterLink(res)
+  const title = getSemesterLinkTitle(res, subject, t)
+  const newLinks = (res.page_links_new || []).filter((l) => /^https?:\/\//i.test(l.url))
+  const listId = `semester-link-new-${res.id}`
+
+  const changedAt = res.content_changed_at
+    ? new Date(res.content_changed_at).toLocaleDateString(
+        getLocaleFromLanguage(i18n.language),
+        i18n.language?.startsWith('cs') ? { day: 'numeric', month: 'numeric' } : { day: 'numeric', month: 'short' }
+      )
+    : null
+
+  const markSeen = () => {
+    if (newLinks.length > 0) onSeen()
+  }
+
+  const toggleNew = () => {
+    if (expandedLinks) {
+      setExpandedLinks(null)
+      return
+    }
+    setExpandedLinks(newLinks)
+    markSeen()
+  }
+
+  const shownLinks = expandedLinks ?? newLinks
+  const hidden = isHidden(res)
+
+  return (
+    <div className={`group relative flex flex-col gap-2 rounded-xl border border-outline-variant bg-surface p-3 transition-colors hover:border-primary/40 hover:bg-surface/80 ${hidden ? 'opacity-60' : ''}`}>
+      <div className="flex items-start gap-3">
+        <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${cfg.iconBg} ${cfg.iconColor}`}>
+          {isLink ? <ExternalLink className="w-4.5 h-4.5" /> : <MaterialTypeIcon type={res.type} />}
+        </span>
+        <div className="min-w-0 flex-1">
+          <a
+            href={res.url || resolveResourceUrl(res.url)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={markSeen}
+            className="block truncate text-sm font-medium text-on-surface after:absolute after:inset-0 after:rounded-xl"
+          >
+            {title}
+          </a>
+          {isAuto ? (
+            <>
+              {subject?.code && <p className="font-mono text-xs text-on-surface-variant/80">{subject.code}</p>}
+              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-on-surface-variant/80">
+                <span className="inline-flex items-center gap-1 rounded-full bg-surface-container-low px-2 py-0.5 text-[11px] font-semibold text-on-surface-variant">
+                  <Globe className="size-3" aria-hidden="true" />
+                  {t('resources:semesterLinks.departmentBadge')}
+                </span>
+                {hidden && (
+                  <span className="rounded-full bg-surface-container-low px-2 py-0.5 text-[11px] font-semibold text-on-surface-variant">
+                    {t('resources:materialActions.hiddenBadge')}
+                  </span>
+                )}
+                <span className="min-w-0 truncate">{getSemesterLinkSourceLabel(res, t)}</span>
+              </p>
+            </>
+          ) : (
+            (res.description || subject?.code) && (
+              <p className="truncate text-xs text-on-surface-variant/80">
+                {subject?.code && <span className="font-mono">{subject.code}</span>}
+                {subject?.code && res.description && ' · '}
+                {res.description}
+              </p>
+            )
+          )}
+        </div>
+        {menu && <MaterialActionsMenu label={menu.label} items={menu.items} />}
+      </div>
+
+      {/* New files and subpages on the linked page */}
+      {shownLinks.length > 0 && (
+        <div className="relative z-10 pl-12">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={toggleNew}
+              aria-expanded={Boolean(expandedLinks)}
+              aria-controls={listId}
+              className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary transition-colors hover:bg-primary/15 cursor-pointer border-0"
+            >
+              <Sparkles className="size-3" aria-hidden="true" />
+              {t('resources:pageChanges.newCount', { count: shownLinks.length })}
+              <ChevronDown className={`size-3 transition-transform motion-reduce:transition-none ${expandedLinks ? 'rotate-180' : ''}`} aria-hidden="true" />
+            </button>
+            {changedAt && (
+              <span className="text-[11px] text-on-surface-variant/80">
+                {t('resources:pageChanges.updatedOn', { date: changedAt })}
+              </span>
+            )}
+          </div>
+          {expandedLinks && (
+            <ul id={listId} className="mt-2 flex flex-col gap-1">
+              {expandedLinks.map((link) => (
+                <li key={link.url} className="min-w-0">
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 rounded-md text-xs text-on-surface-variant transition-colors hover:text-primary"
+                  >
+                    <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
+                    <span className="truncate">{link.text || link.url}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Refresh of links from department websites ────────────────
+const RefreshLinksButton = ({ departmentLinks }) => {
+  const { t } = useTranslation('resources')
+  const { status, nextAllowedAt, refresh, isRefreshing } = departmentLinks
+  const [now, setNow] = useState(() => Date.now())
+
+  // Re-render while a cooldown is shown
+  useEffect(() => {
+    if (!nextAllowedAt) return
+    const interval = setInterval(() => setNow(Date.now()), 30000)
+    return () => clearInterval(interval)
+  }, [nextAllowedAt])
+
+  const minutesLeft = nextAllowedAt ? Math.ceil((new Date(nextAllowedAt).getTime() - now) / 60000) : 0
+  const onCooldown = !isRefreshing && minutesLeft > 0
+
+  let label = t('resources:semesterLinks.refresh')
+  if (isRefreshing) label = t('resources:semesterLinks.refreshing')
+  else if (onCooldown) label = t('resources:semesterLinks.refreshCooldown', { count: minutesLeft })
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <button
+        type="button"
+        onClick={() => refresh().catch(() => {})}
+        disabled={isRefreshing || onCooldown}
+        className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-on-surface-variant transition-colors hover:bg-primary/10 hover:text-primary cursor-pointer bg-transparent border-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent disabled:hover:text-on-surface-variant"
+      >
+        <RefreshCw className={`size-3.5 ${isRefreshing ? 'animate-spin motion-reduce:animate-none' : ''}`} aria-hidden="true" />
+        {label}
+      </button>
+      <p role="status" className="text-[11px] text-on-surface-variant/80 empty:hidden">
+        {!isRefreshing && status === 'failed' ? t('resources:semesterLinks.refreshFailed') : ''}
+      </p>
     </div>
   )
 }
@@ -636,13 +886,58 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
 }
 
 // ─── Main ResourcesView Component ────────────────────────────
-const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
+const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdateResource, onDeleteResource, onMarkSeen, onAssignEvent, onUpdateMaterial, onSetHidden, departmentLinks }) => {
   const { t, i18n } = useTranslation(['resources', 'dashboard'])
-  const [searchQuery, setSearchQuery] = useState('')
-  const [subjectFilter, setSubjectFilter] = useState('all')
-  const [typeFilter, setTypeFilter] = useState('all')
+  // Filters live in the URL (?subject=…&type=…&week=…&q=…&hidden=1): shareable, kept on reload
+  const [searchParams, setSearchParams] = useSearchParams()
+  const subjectFilter = searchParams.get('subject') ?? 'all'
+  const typeFilter = searchParams.get('type') ?? 'all'
+  const weekFilter = searchParams.get('week') ?? 'all'
+  const searchQuery = searchParams.get('q') ?? ''
+  const showHidden = searchParams.get('hidden') === '1'
+  const setFilter = (name, value, defaultValue) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (value === defaultValue || value === '' || value == null) next.delete(name)
+      else next.set(name, value)
+      return next
+    }, { replace: true })
+  }
+  const setSubjectFilter = (value) => setFilter('subject', value, 'all')
+  const setTypeFilter = (value) => setFilter('type', value, 'all')
+  const setWeekFilter = (value) => setFilter('week', value, 'all')
+  const setSearchQuery = (value) => setFilter('q', value, '')
+  const setShowHidden = (value) => setFilter('hidden', value ? '1' : null, null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [previewResource, setPreviewResource] = useState(null)
+  // Adding a new semester link
+  const [isAddingLink, setIsAddingLink] = useState(false)
+
+  const semesterStarts = useMemo(() => buildSemesterStarts(events, subjects), [events, subjects])
+
+  // Edit / move / delete / hide — shared with the subject detail
+  const materialActions = useMaterialActions({
+    subjects,
+    events,
+    semesterStarts,
+    actions: {
+      updateMaterial: onUpdateMaterial,
+      assignEvent: onAssignEvent,
+      updateSemesterLink: onUpdateResource,
+      deleteResource: onDeleteResource,
+      setHidden: onSetHidden,
+    },
+  })
+  const menuFor = (resource) => {
+    const items = materialActions.getMenuItems(resource)
+    return items.length > 0 ? { label: materialActions.getMenuLabel(resource), items } : null
+  }
+
+  const hiddenCount = useMemo(() => (resources || []).filter(isHidden).length, [resources])
+  const visibleResources = useMemo(
+    () => (showHidden ? resources || [] : (resources || []).filter((r) => !isHidden(r))),
+    [resources, showHidden]
+  )
 
   const [presetEventId, setPresetEventId] = useState(null)
   const [presetSubjectId, setPresetSubjectId] = useState(null)
@@ -678,12 +973,32 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
     return getWeekAndYear(new Date().toISOString().split('T')[0])
   }, [])
 
+  // Semester week of every material (lesson week, otherwise the week it was added)
+  const materialWeeks = useMemo(() => {
+    const weeks = new Map()
+    for (const r of visibleResources) {
+      if (r.category === 'platform') continue
+      weeks.set(r, getMaterialWeek(r, { events, subjects, semesterStarts }))
+    }
+    return weeks
+  }, [visibleResources, events, subjects, semesterStarts])
+
+  const currentWeekKey = useMemo(
+    () => getSemesterWeekInfo(new Date(), null, semesterStarts)?.key ?? null,
+    [semesterStarts]
+  )
+  const selectedWeekKey = weekFilter === 'current' ? currentWeekKey : weekFilter
+
   const filteredResources = useMemo(() => {
-    let list = [...(resources || [])]
+    let list = [...visibleResources]
+    // Semester materials stay pinned whatever week is chosen
+    if (weekFilter !== 'all') {
+      list = list.filter(r => r.category === 'platform' || materialWeeks.get(r)?.key === selectedWeekKey)
+    }
     if (subjectFilter === OTHER_SUBJECT) {
       list = list.filter(hasNoSubject)
     } else if (subjectFilter !== 'all') {
-      list = list.filter(r => String(r.subjectId) === subjectFilter)
+      list = list.filter(r => isSameId(getSubjectIdOf(r), subjectFilter))
     }
     if (typeFilter !== 'all') {
       list = list.filter(r => r.type === typeFilter)
@@ -696,21 +1011,21 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
       )
     }
     return list
-  }, [resources, subjectFilter, typeFilter, searchQuery])
+  }, [visibleResources, subjectFilter, typeFilter, searchQuery, weekFilter, selectedWeekKey, materialWeeks])
 
   const eventResources = useMemo(() => {
-    return filteredResources.filter(r => r.eventId || r.event_id)
+    return filteredResources.filter(r => getEventIdOf(r) != null)
   }, [filteredResources])
 
   const eventSessions = useMemo(() => {
     const map = new Map()
     eventResources.forEach((res) => {
-      const eId = res.eventId || res.event_id
+      const eId = getEventIdOf(res)
       if (!eId) return
       if (!map.has(eId)) {
-        const ev = (events || []).find((e) => e.id === eId || e.id === Number(eId))
+        const ev = (events || []).find((e) => isSameId(e.id, eId))
         if (ev) {
-          const sub = subjects.find((s) => s.id === ev.subjectId)
+          const sub = subjects.find((s) => isSameId(s.id, getSubjectIdOf(ev)))
           const { week, year } = getWeekAndYear(ev.date)
           map.set(eId, {
             event: ev,
@@ -749,10 +1064,10 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
   }, [eventSessions])
 
   const generalGrouped = useMemo(() => {
-    const generalResources = filteredResources.filter(r => !r.eventId && !r.event_id && r.category !== 'platform')
+    const generalResources = filteredResources.filter(r => getEventIdOf(r) == null && r.category !== 'platform')
     const groups = subjects.map(subject => ({
       subject,
-      items: generalResources.filter(r => r.subjectId === subject.id),
+      items: generalResources.filter(r => isSameId(getSubjectIdOf(r), subject.id)),
     }))
     // Materials without a subject (e.g. Moodle courses outside the study plan) go to "Jiné".
     groups.push({ subject: null, items: generalResources.filter(hasNoSubject) })
@@ -760,8 +1075,10 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
   }, [filteredResources, subjects])
 
   const platformResources = useMemo(() => {
-    return (resources || []).filter(r => r.category === 'platform')
-  }, [resources])
+    return visibleResources.filter(r => r.category === 'platform')
+  }, [visibleResources])
+
+  const addSemesterLink = (values) => onUploadResource({ ...values, type: 'LINK', category: 'platform' })
 
   const formatEventDate = (dateStr) => {
     if (!dateStr) return ''
@@ -774,7 +1091,38 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
     })
   }
 
+  // Weeks that have some material, ascending ("3. týden (5.–11. 10.)")
+  const WEEK_OPTIONS = useMemo(() => {
+    const locale = getLocaleFromLanguage(i18n.language)
+    const englishRange = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' })
+    // cs "21.–27. 9." / "28. 9. – 4. 10.", en "Sep 21 – 27"
+    const formatRange = (from, to) => {
+      if (locale !== 'cs-CZ') return englishRange.formatRange(from, to)
+      return from.getMonth() === to.getMonth()
+        ? `${from.getDate()}.–${to.getDate()}. ${to.getMonth() + 1}.`
+        : `${from.getDate()}. ${from.getMonth() + 1}. – ${to.getDate()}. ${to.getMonth() + 1}.`
+    }
+    const weeks = new Map()
+    for (const info of materialWeeks.values()) {
+      if (info && !weeks.has(info.key)) weeks.set(info.key, info)
+    }
+    const sorted = [...weeks.values()].sort((a, b) => a.from - b.from)
+    const manySemesters = new Set(sorted.map((w) => w.semester)).size > 1
+    return [
+      { value: 'all', label: t('resources:weekFilter.all') },
+      ...(currentWeekKey ? [{ value: 'current', label: t('resources:weekFilter.current') }] : []),
+      ...sorted.map((w) => ({
+        value: w.key,
+        label: `${manySemesters ? `${w.semester} · ` : ''}${t('resources:weekFilter.option', {
+          n: w.week,
+          range: formatRange(w.from, w.to),
+        })}`,
+      })),
+    ]
+  }, [materialWeeks, currentWeekKey, i18n.language, t])
+
   const subjectLabel = SUBJECT_OPTIONS.find(o => o.value === subjectFilter)?.label ?? t('resources:filters.subjectFallback')
+  const weekLabel = WEEK_OPTIONS.find(o => o.value === weekFilter)?.label ?? t('resources:weekFilter.fallback')
   const typeLabel    = TYPE_OPTIONS.find(o => o.value === typeFilter)?.label ?? t('resources:filters.typeFallback')
 
   return (
@@ -814,6 +1162,19 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
           </div>
           <Dropdown label={subjectLabel} icon={SlidersHorizontal} options={SUBJECT_OPTIONS} value={subjectFilter} onChange={setSubjectFilter} />
           <Dropdown label={typeLabel}    icon={SlidersHorizontal} options={TYPE_OPTIONS}    value={typeFilter}    onChange={setTypeFilter} />
+          <Dropdown label={weekLabel}    icon={CalendarDays}      options={WEEK_OPTIONS}    value={weekFilter}    onChange={setWeekFilter} menuClassName="max-h-80 overflow-y-auto" />
+          {(hiddenCount > 0 || showHidden) && (
+            <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-2 py-2 text-sm text-on-surface-variant select-none">
+              <input
+                type="checkbox"
+                checked={showHidden}
+                onChange={(e) => setShowHidden(e.target.checked)}
+                className="size-4 accent-primary cursor-pointer"
+              />
+              <EyeOff className="size-4" aria-hidden="true" />
+              {t('resources:materialActions.showHidden', { count: hiddenCount })}
+            </label>
+          )}
         </div>
 
         {/* Two Columns Grid */}
@@ -825,23 +1186,53 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
                 <div className="w-12 h-12 bg-surface-container-low text-primary rounded-full flex items-center justify-center">
                   <CustomIcon name="book" className="w-6 h-6" />
                 </div>
-                <p className="text-lg font-semibold text-on-surface">{t('resources:emptyState.title')}</p>
-                <p className="text-sm text-on-surface-variant">{t('resources:emptyState.description')}</p>
+                {weekFilter !== 'all' ? (
+                  <>
+                    <p className="text-lg font-semibold text-on-surface">{t('resources:weekFilter.empty')}</p>
+                    <button
+                      type="button"
+                      onClick={() => setWeekFilter('all')}
+                      className="mt-1 inline-flex items-center gap-2 rounded-xl border border-outline-variant px-4 py-2 text-sm font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary cursor-pointer bg-transparent"
+                    >
+                      <X className="size-4" aria-hidden="true" />
+                      {t('resources:weekFilter.clear')}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg font-semibold text-on-surface">{t('resources:emptyState.title')}</p>
+                    <p className="text-sm text-on-surface-variant">{t('resources:emptyState.description')}</p>
+                  </>
+                )}
               </div>
             ) : (
               <>
                 {/* Timeline */}
                 {weeklyGroups.map((group) => {
                   const isCurrent = group.week === currentWeekAndYear.week && group.year === currentWeekAndYear.year
+                  // Groups are calendar (ISO) weeks; teachers count weeks of the semester
+                  const firstSession = group.sessions[0]
+                  const semesterWeek = firstSession
+                    ? getSemesterWeek(firstSession.date, firstSession.subject?.semester, semesterStarts)
+                    : null
                   return (
                     <section key={`${group.year}-W${group.week}`}>
                       {/* Week Heading */}
-                      <div className="mb-4 flex items-center gap-3">
+                      <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                         <h2 className="text-lg font-semibold text-on-surface">
-                          {isCurrent ? t('resources:library.thisWeek') : t('resources:library.weekLabel', { n: group.week })}
+                          {isCurrent
+                            ? t('resources:library.thisWeek')
+                            : semesterWeek
+                              ? t('resources:lessons.semesterWeekHeading', { n: semesterWeek })
+                              : t('resources:library.weekLabel', { n: group.week })}
                         </h2>
+                        {isCurrent && semesterWeek && (
+                          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                            {t('resources:lessons.semesterWeekHeading', { n: semesterWeek })}
+                          </span>
+                        )}
                         <span className="rounded-full bg-surface-container-high px-2.5 py-0.5 text-xs font-medium text-on-surface-variant">
-                          {t('resources:library.weekLabel', { n: group.week })}
+                          {t('resources:lessons.calendarWeek', { n: group.week })}
                         </span>
                         <span className="h-px flex-1 bg-outline-variant" />
                       </div>
@@ -854,11 +1245,12 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
                         />
                         {group.sessions.map((session) => {
                           const color = getSubjectColor(session.subject)
-                          const isLecture = session.event.type === 'Lecture'
-                          const TypeIcon = isLecture ? GraduationCap : Users
-                          const eventTypeLabel = isLecture
-                            ? t('dashboard:timetable.eventTypes.Lecture')
-                            : t('dashboard:timetable.eventTypes.Lab')
+                          // STAG sends Czech types ("Přednáška"), manual events English ones ("Lecture")
+                          const typeKey = getLessonTypeKey(session.event.type)
+                          const TypeIcon = typeKey === 'lecture' ? GraduationCap : Users
+                          const eventTypeLabel = typeKey
+                            ? t(`resources:lessons.types.${typeKey}`)
+                            : t(`dashboard:timetable.eventTypes.${session.event.type}`, session.event.type)
 
                           return (
                             <div key={session.event.id} className="relative">
@@ -904,7 +1296,14 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
                                         setPreviewResource(res)
                                       }
                                     }
-                                    return <ResourceRow key={res.id} resource={res} onOpen={handleOpen} />
+                                    return (
+                                      <ResourceRow
+                                        key={res.id}
+                                        resource={res}
+                                        onOpen={handleOpen}
+                                        menu={menuFor(res)}
+                                      />
+                                    )
                                   })}
                                 </div>
 
@@ -953,6 +1352,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
                               subjectName={subject?.name ?? t('resources:otherSubject')}
                               t={t}
                               onPreview={(res) => setPreviewResource(res)}
+                              menu={menuFor(r)}
                             />
                           ))}
                         </div>
@@ -979,36 +1379,31 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
 
             <div className="flex flex-col gap-2.5">
               {platformResources.length === 0 ? (
-                <p className="text-sm text-on-surface-variant italic text-center py-6">Žádné semestrální materiály.</p>
+                <p className="text-sm text-on-surface-variant italic text-center py-6">{t('resources:semesterLinks.empty')}</p>
               ) : (
-                platformResources.map((res) => {
-                  const cfg = getTypeConfig(res.type)
-                  const isLink = res.type === 'LINK'
-                  const url = resolveResourceUrl(res.url)
-                  const handleOpen = () => {
-                    window.open(res.url || url, '_blank', 'noopener,noreferrer')
-                  }
-
-                  return (
-                    <div
-                      key={res.id}
-                      onClick={handleOpen}
-                      className="group flex items-start gap-3 rounded-xl border border-outline-variant bg-surface p-3 transition-colors hover:border-primary/40 hover:bg-surface/80 cursor-pointer"
-                    >
-                      <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${cfg.iconBg} ${cfg.iconColor}`}>
-                        {isLink ? <ExternalLink className="w-4.5 h-4.5" /> : <MaterialTypeIcon type={res.type} />}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-on-surface">{res.title}</p>
-                        {res.description && (
-                          <p className="truncate text-xs text-on-surface-variant/80">{res.description}</p>
-                        )}
-                      </div>
-                      <ExternalLink className="ml-auto size-3.5 shrink-0 text-on-surface-variant opacity-0 transition-opacity group-hover:opacity-100" />
-                    </div>
-                  )
-                })
+                platformResources.map((res) => (
+                  <SemesterLinkItem
+                    key={res.id ?? res.url}
+                    resource={res}
+                    subject={subjects.find((s) => isSameId(s.id, getSubjectIdOf(res)))}
+                    menu={menuFor(res)}
+                    onSeen={() => isPersistedId(res.id) && onMarkSeen?.(res.id)?.catch((err) => console.error(err))}
+                  />
+                ))
               )}
+            </div>
+
+            <div className="mt-4 flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsAddingLink(true)}
+                disabled={subjects.length === 0}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-outline-variant px-3 py-2 text-xs font-medium text-on-surface-variant transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary cursor-pointer bg-transparent disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Plus className="size-4" />
+                <span>{t('resources:semesterLinks.add')}</span>
+              </button>
+              {departmentLinks?.supported && <RefreshLinksButton departmentLinks={departmentLinks} />}
             </div>
           </aside>
         </div>
@@ -1024,8 +1419,23 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource }) => {
           }}
           onSave={onUploadResource}
           subjects={subjects}
+          events={events}
+          semesterStarts={semesterStarts}
           presetEventId={presetEventId}
           presetSubjectId={presetSubjectId}
+        />
+      )}
+
+      {/* Edit / move modals of the material actions */}
+      {materialActions.modals}
+
+      {/* New semester link */}
+      {isAddingLink && (
+        <SemesterLinkModal
+          link={null}
+          subjects={subjects}
+          onClose={() => setIsAddingLink(false)}
+          onSave={addSemesterLink}
         />
       )}
 

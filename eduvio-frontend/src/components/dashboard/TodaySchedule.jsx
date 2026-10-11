@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Clock, Coffee, PartyPopper } from 'lucide-react'
+import { Check, Coffee, PartyPopper } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { formatRoom } from '../../utils/room'
 
@@ -16,9 +16,16 @@ const TodaySchedule = ({ schedule }) => {
       const d = new Date()
       setNowMinutes(d.getHours() * 60 + d.getMinutes())
     }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') updateTime()
+    }
     updateTime()
-    const interval = setInterval(updateTime, 30000)
-    return () => clearInterval(interval)
+    const interval = setInterval(updateTime, 60000)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   const timeToMinutes = (timeStr) => {
@@ -41,7 +48,23 @@ const TodaySchedule = ({ schedule }) => {
     return nowMinutes >= gapStart && nowMinutes < gapEnd
   }
 
+  const isEventDone = (event) => {
+    if (!event?.endTime) return false
+    return nowMinutes >= timeToMinutes(event.endTime)
+  }
+
+  // Elapsed share (0–1) of the interval start–end
+  const getProgress = (start, end) => {
+    if (nowMinutes >= end) return 1
+    if (nowMinutes <= start) return 0
+    return (nowMinutes - start) / (end - start)
+  }
+
   const getDotColorClass = (event) => {
+    if (isEventDone(event)) {
+      return 'bg-success'
+    }
+
     if (isEventActive(event)) {
       return 'bg-live animate-[eduvio-live-pulse_1.8s_ease-in-out_infinite]'
     }
@@ -110,75 +133,135 @@ const TodaySchedule = ({ schedule }) => {
     }
   }
 
+  const isDayDone = sortedSchedule.every(isEventDone)
+
+  // Vertical offset of each dot's center from the top of its <li>
+  const EVENT_DOT_CENTER = 12
+  const GAP_DOT_CENTER = 25
+  const getDotCenter = (item) => (item.type === 'event' ? EVENT_DOT_CENTER : GAP_DOT_CENTER)
+
+  const getSegmentProgress = (index) => {
+    if (isDayDone) return 1
+    const item = timelineItems[index]
+    if (item.type === 'event') {
+      return getProgress(timeToMinutes(item.data.startTime), timeToMinutes(item.data.endTime))
+    }
+    return getProgress(
+      timeToMinutes(timelineItems[index - 1].data.endTime),
+      timeToMinutes(timelineItems[index + 1].data.startTime)
+    )
+  }
+
+  // Line segment from this item's dot to the next one, filled by elapsed time
+  const renderSegment = (index) => {
+    const nextItem = timelineItems[index + 1]
+    if (!nextItem) return null
+    return (
+      <span
+        className="absolute -left-0.5 w-0.5 bg-outline-variant"
+        style={{ top: getDotCenter(timelineItems[index]), bottom: -getDotCenter(nextItem) }}
+        aria-hidden="true"
+      >
+        <span
+          className="block w-full bg-success transition-[height] duration-500 ease-out motion-reduce:transition-none"
+          style={{ height: `${getSegmentProgress(index) * 100}%` }}
+        />
+      </span>
+    )
+  }
+
   return (
     <section aria-labelledby="schedule-heading" className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-ambient w-full">
       <h2 id="schedule-heading" className="mb-4 text-base font-semibold text-foreground">
         {t('todaySchedule.title')}
       </h2>
 
-      <ol className="relative ml-1.5 border-l-2 border-outline-variant">
+      <ol className="relative ml-1.5 pl-0.5">
         {timelineItems.map((item, index) => {
           const isEvent = item.type === 'event'
           const isLast = index === timelineItems.length - 1
 
-          return isEvent ? (
-            <li
-              key={`e-${item.data.id}`}
-              className={`relative pl-6 ${isLast ? 'pb-0' : 'pb-6'}`}
-            >
+          if (isEvent) {
+            const isDone = isEventDone(item.data)
+            const isLive = isEventActive(item.data)
+
+            return (
+              <li
+                key={`e-${item.data.id}`}
+                className={`relative pl-6 ${isLast ? 'pb-0' : 'pb-6'}`}
+              >
+                {renderSegment(index)}
+                <span
+                  className={`absolute -left-[9px] top-1 z-10 flex size-4 items-center justify-center rounded-full border-2 border-surface-container-lowest ${getDotColorClass(item.data)}`}
+                  aria-hidden="true"
+                >
+                  {isDone && <Check className="size-2.5 text-on-success" strokeWidth={3.5} />}
+                </span>
+                <p className="text-xs font-medium tabular-nums text-on-surface-variant">
+                  {item.data.startTime} – {item.data.endTime}
+                </p>
+                <div className="mt-0.5 flex items-center gap-2 flex-wrap">
+                  <p className={`text-sm font-semibold ${isDone ? 'text-on-surface-variant' : 'text-foreground'}`}>
+                    {t(`timetable.eventTypes.${item.data.type}`, item.data.type)}: {item.data.title}
+                    {(isDone || isLive) && (
+                      <span className="sr-only">
+                        {' – '}
+                        {t(isDone ? 'todaySchedule.statusDone' : 'todaySchedule.statusLive')}
+                      </span>
+                    )}
+                  </p>
+                  {(item.data.type === 'Test' || item.data.type === 'Exam') && (
+                    <span className="rounded-md bg-warning/15 px-1.5 py-0.5 text-[11px] font-semibold text-warning">
+                      {t(`timetable.eventTypes.${item.data.type}`)}
+                    </span>
+                  )}
+                </div>
+                {item.data.room && (
+                  <p className="text-xs text-on-surface-variant">
+                    {formatRoom(item.data.room, { language: i18n?.language })}
+                  </p>
+                )}
+              </li>
+            )
+          }
+
+          const prevEvent = timelineItems[index - 1]?.data
+          const nextEvent = timelineItems[index + 1]?.data
+          const isGapLive = isGapActive(prevEvent, nextEvent)
+          const isGapDone = isDayDone || nowMinutes >= timeToMinutes(nextEvent?.startTime)
+
+          return (
+            <li key={`g-${index}`} className="relative py-2 pl-6">
+              {renderSegment(index)}
               <span
-                className={`absolute -left-[9px] top-1 size-4 rounded-full border-2 border-surface-container-lowest ${getDotColorClass(item.data)}`}
+                className={`absolute -left-[7px] top-[25px] z-10 size-3 -translate-y-1/2 rounded-full border-2 bg-surface-container-lowest ${
+                  isGapLive
+                    ? 'border-live animate-[eduvio-live-pulse-subtle_1.8s_ease-in-out_infinite]'
+                    : isGapDone
+                    ? 'border-success'
+                    : 'border-dashed border-outline-variant'
+                }`}
                 aria-hidden="true"
               />
-              <p className="text-xs font-medium tabular-nums text-on-surface-variant">
-                {item.data.startTime} – {item.data.endTime}
-              </p>
-              <div className="mt-0.5 flex items-center gap-2 flex-wrap">
-                <p className="text-sm font-semibold text-foreground">
-                  {t(`timetable.eventTypes.${item.data.type}`, item.data.type)}: {item.data.title}
-                </p>
-                {(item.data.type === 'Test' || item.data.type === 'Exam') && (
-                  <span className="rounded-md bg-warning/15 px-1.5 py-0.5 text-[11px] font-semibold text-warning">
-                    {t(`timetable.eventTypes.${item.data.type}`)}
-                  </span>
-                )}
+              <div
+                className={`flex items-center gap-2 rounded-lg border bg-surface-container-low px-3 py-2 text-on-surface-variant ${
+                  isGapLive ? 'border-live/40' : 'border-dashed border-outline-variant'
+                }`}
+              >
+                <Coffee className="size-3.5 shrink-0" aria-hidden="true" />
+                <span className="text-xs font-medium">{formatGap(item.minutes)}</span>
               </div>
-              {item.data.room && (
-                <p className="text-xs text-on-surface-variant">
-                  {formatRoom(item.data.room, { language: i18n?.language })}
-                </p>
-              )}
             </li>
-          ) : (
-            (() => {
-              const prevEvent = timelineItems[index - 1]?.data
-              const nextEvent = timelineItems[index + 1]?.data
-              const isGapLive = isGapActive(prevEvent, nextEvent)
-
-              return (
-                <li key={`g-${index}`} className="relative py-2 pl-6">
-                  <span
-                    className={`absolute -left-[7px] top-1/2 size-3 -translate-y-1/2 rounded-full border-2 bg-surface-container-lowest ${
-                      isGapLive
-                        ? 'border-live animate-[eduvio-live-pulse-subtle_1.8s_ease-in-out_infinite]'
-                        : 'border-dashed border-outline-variant'
-                    }`}
-                    aria-hidden="true"
-                  />
-                  <div
-                    className={`flex items-center gap-2 rounded-lg border bg-surface-container-low px-3 py-2 text-on-surface-variant ${
-                      isGapLive ? 'border-live/40' : 'border-dashed border-outline-variant'
-                    }`}
-                  >
-                    <Coffee className="size-3.5 shrink-0" aria-hidden="true" />
-                    <span className="text-xs font-medium">{formatGap(item.minutes)}</span>
-                  </div>
-                </li>
-              )
-            })()
           )
         })}
       </ol>
+
+      {isDayDone && (
+        <p className="mt-4 flex items-center gap-1.5 pl-8 text-xs font-medium text-on-surface-variant">
+          <Check className="size-3.5 shrink-0 text-success" aria-hidden="true" />
+          {t('todaySchedule.allDone')}
+        </p>
+      )}
     </section>
   )
 }

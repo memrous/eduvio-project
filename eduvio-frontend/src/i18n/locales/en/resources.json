@@ -102,5 +102,88 @@
     "allSubjects": "All Subjects",
     "allTypes": "All Types",
     "externalLink": "External Link"
+  },
+  "lessons": {
+    "field": "Lesson",
+    "general": "General material (no week)",
+    "semesterWeek": "Week {{n}}",
+    "semesterWeekHeading": "Week {{n}} of the semester",
+    "calendarWeek": "Calendar week {{n}}",
+    "otherDates": "Outside the semester",
+    "suggestedShort": "suggested",
+    "suggestionNote": "Suggested: the subject's most recent lesson. You can pick another one or a general material.",
+    "types": {
+      "lecture": "Lecture",
+      "practice": "Practical",
+      "seminar": "Seminar"
+    },
+    "moveTitle": "Move to a week / lesson",
+    "moveShort": "Move to a week / lesson",
+    "moveSave": "Move",
+    "moveFailed": "The material could not be moved. Please try again.",
+    "moodleNote": "This material comes from Moodle. Your choice will be kept after the next sync."
+  },
+  "pageChanges": {
+    "newCount": "New: {{count}}",
+    "updatedOn": "Updated {{date}}"
+  },
+  "semesterLinks": {
+    "empty": "No semester materials.",
+    "add": "Add a link to the course page",
+    "addTitle": "Link to the course page",
+    "editTitle": "Edit link",
+    "editAutoNote": "This link was found automatically on the department website. Once edited it becomes your own link and later searches won't change it.",
+    "fields": {
+      "title": "Title",
+      "url": "Address (URL)"
+    },
+    "placeholders": {
+      "title": "e.g. Practical class materials"
+    },
+    "save": "Save",
+    "departmentBadge": "Department website",
+    "teacherWebsite": "Teacher's website",
+    "teacherWebsiteWithPerson": "Teacher's website · {{person}}",
+    "personWithRole": "{{person}} ({{role}})",
+    "roles": {
+      "guarantor": "guarantor",
+      "lecturer": "lecturer",
+      "tutor": "tutor"
+    },
+    "refresh": "Find links again",
+    "refreshing": "Searching for links…",
+    "refreshCooldown_one": "Again in {{count}} minute",
+    "refreshCooldown_other": "Again in {{count}} minutes",
+    "refreshFailed": "The department websites could not be checked. Try again later.",
+    "errors": {
+      "invalidUrl": "The address must start with http:// or https://.",
+      "saveFailed": "The link could not be saved. Check the address, or whether the subject already has it."
+    }
+  },
+  "materialActions": {
+    "menu": "Actions for {{title}}",
+    "edit": "Edit",
+    "delete": "Delete",
+    "hide": "Hide",
+    "unhide": "Show again",
+    "hiddenBadge": "Hidden",
+    "showHidden": "Show hidden ({{count}})",
+    "editTitle": "Edit material",
+    "replaceFile": "Replace file (optional)",
+    "currentFile": "Current file: {{name}}",
+    "replaceFileNote": "The original file is permanently deleted after saving.",
+    "saveFailed": "The changes could not be saved. Check the details and try again.",
+    "deleteFileConfirm": "Delete “{{title}}”? The file is permanently removed from storage and cannot be restored.",
+    "deleteLinkConfirm": "Delete the link “{{title}}”? This cannot be undone.",
+    "deleteFailed": "The material could not be deleted.",
+    "hideFailed": "The visibility change could not be saved."
+  },
+  "weekFilter": {
+    "all": "All weeks",
+    "current": "Current week",
+    "option": "Week {{n}} ({{range}})",
+    "fallback": "Week",
+    "empty": "You have no materials in this week",
+    "clear": "Clear week filter"
   }
 }

@@ -102,5 +102,89 @@
     "allSubjects": "Všechny předměty",
     "allTypes": "Všechny typy",
     "externalLink": "Externí odkaz"
+  },
+  "lessons": {
+    "field": "Hodina",
+    "general": "Obecný materiál (bez týdne)",
+    "semesterWeek": "{{n}}. týden",
+    "semesterWeekHeading": "{{n}}. týden semestru",
+    "calendarWeek": "Kalendářní týden {{n}}",
+    "otherDates": "Mimo semestr",
+    "suggestedShort": "návrh",
+    "suggestionNote": "Návrh: poslední proběhlá hodina předmětu. Můžeš vybrat jinou nebo obecný materiál.",
+    "types": {
+      "lecture": "Přednáška",
+      "practice": "Cvičení",
+      "seminar": "Seminář"
+    },
+    "moveTitle": "Přesunout do týdne / hodiny",
+    "moveShort": "Přesunout do týdne / hodiny",
+    "moveSave": "Přesunout",
+    "moveFailed": "Materiál se nepodařilo přesunout. Zkus to prosím znovu.",
+    "moodleNote": "Materiál je z Moodlu. Tvoje přiřazení zůstane i po další synchronizaci."
+  },
+  "pageChanges": {
+    "newCount": "Nové: {{count}}",
+    "updatedOn": "Aktualizováno {{date}}"
+  },
+  "semesterLinks": {
+    "empty": "Žádné semestrální materiály.",
+    "add": "Přidat odkaz na stránku předmětu",
+    "addTitle": "Odkaz na stránku předmětu",
+    "editTitle": "Upravit odkaz",
+    "editAutoNote": "Odkaz byl nalezen automaticky na webu katedry. Po úpravě se z něj stane tvůj vlastní odkaz a další hledání ho nezmění.",
+    "fields": {
+      "title": "Název",
+      "url": "Adresa (URL)"
+    },
+    "placeholders": {
+      "title": "např. Materiály ke cvičení"
+    },
+    "save": "Uložit",
+    "departmentBadge": "Web katedry",
+    "teacherWebsite": "Web vyučujícího",
+    "teacherWebsiteWithPerson": "Web vyučujícího · {{person}}",
+    "personWithRole": "{{person}} ({{role}})",
+    "roles": {
+      "guarantor": "garant",
+      "lecturer": "přednášející",
+      "tutor": "cvičící"
+    },
+    "refresh": "Najít odkazy znovu",
+    "refreshing": "Hledám odkazy…",
+    "refreshCooldown_one": "Znovu za {{count}} minutu",
+    "refreshCooldown_few": "Znovu za {{count}} minuty",
+    "refreshCooldown_other": "Znovu za {{count}} minut",
+    "refreshFailed": "Weby katedry se nepodařilo projít. Zkus to později.",
+    "errors": {
+      "invalidUrl": "Adresa musí začínat http:// nebo https://.",
+      "saveFailed": "Odkaz se nepodařilo uložit. Zkontroluj adresu, případně jestli už ho u předmětu nemáš."
+    }
+  },
+  "materialActions": {
+    "menu": "Akce pro {{title}}",
+    "edit": "Upravit",
+    "delete": "Smazat",
+    "hide": "Skrýt",
+    "unhide": "Zobrazit znovu",
+    "hiddenBadge": "Skryté",
+    "showHidden": "Zobrazit skryté ({{count}})",
+    "editTitle": "Upravit materiál",
+    "replaceFile": "Nahradit soubor (nepovinné)",
+    "currentFile": "Současný soubor: {{name}}",
+    "replaceFileNote": "Po uložení se původní soubor trvale smaže.",
+    "saveFailed": "Změny se nepodařilo uložit. Zkontroluj údaje a zkus to znovu.",
+    "deleteFileConfirm": "Smazat „{{title}}“? Soubor se trvale odstraní z úložiště a nepůjde obnovit.",
+    "deleteLinkConfirm": "Smazat odkaz „{{title}}“? Tuto akci nejde vrátit.",
+    "deleteFailed": "Materiál se nepodařilo smazat.",
+    "hideFailed": "Změnu viditelnosti se nepodařilo uložit."
+  },
+  "weekFilter": {
+    "all": "Všechny týdny",
+    "current": "Aktuální týden",
+    "option": "{{n}}. týden ({{range}})",
+    "fallback": "Týden",
+    "empty": "V tomto týdnu nemáš žádné materiály",
+    "clear": "Zrušit filtr týdne"
   }
 }

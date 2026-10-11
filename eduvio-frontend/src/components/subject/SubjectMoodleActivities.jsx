@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 
 import { formatAcademicGrade } from '../../utils/subjectColors'
+import { isSameId } from '../../utils/ids'
 
 const getDayDiff = (dateStr) => {
   if (!dateStr) return null
@@ -128,7 +129,7 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
           }
 
           const linkedMaterials = resources
-            ? resources.filter((r) => r.requirementId === req.id || r.requirement_id === req.id)
+            ? resources.filter((r) => isSameId(r.requirementId ?? r.requirement_id, req.id))
             : []
 
           const reqTypeName = t(`academic:subjectDetail.requirements.types.${req.type}`, req.type)

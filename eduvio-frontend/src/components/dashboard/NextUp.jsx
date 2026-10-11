@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { MapPin, Clock, FileText, CalendarPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { formatRoom } from '../../utils/room'
+import { getLocaleFromLanguage } from '../../utils/locale'
 
 const parseLocalDateTime = (dateInput, timeStr) => {
   if (!dateInput || !timeStr) return null
@@ -15,10 +16,19 @@ const parseLocalDateTime = (dateInput, timeStr) => {
   return new Date(year, month - 1, day, hours, minutes, 0)
 }
 
+// Whole calendar days between two dates in local time (0 = same day)
+const getCalendarDayDiff = (from, to) => {
+  const fromDay = new Date(from.getFullYear(), from.getMonth(), from.getDate())
+  const toDay = new Date(to.getFullYear(), to.getMonth(), to.getDate())
+  return Math.round((toDay - fromDay) / (24 * 60 * 60 * 1000))
+}
+
 const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
   const { t, i18n } = useTranslation('dashboard')
   const [minutesLeft, setMinutesLeft] = useState(null)
   const [isOngoing, setIsOngoing] = useState(false)
+  const [startDateTime, setStartDateTime] = useState(null)
+  const [startDayOffset, setStartDayOffset] = useState(null)
 
   useEffect(() => {
     if (!nextClass) return
@@ -43,6 +53,8 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
         }
 
         const now = new Date()
+        setStartDateTime(startDateTime)
+        setStartDayOffset(getCalendarDayDiff(now, startDateTime))
         const ongoing = now >= startDateTime && now < endDateTime
         setIsOngoing(ongoing)
 
@@ -61,10 +73,34 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
       }
     }
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') calculateTimeLeft()
+    }
+
     calculateTimeLeft()
     const interval = setInterval(calculateTimeLeft, 60000)
-    return () => clearInterval(interval)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [nextClass])
+
+  const locale = getLocaleFromLanguage(i18n?.language)
+
+  const formatStartTime = (date) => (
+    new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }).format(date)
+  )
+
+  // cs "Po, 12. 10.", en "Mon, Oct 12"
+  const formatStartDate = (date) => {
+    if (locale === 'cs-CZ') {
+      const weekday = new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date)
+      const dayMonth = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'numeric' }).format(date)
+      return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${dayMonth}`
+    }
+    return new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric' }).format(date)
+  }
 
   const formatCountdown = () => {
     if (isOngoing) {
@@ -73,17 +109,23 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
 
     if (minutesLeft === null) return ''
 
+    if (startDateTime && startDayOffset === 1) {
+      return t('nextUp.tomorrowAt', { time: formatStartTime(startDateTime) })
+    }
+
+    if (startDateTime && startDayOffset > 1) {
+      return t('nextUp.onDateAt', {
+        date: formatStartDate(startDateTime),
+        time: formatStartTime(startDateTime),
+      })
+    }
+
     if (minutesLeft <= 100) {
       return t('nextUp.startsIn', { count: minutesLeft, minutes: minutesLeft })
     }
 
-    if (minutesLeft < 24 * 60) {
-      const hours = Math.round(minutesLeft / 60)
-      return t('nextUp.startsInHours', { count: hours, hours })
-    }
-
-    const days = Math.round(minutesLeft / (24 * 60))
-    return t('nextUp.startsInDays', { count: days, days })
+    const hours = Math.round(minutesLeft / 60)
+    return t('nextUp.startsInHours', { count: hours, hours })
   }
 
   const typeBadge = nextClass?.type
