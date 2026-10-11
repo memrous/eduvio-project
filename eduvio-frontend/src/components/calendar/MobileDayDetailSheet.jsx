@@ -1,4 +1,5 @@
 import { useState, forwardRef, useImperativeHandle } from 'react'
+import { deadlineTimeLabel, getAssessmentLabel, isWebAssessment } from '../../utils/assessments'
 
 const MobileDayDetailSheet = forwardRef(({ subjects, handleEventSelect, t, getSubjectStyle, getDeadlineIcon }, ref) => {
   const [mobileDetail, setMobileDetail] = useState(null)
@@ -26,7 +27,7 @@ const MobileDayDetailSheet = forwardRef(({ subjects, handleEventSelect, t, getSu
       onClick={closeMobileDetail}
     >
       <div
-        className={`absolute inset-0 bg-black/40 transition-opacity duration-250 ${
+        className={`absolute inset-0 bg-scrim/40 transition-opacity duration-250 ${
           sheetVisible ? 'opacity-100' : 'opacity-0'
         }`}
       />
@@ -54,12 +55,14 @@ const MobileDayDetailSheet = forwardRef(({ subjects, handleEventSelect, t, getSu
               return (
                 <div
                   key={`d-${item.id ?? idx}`}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 border border-rose-400/30 ${style.bg} ${style.text}`}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 border border-error/30 ${style.bg} ${style.text}`}
                 >
-                  <Icon className="size-4 shrink-0 text-rose-600" />
+                  <Icon className="size-4 shrink-0 text-error" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold truncate">{item.title}</p>
-                    <p className="text-[11px] opacity-80">{item.time || '23:59'}</p>
+                    <p className="text-[11px] opacity-80">
+                      {isWebAssessment(item) ? getAssessmentLabel(item.type, t) : deadlineTimeLabel(item)}
+                    </p>
                   </div>
                 </div>
               )

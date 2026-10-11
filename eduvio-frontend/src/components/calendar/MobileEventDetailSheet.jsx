@@ -32,7 +32,7 @@ const MobileEventDetailSheet = ({
       {/* Backdrop overlay */}
       <div 
         onClick={onClose}
-        className={`absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-scrim/40 backdrop-blur-xs transition-opacity duration-300 ${
           sheetVisible ? 'opacity-100' : 'opacity-0'
         }`}
       />

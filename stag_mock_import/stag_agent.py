@@ -416,6 +416,8 @@ def run_sync(args, config: dict, home: Path) -> int:
         schedule = stag.transformuj_rozvrh_pro_laravel(raw_schedule, credits_by_code, semestr) if raw_schedule else []
         # Studijní údaje: jen whitelist polí; selhání sync neshodí
         student_info = stag.nacti_info_studenta_bezpecne(ticket["ticket"], ws_base_url, ticket["student_id"])
+        # Termíny zkoušek; selhání sync neshodí (None = nenačteno, staré termíny zůstanou)
+        exam_terms = stag.nacti_terminy_bezpecne(ticket["ticket"], ws_base_url, ticket["student_id"])
 
         if args.dry_run:
             with_info = sum(1 for s in subjects if "lecturers" in s)
@@ -424,6 +426,11 @@ def run_sync(args, config: dict, home: Path) -> int:
                   f"{len(raw_schedule)} rozvrhových akcí → {len(schedule)} událostí. Nic se neodesílá.")
             # Jen zda se údaje načetly, ne jejich obsah
             print(f"🎓 Studijní údaje: {'načteny' if student_info else 'nenačteny'}.")
+            if exam_terms is None:
+                print("🗓️ Termíny zkoušek: nenačteny.")
+            else:
+                registered = sum(1 for term in exam_terms if term["registered"])
+                print(f"🗓️ Termíny zkoušek: {len(exam_terms)} (zapsáno: {registered}).")
             return EXIT_OK
 
         if subjects:
@@ -435,6 +442,7 @@ def run_sync(args, config: dict, home: Path) -> int:
         else:
             print("📭 Žádné rozvrhové události k odeslání.")
         stag.odesli_info_studenta_bezpecne(api_url, token, student_info)
+        stag.odesli_terminy_bezpecne(api_url, token, exam_terms)
     except LoginRequired:
         return fail(TICKET_EXPIRED_MESSAGE, EXIT_LOGIN_REQUIRED)
     except stag.StagWsError as e:

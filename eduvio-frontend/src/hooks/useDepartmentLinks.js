@@ -17,6 +17,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
 import { RESOURCES_KEY } from './useResources'
+import { SYLLABUS_KEY, WEB_ASSESSMENTS_KEY } from './useSyllabus'
 
 export const DEPARTMENT_LINKS_KEY = 'department-links-status'
 
@@ -45,6 +46,10 @@ export const useDepartmentLinks = () => {
   useEffect(() => {
     if (previousStatus.current === 'pending' && status !== 'pending') {
       queryClient.invalidateQueries({ queryKey: [RESOURCES_KEY, user?.id] })
+      // The same job reads the semester schedules
+      queryClient.invalidateQueries({ queryKey: [SYLLABUS_KEY] })
+      queryClient.invalidateQueries({ queryKey: [WEB_ASSESSMENTS_KEY] })
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] })
     }
     previousStatus.current = status
   }, [status, queryClient, user?.id])

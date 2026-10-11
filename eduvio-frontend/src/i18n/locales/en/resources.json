@@ -36,6 +36,7 @@
   "subjectFallback": "General",
   "otherSubject": "Other",
   "moodleBadge": "Moodle",
+  "ownBadge": "Own",
   "modal": {
     "title": "Upload Study Resource",
     "fields": {
@@ -176,7 +177,11 @@
     "deleteFileConfirm": "Delete “{{title}}”? The file is permanently removed from storage and cannot be restored.",
     "deleteLinkConfirm": "Delete the link “{{title}}”? This cannot be undone.",
     "deleteFailed": "The material could not be deleted.",
-    "hideFailed": "The visibility change could not be saved."
+    "hideFailed": "The visibility change could not be saved.",
+    "markForExam": "Mark for the exam",
+    "unmarkForExam": "Remove from the exam",
+    "forExamBadge": "For the exam",
+    "forExamFailed": "Could not save the exam mark."
   },
   "weekFilter": {
     "all": "All weeks",

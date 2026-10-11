@@ -1,10 +1,12 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Calendar, Flame, Zap, GraduationCap, BookOpen, MapPin } from 'lucide-react'
+import { CalendarDays, Flame, Zap, GraduationCap, BookOpen, MapPin } from 'lucide-react'
 import { formatRoom } from '../../utils/room'
 import { getSubjectStyle } from './useCalendarState'
+import { deadlineTimeLabel, getAssessmentIcon, getAssessmentLabel, isAssessmentType, isWebAssessment } from '../../utils/assessments'
 
 const getDeadlineIcon = (type) => {
+  if (isAssessmentType(type)) return getAssessmentIcon(type)
   const t = String(type).toLowerCase()
   if (t.includes('test') || t.includes('quiz')) {
     return Zap
@@ -60,7 +62,7 @@ const QuickOverviewPanel = ({
       {/* Dnešní výuka Section */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2 text-on-surface-variant font-bold text-sm">
-          <Calendar className="w-4 h-4 text-primary" />
+          <CalendarDays className="w-4 h-4 text-primary" />
           <span>{t('academic:calendarView.quickOverview.todayClasses')}</span>
         </div>
 
@@ -146,11 +148,11 @@ const QuickOverviewPanel = ({
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-on-surface">{req.title}</p>
                     <p className="truncate text-xs text-on-surface-variant mt-0.5 capitalize leading-none">
-                      {subject?.code || ''} · {dayLabel}
+                      {subject?.code || ''}{isWebAssessment(req) ? ` · ${getAssessmentLabel(req.type, t)}` : ''} · {dayLabel}
                     </p>
                   </div>
                   <span className="shrink-0 text-xs font-semibold tabular-nums text-on-surface-variant">
-                    {req.time || '23:59'}
+                    {deadlineTimeLabel(req)}
                   </span>
                 </div>
               )

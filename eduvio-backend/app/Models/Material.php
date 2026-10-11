@@ -36,10 +36,13 @@ class Material extends Model
         'seen_at',
         'event_manually_set',
         'hidden_at',
+        'is_exam_topics',
     ];
 
     protected $casts = [
         'event_manually_set' => 'boolean',
+        'for_exam' => 'boolean',
+        'is_exam_topics' => 'boolean',
         'hidden_at' => 'datetime',
         'subject_id' => 'integer',
         'last_checked_at' => 'datetime',

@@ -48,7 +48,7 @@ const SemesterLinkModal = ({ link, subjects, onClose, onSave }) => {
   const labelCls = 'text-xs font-semibold text-on-surface-variant'
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-scrim/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
       <div role="dialog" aria-modal="true" aria-labelledby="semester-link-title" className="bg-surface rounded-2xl shadow-2xl border border-outline-variant w-full max-w-md overflow-hidden font-inter">
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface">
           <h2 id="semester-link-title" className="text-lg font-semibold text-on-surface">
@@ -61,7 +61,7 @@ const SemesterLinkModal = ({ link, subjects, onClose, onSave }) => {
 
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
           {submitError && (
-            <div role="alert" className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-500">
+            <div role="alert" className="p-3 bg-error-container border border-error/30 rounded-xl text-sm text-on-error-container">
               {submitError}
             </div>
           )}

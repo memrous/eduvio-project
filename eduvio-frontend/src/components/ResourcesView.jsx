@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { renderAsync } from 'docx-preview'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import {
@@ -25,14 +24,11 @@ import {
   ChevronDown,
   CalendarClock,
   EyeOff,
+  FolderOpen,
 } from "lucide-react"
-import pdfIcon from '../assets/icons/pdf.png'
-import bookIcon from '../assets/icons/book.png'
-import imageIcon from '../assets/icons/image.png'
-import fileIcon from '../assets/icons/file.png'
-import folderIcon from '../assets/icons/folder.png'
 import Dropdown from './common/Dropdown'
-import CustomIcon from './CustomIcon'
+import Icon from './common/Icon'
+import MaterialTypeIcon from './materials/MaterialTypeIcon'
 import { getSubjectColor } from '../utils/subjectColors'
 import { getLocaleFromLanguage } from '../utils/locale'
 import LessonSelect from './materials/LessonSelect'
@@ -40,6 +36,8 @@ import MaterialActionsMenu from './materials/MaterialActionsMenu'
 import { useMaterialActions } from './materials/useMaterialActions'
 import { getMaterialKind, isHidden } from '../utils/materialKinds'
 import SemesterLinkModal from './materials/SemesterLinkModal'
+import ResourcePreviewModal from './materials/ResourcePreviewModal'
+import { getPreviewInfo, resolveResourceUrl } from '../utils/materialPreview'
 import { getSemesterLinkSourceLabel, getSemesterLinkTitle, isAutoSemesterLink } from '../utils/semesterLinks'
 import { getEventIdOf, getSubjectIdOf, isPersistedId, isSameId } from '../utils/ids'
 import {
@@ -53,60 +51,10 @@ import {
   getSubjectLessons,
 } from '../utils/lessons'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:80/api"
-
 // Select/filter value for materials without a subject ("Jiné").
 const OTHER_SUBJECT = 'none'
 
 const hasNoSubject = (resource) => resource.subjectId == null && resource.subject_id == null
-
-const MATERIAL_ICONS = {
-  PDF: pdfIcon,
-  NOTES: bookIcon,
-  SLIDES: imageIcon,
-  RECORDING: fileIcon,
-  LINK: folderIcon,
-  DOC: fileIcon,
-}
-
-const MaterialTypeIcon = ({ type, className = 'w-4.5 h-4.5' }) => (
-  <img
-    src={MATERIAL_ICONS[type] || fileIcon}
-    alt=""
-    aria-hidden="true"
-    className={`${className} object-contain`}
-  />
-)
-
-const resolveResourceUrl = (url) => {
-  if (!url) return ""
-  if (!import.meta.env.DEV) return url
-
-  try {
-    const parsed = new URL(url, window.location.origin)
-    const backend = new URL(API_BASE_URL, window.location.origin)
-
-    if (parsed.origin === backend.origin && parsed.pathname.startsWith("/storage/")) {
-      return `${parsed.pathname}${parsed.search}${parsed.hash}`
-    }
-  } catch {
-    // Fall back to the original URL when parsing fails.
-  }
-
-  return url
-}
-
-// ─── Type Config (colored icon tints, one per material type) ─
-const TYPE_CONFIG = {
-  PDF:       { Icon: (props) => <MaterialTypeIcon type="PDF" {...props} />,       iconBg: 'bg-red-500/10',     iconColor: 'text-red-500',     badgeBg: 'bg-surface-container-low', badgeText: 'text-on-surface-variant' },
-  NOTES:     { Icon: (props) => <MaterialTypeIcon type="NOTES" {...props} />,     iconBg: 'bg-amber-500/10',   iconColor: 'text-amber-500',   badgeBg: 'bg-surface-container-low', badgeText: 'text-on-surface-variant' },
-  SLIDES:    { Icon: (props) => <MaterialTypeIcon type="SLIDES" {...props} />,    iconBg: 'bg-indigo-500/10',  iconColor: 'text-indigo-500',  badgeBg: 'bg-surface-container-low', badgeText: 'text-on-surface-variant' },
-  RECORDING: { Icon: (props) => <MaterialTypeIcon type="RECORDING" {...props} />, iconBg: 'bg-emerald-500/10', iconColor: 'text-emerald-500', badgeBg: 'bg-surface-container-low', badgeText: 'text-on-surface-variant' },
-  LINK:      { Icon: (props) => <MaterialTypeIcon type="LINK" {...props} />,      iconBg: 'bg-sky-500/10',     iconColor: 'text-sky-500',     badgeBg: 'bg-surface-container-low', badgeText: 'text-on-surface-variant' },
-  DOC:       { Icon: (props) => <MaterialTypeIcon type="DOC" {...props} />,       iconBg: 'bg-blue-500/10',    iconColor: 'text-blue-500',    badgeBg: 'bg-surface-container-low', badgeText: 'text-on-surface-variant' },
-}
-
-const getTypeConfig = (type) => TYPE_CONFIG[type] ?? TYPE_CONFIG['DOC']
 
 const getTypeFromFileName = (fileName) => {
   const ext = fileName.split('.').pop()?.toLowerCase() || ''
@@ -119,23 +67,6 @@ const getTypeFromFileName = (fileName) => {
   return 'DOC'
 }
 
-const getPreviewInfo = (resource) => {
-  const rawUrl = resource.url || ""
-  const source = resource.fileName || resource.file_name || rawUrl
-  const ext = source.split(".").pop()?.toLowerCase() || ""
-  const isRemote = /^https?:\/\//i.test(rawUrl)
-  const isStorageUrl = rawUrl.includes("/storage/")
-  if (['jpg','jpeg','png','gif','svg','webp'].includes(ext)) return { canPreview: true, type: 'image' }
-  if (ext === 'pdf') return { canPreview: true, type: 'pdf' }
-  if (['txt','md'].includes(ext)) return { canPreview: true, type: 'text' }
-  if (['mp4','webm','mov'].includes(ext)) return { canPreview: true, type: 'video' }
-  if (ext === 'docx') return { canPreview: true, type: 'office-docx' }
-  if (['doc','ppt','pptx'].includes(ext) && isRemote && !isStorageUrl) return { canPreview: true, type: 'office-remote' }
-  if (['docx','ppt','pptx'].includes(ext) && isRemote && !isStorageUrl) return { canPreview: true, type: 'office-remote' }
-  if (['doc','ppt','pptx'].includes(ext)) return { canPreview: true, type: 'office-local' }
-  return { canPreview: false, type: 'unsupported' }
-}
-
 const TagChip = ({ label }) => (
   <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-container-low px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant">
     {label}
@@ -144,15 +75,11 @@ const TagChip = ({ label }) => (
 
 // ─── Recent Resource Card (horizontal compact) ───────────────
 const RecentCard = ({ resource, subjectName, t }) => {
-  const cfg = getTypeConfig(resource.type)
-  const { Icon } = cfg
   return (
     <div className="rounded-2xl border border-outline-variant bg-surface p-4 flex flex-col gap-3 flex-1 min-w-[220px] max-w-sm transition-colors hover:border-outline-variant/80">
       <div className="flex items-start justify-between">
-        <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${cfg.iconBg} ${cfg.iconColor}`}>
-          <Icon className="w-4.5 h-4.5" />
-        </span>
-        <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${cfg.badgeBg} ${cfg.badgeText}`}>
+        <MaterialTypeIcon resource={resource} tile="md" />
+        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-surface-container-low text-on-surface-variant">
           {t(`resources:typeShort.${resource.type}`, resource.type)}
         </span>
       </div>
@@ -168,7 +95,6 @@ const RecentCard = ({ resource, subjectName, t }) => {
 // ─── Resource Row (used inside session/event cards) ───────────
 const ResourceRow = ({ resource, onOpen, menu }) => {
   const { t } = useTranslation('resources')
-  const cfg = getTypeConfig(resource.type)
   const isLink = resource.type === 'LINK'
   const hidden = isHidden(resource)
 
@@ -177,9 +103,7 @@ const ResourceRow = ({ resource, onOpen, menu }) => {
       onClick={onOpen}
       className={`group flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 transition-colors hover:border-outline-variant hover:bg-surface-container-low/50 cursor-pointer ${hidden ? 'opacity-60' : ''}`}
     >
-      <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${cfg.iconBg} ${cfg.iconColor}`}>
-        <MaterialTypeIcon type={resource.type} />
-      </span>
+      <MaterialTypeIcon resource={resource} tile="md" />
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-on-surface">{resource.title}</p>
@@ -199,8 +123,6 @@ const ResourceRow = ({ resource, onOpen, menu }) => {
 
 // ─── Full Resource Card (grid, "Other materials" section) ────
 const ResourceCard = ({ resource, subjectName, onPreview, menu, t }) => {
-  const cfg = getTypeConfig(resource.type)
-  const { Icon } = cfg
   const isLink = resource.type === "LINK"
   const previewInfo = getPreviewInfo(resource)
   const url = resolveResourceUrl(resource.url)
@@ -220,9 +142,7 @@ const ResourceCard = ({ resource, subjectName, onPreview, menu, t }) => {
     <div className={`rounded-2xl border border-outline-variant bg-surface transition-colors hover:border-outline-variant/70 font-inter ${hidden ? 'opacity-60' : ''}`}>
       {/* Header */}
       <div className="flex items-start justify-between gap-2 p-4 pb-3">
-        <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${cfg.iconBg} ${cfg.iconColor}`}>
-          <Icon className="w-4.5 h-4.5" />
-        </span>
+        <MaterialTypeIcon resource={resource} tile="md" />
         <div className="flex flex-wrap gap-1.5 justify-end">
           {hidden && <TagChip label={t('resources:materialActions.hiddenBadge')} />}
           {getMaterialKind(resource) === 'moodle' && <TagChip label={t('resources:moodleBadge')} />}
@@ -250,7 +170,7 @@ const ResourceCard = ({ resource, subjectName, onPreview, menu, t }) => {
               className="flex size-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-primary/15 hover:text-primary"
               title={t('resources:actions.download')}
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="size-4" />
             </a>
           )}
           <button
@@ -258,7 +178,7 @@ const ResourceCard = ({ resource, subjectName, onPreview, menu, t }) => {
             className="flex size-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-primary/15 hover:text-primary cursor-pointer bg-transparent border-0"
             title={t('resources:actions.open')}
           >
-            {isLink || !previewInfo.canPreview ? <ExternalLink className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            {isLink || !previewInfo.canPreview ? <ExternalLink className="size-4" /> : <Eye className="size-4" />}
           </button>
           {menu && <MaterialActionsMenu label={menu.label} items={menu.items} />}
         </div>
@@ -365,7 +285,7 @@ const UploadModal = ({ onClose, onSave, subjects, events, semesterStarts, preset
   const labelCls = 'text-xs font-semibold text-on-surface-variant'
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-scrim/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
       <div className="bg-surface rounded-2xl shadow-2xl border border-outline-variant w-full max-w-md overflow-hidden font-inter">
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface">
           <h2 className="text-lg font-semibold text-on-surface">{t('resources:modal.title')}</h2>
@@ -376,7 +296,7 @@ const UploadModal = ({ onClose, onSave, subjects, events, semesterStarts, preset
 
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
           {submitError && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-500">
+            <div className="p-3 bg-error-container border border-error/30 rounded-xl text-sm text-on-error-container">
               {submitError}
             </div>
           )}
@@ -420,7 +340,7 @@ const UploadModal = ({ onClose, onSave, subjects, events, semesterStarts, preset
               />
               {showSuggestion && (
                 <p className="flex items-center gap-1.5 text-xs text-primary">
-                  <Sparkles className="size-3.5 shrink-0" aria-hidden="true" />
+                  <Sparkles className="size-4 shrink-0" aria-hidden="true" />
                   {t('resources:lessons.suggestionNote')}
                 </p>
               )}
@@ -490,7 +410,7 @@ const UploadModal = ({ onClose, onSave, subjects, events, semesterStarts, preset
             >
               {isSubmitting ? (
                 <>
-                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-4 w-4 text-on-primary" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
@@ -513,8 +433,6 @@ const SemesterLinkItem = ({ resource: res, subject, menu, onSeen }) => {
   // New links stay listed after "seen" clears them on the server
   const [expandedLinks, setExpandedLinks] = useState(null)
 
-  const cfg = getTypeConfig(res.type)
-  const isLink = res.type === 'LINK'
   const isAuto = isAutoSemesterLink(res)
   const title = getSemesterLinkTitle(res, subject, t)
   const newLinks = (res.page_links_new || []).filter((l) => /^https?:\/\//i.test(l.url))
@@ -546,9 +464,7 @@ const SemesterLinkItem = ({ resource: res, subject, menu, onSeen }) => {
   return (
     <div className={`group relative flex flex-col gap-2 rounded-xl border border-outline-variant bg-surface p-3 transition-colors hover:border-primary/40 hover:bg-surface/80 ${hidden ? 'opacity-60' : ''}`}>
       <div className="flex items-start gap-3">
-        <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${cfg.iconBg} ${cfg.iconColor}`}>
-          {isLink ? <ExternalLink className="w-4.5 h-4.5" /> : <MaterialTypeIcon type={res.type} />}
-        </span>
+        <MaterialTypeIcon resource={res} tile="md" />
         <div className="min-w-0 flex-1">
           <a
             href={res.url || resolveResourceUrl(res.url)}
@@ -660,7 +576,7 @@ const RefreshLinksButton = ({ departmentLinks }) => {
         disabled={isRefreshing || onCooldown}
         className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-on-surface-variant transition-colors hover:bg-primary/10 hover:text-primary cursor-pointer bg-transparent border-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent disabled:hover:text-on-surface-variant"
       >
-        <RefreshCw className={`size-3.5 ${isRefreshing ? 'animate-spin motion-reduce:animate-none' : ''}`} aria-hidden="true" />
+        <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin motion-reduce:animate-none' : ''}`} aria-hidden="true" />
         {label}
       </button>
       <p role="status" className="text-[11px] text-on-surface-variant/80 empty:hidden">
@@ -670,225 +586,11 @@ const RefreshLinksButton = ({ departmentLinks }) => {
   )
 }
 
-// ─── Preview Modal ────────────────────────────────────────────
-const ResourcePreviewModal = ({ resource, onClose }) => {
-  const { t } = useTranslation('resources')
-  const [textContent, setTextContent] = useState('')
-  const [loadingText, setLoadingText] = useState(false)
-  const [textError, setTextError] = useState(null)
-  const [loadingDocx, setLoadingDocx] = useState(false)
-  const [docxError, setDocxError] = useState(null)
-  const renderedDocxUrlRef = useRef(null)
-
-  const previewInfo = resource ? getPreviewInfo(resource) : { canPreview: false, type: 'unsupported' }
-  const url = resolveResourceUrl(resource?.url || "")
-
-  useEffect(() => {
-    if (previewInfo.type !== 'text' || !url) return
-
-    let active = true
-    const loadText = async () => {
-      setLoadingText(true)
-      setTextError(null)
-      try {
-        const res = await fetch(url)
-        if (!res.ok) throw new Error('preview.loadTextError')
-        const text = await res.text()
-        if (!active) return
-        setTextContent(text)
-      } catch (err) {
-        if (!active) return
-        setTextError(err.message)
-      } finally {
-        if (active) setLoadingText(false)
-      }
-    }
-
-    void loadText()
-    return () => {
-      active = false
-    }
-  }, [previewInfo.type, url])
-
-  const docxCallbackRef = (container) => {
-    if (!container || previewInfo.type !== 'office-docx' || !url) return
-    if (renderedDocxUrlRef.current === url) return
-
-    renderedDocxUrlRef.current = url
-    setLoadingDocx(true)
-    setDocxError(null)
-    container.innerHTML = ''
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) throw new Error('preview.loadDocxError')
-        return res.arrayBuffer()
-      })
-      .then((data) => renderAsync(data, container, undefined, {
-        className: 'docx-preview-container',
-        inWrapper: true,
-        ignoreWidth: false,
-        ignoreHeight: false,
-        ignoreFonts: false,
-        breakPages: true,
-        useBase64URL: true,
-      }))
-      .then(() => setLoadingDocx(false))
-      .catch((err) => {
-        renderedDocxUrlRef.current = null
-        setDocxError(err.message)
-        setLoadingDocx(false)
-      })
-  }
-
-  if (!resource) return null
-
-  const docPreviewUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`
-
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-      <div className="bg-surface rounded-2xl shadow-2xl border border-outline-variant w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden font-inter">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <h2 className="text-lg font-semibold text-on-surface truncate">{resource.title}</h2>
-            <span className="inline-flex items-center rounded-full bg-surface-container-low px-2.5 py-1 text-[10px] font-semibold text-on-surface-variant">
-              {resource.type}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <a
-              href={url}
-              download
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-outline-variant hover:bg-surface-container rounded-xl text-sm font-semibold text-on-surface transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>{t('resources:actions.download')}</span>
-            </a>
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-full hover:bg-surface-container transition-colors text-on-surface-variant hover:text-on-surface cursor-pointer bg-transparent border-0"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 bg-surface-container-low overflow-hidden p-6 flex flex-col">
-          <div className="mb-4 shrink-0">
-            <p className="text-sm font-semibold text-on-surface">{resource.title}</p>
-            <p className="text-sm text-on-surface-variant">{resource.description}</p>
-          </div>
-
-          <div className="flex-1 bg-surface rounded-2xl overflow-hidden border border-outline-variant flex items-center justify-center relative">
-            {previewInfo.type === 'image' && (
-              <img src={url} alt={resource.title} className="w-full h-full object-contain" />
-            )}
-
-            {previewInfo.type === 'pdf' && (
-              <iframe src={url} title={resource.title} className="w-full h-full border-0" />
-            )}
-
-            {previewInfo.type === 'video' && (
-              <video controls src={url} className="max-w-full max-h-full" />
-            )}
-
-            {previewInfo.type === 'text' && (
-              <div className="w-full h-full overflow-auto p-6 bg-surface self-stretch text-left">
-                {loadingText ? (
-                  <div className="flex items-center justify-center h-full">
-                    <span className="text-on-surface-variant font-medium">{t('resources:preview.loadingText')}</span>
-                  </div>
-                ) : textError ? (
-                  <div className="flex items-center justify-center h-full text-error font-medium">
-                    <span>{t(`resources:${textError}`, t('resources:preview.loadTextError'))}</span>
-                  </div>
-                ) : (
-                  <pre className="text-sm font-mono whitespace-pre-wrap text-on-surface">
-                    {textContent}
-                  </pre>
-                )}
-              </div>
-            )}
-
-            {previewInfo.type === 'office-remote' && (
-              <iframe src={docPreviewUrl} title={resource.title} className="w-full h-full border-0" />
-            )}
-
-            {previewInfo.type === 'office-docx' && (
-              <div className="w-full h-full overflow-auto bg-surface-container-low relative">
-                {loadingDocx && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-surface/90 z-10">
-                    <div className="flex flex-col items-center gap-3">
-                      <svg className="animate-spin h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      <span className="text-sm font-medium text-on-surface-variant">{t('resources:preview.renderingDocument')}</span>
-                    </div>
-                  </div>
-                )}
-                {docxError && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-                    <File className="w-12 h-12 text-red-500 mb-3" />
-                    <p className="text-sm text-red-500 font-semibold mb-1">{t('resources:preview.failedRenderDocument')}</p>
-                    <p className="text-sm text-on-surface-variant mb-4">{docxError}</p>
-                    <a href={url} download className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
-                      <Download className="w-4 h-4" />
-                      <span>{t('resources:actions.downloadFile')}</span>
-                    </a>
-                  </div>
-                )}
-                <div
-                  ref={docxCallbackRef}
-                  className="w-full h-full"
-                />
-              </div>
-            )}
-
-            {previewInfo.type === 'office-local' && (
-              <div className="flex flex-col items-center justify-center text-center p-8">
-                <File className="w-16 h-16 text-on-surface-variant mb-4" />
-                <p className="text-sm text-on-surface font-semibold mb-2">{t('resources:preview.directPreviewLocalOffice')}</p>
-                <p className="text-sm text-on-surface-variant mb-4">{t('resources:preview.pleaseDownload')}</p>
-                <a
-                  href={url}
-                  download
-                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>{t('resources:actions.downloadFile')}</span>
-                </a>
-              </div>
-            )}
-
-            {previewInfo.type === 'unsupported' && (
-              <div className="flex flex-col items-center justify-center text-center p-8">
-                <File className="w-16 h-16 text-on-surface-variant mb-4" />
-                <p className="text-sm text-on-surface mb-4">{t('resources:preview.noPreview')}</p>
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors shadow-sm"
-                >
-                  {t('resources:openInNewTab')}
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // ─── Main ResourcesView Component ────────────────────────────
-const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdateResource, onDeleteResource, onMarkSeen, onAssignEvent, onUpdateMaterial, onSetHidden, departmentLinks }) => {
+const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdateResource, onDeleteResource, onMarkSeen, onAssignEvent, onUpdateMaterial, onSetHidden, onSetForExam, departmentLinks }) => {
   const { t, i18n } = useTranslation(['resources', 'dashboard'])
-  // Filters live in the URL (?subject=…&type=…&week=…&q=…&hidden=1): shareable, kept on reload
+  // Filters live in the URL (?subject=…&type=…&week=…&q=…&hidden=1): shareable, kept on reload.
+  // ?preview=<id> opens the preview of a material (e.g. from the header search).
   const [searchParams, setSearchParams] = useSearchParams()
   const subjectFilter = searchParams.get('subject') ?? 'all'
   const typeFilter = searchParams.get('type') ?? 'all'
@@ -910,6 +612,13 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
   const setShowHidden = (value) => setFilter('hidden', value ? '1' : null, null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [previewResource, setPreviewResource] = useState(null)
+  const previewParam = searchParams.get('preview')
+  const shownPreview = previewResource
+    ?? (previewParam ? (resources || []).find((r) => isSameId(r.id, previewParam)) ?? null : null)
+  const closePreview = () => {
+    setPreviewResource(null)
+    if (previewParam) setFilter('preview', null, null)
+  }
   // Adding a new semester link
   const [isAddingLink, setIsAddingLink] = useState(false)
 
@@ -926,6 +635,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
       updateSemesterLink: onUpdateResource,
       deleteResource: onDeleteResource,
       setHidden: onSetHidden,
+      setForExam: onSetForExam,
     },
   })
   const menuFor = (resource) => {
@@ -1184,7 +894,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
             {weeklyGroups.length === 0 && generalGrouped.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-outline-variant bg-surface/50 p-16 text-center flex flex-col items-center gap-3">
                 <div className="w-12 h-12 bg-surface-container-low text-primary rounded-full flex items-center justify-center">
-                  <CustomIcon name="book" className="w-6 h-6" />
+                  <Icon icon={FolderOpen} size="lg" />
                 </div>
                 {weekFilter !== 'all' ? (
                   <>
@@ -1241,7 +951,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
                       <div className="relative flex flex-col gap-5 pl-6">
                         <span
                           aria-hidden="true"
-                          className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-outline-variant via-outline-variant to-transparent"
+                          className="absolute left-[7px] top-2 bottom-2 w-px bg-outline-variant"
                         />
                         {group.sessions.map((session) => {
                           const color = getSubjectColor(session.subject)
@@ -1269,7 +979,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
                                       <span className="hidden font-normal opacity-80 sm:inline">{session.subject?.name}</span>
                                     </span>
                                     <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-container-low px-2.5 py-1 text-xs font-medium text-on-surface-variant">
-                                      <TypeIcon className="size-3.5" />
+                                      <TypeIcon className="size-4" />
                                       {eventTypeLabel}
                                     </span>
                                   </div>
@@ -1279,7 +989,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
                                       {session.event.title}
                                     </h3>
                                     <p className="flex items-center gap-1.5 text-xs text-on-surface-variant">
-                                      <CalendarDays className="size-3.5" />
+                                      <CalendarDays className="size-4" />
                                       {formatEventDate(session.event.date)}
                                     </p>
                                   </div>
@@ -1339,7 +1049,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
                     {generalGrouped.map(({ subject, items }) => (
                       <div key={subject?.id ?? OTHER_SUBJECT} className="flex flex-col gap-4">
                         <h3 className="text-sm font-semibold text-on-surface flex items-center gap-2">
-                          <CustomIcon name="folder" className="w-4 h-4" />
+                          <Icon icon={FolderOpen} className="text-on-surface-variant" />
                           {subject ? (
                             <>{subject.name} <span className="text-xs text-on-surface-variant font-medium">({subject.code})</span></>
                           ) : t('resources:otherSubject')}
@@ -1440,8 +1150,8 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
       )}
 
       {/* Preview Modal */}
-      {previewResource && (
-        <ResourcePreviewModal resource={previewResource} onClose={() => setPreviewResource(null)} />
+      {shownPreview && (
+        <ResourcePreviewModal resource={shownPreview} onClose={closePreview} />
       )}
     </>
   )

@@ -246,8 +246,8 @@ const StagServerCard = ({
     <div className="space-y-4">
       {isStagConnected && syncStatus === 'pending' && (
         <div className="flex items-start gap-2.5 px-4 py-3 bg-primary-container border border-primary/30 rounded-lg">
-          <Loader2 className="w-4 h-4 text-on-primary shrink-0 mt-0.5 animate-spin" />
-          <p className="text-label-sm text-on-primary">{t('stag.status.syncing')}</p>
+          <Loader2 className="w-4 h-4 text-primary shrink-0 mt-0.5 animate-spin" />
+          <p className="text-label-sm text-on-primary-container">{t('stag.status.syncing')}</p>
         </div>
       )}
 
@@ -255,7 +255,7 @@ const StagServerCard = ({
         <div className="flex items-center justify-between gap-3 px-4 py-3 bg-success-container border border-success/30 rounded-lg">
           <div className="flex items-start gap-2.5">
             <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
-            <p className="text-label-sm text-success">{t('stag.status.success')}</p>
+            <p className="text-label-sm text-on-success-container">{t('stag.status.success')}</p>
           </div>
           {navigate && (
             <button
@@ -263,7 +263,7 @@ const StagServerCard = ({
               onClick={() => navigate('/dashboard')}
               className="cursor-pointer shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-success px-3 py-1.5 text-xs font-semibold text-on-success transition-colors"
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
+              <LayoutGrid className="size-4" />
               {t('profile:stag.actions.goToDashboard')}
             </button>
           )}
@@ -284,11 +284,11 @@ const StagServerCard = ({
             <p className="text-sm text-on-surface-variant">{t('stag.card.subtitle')}</p>
           </div>
           {isStagConnected ? (
-            <span className="inline-flex items-center rounded-full bg-success-container text-success px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
+            <span className="inline-flex items-center rounded-full bg-success-container text-on-success-container px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
               {t('stag.connected.connected')}
             </span>
           ) : (
-            <span className="inline-flex items-center rounded-full bg-error-container text-error px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
+            <span className="inline-flex items-center rounded-full bg-error-container text-on-error-container px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
               {t('stag.connected.notConnected')}
             </span>
           )}
@@ -304,7 +304,7 @@ const StagServerCard = ({
               type="button"
               onClick={handleStagConnect}
               disabled={stagRedirecting}
-              className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+              className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {stagRedirecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
               {t('stag.actions.connect')}
@@ -314,11 +314,11 @@ const StagServerCard = ({
           <div className="space-y-4">
             <div className="grid gap-3 rounded-xl border border-success/30 bg-success-container/10 p-4 sm:grid-cols-2">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-success">{t('stag.labels.studentId')}</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('stag.labels.studentId')}</p>
                 <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_student_id || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-success">{t('stag.labels.username')}</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('stag.labels.username')}</p>
                 <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_user_name || 'N/A'}</p>
               </div>
             </div>
@@ -328,7 +328,7 @@ const StagServerCard = ({
                 type="button"
                 onClick={handleResync}
                 disabled={resyncLoading || syncStatus === 'pending' || cooldownSecs > 0}
-                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {resyncLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

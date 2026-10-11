@@ -16,6 +16,7 @@ class InfUpolClient
 {
     private const PAGE_CACHE_PREFIX = 'department-http:page:';
     private const ROBOTS_CACHE_PREFIX = 'department-http:robots:';
+    private const ACTION_CACHE_PREFIX = 'department-http:action:';
     private const THROTTLE_LOCK = 'department-http:throttle';
     private const LAST_REQUEST_KEY = 'department-http:last-request';
 
@@ -47,6 +48,62 @@ class InfUpolClient
         Cache::put($cacheKey, ['page' => $page], $this->cacheTtl());
 
         return $page;
+    }
+
+    /**
+     * Call a Next.js server action of a page (a POST to the page URL), with the
+     * same host, robots.txt, throttling and cache rules as page requests.
+     * Used for course pages that load their content client-side.
+     *
+     * @param  list<string|int>  $args  arguments of the action
+     * @return string|null  the React Flight response, null when the page does
+     *         not exist, robots.txt disallows it or its host is not allowed
+     *
+     * @throws DepartmentFetchException when the outcome is unknown
+     */
+    public function postServerAction(string $url, string $actionId, array $args, array $extraHosts = []): ?string
+    {
+        if (! $this->isFetchableUrl($url, $extraHosts) || ! preg_match('/^[0-9a-f]{16,64}$/i', $actionId)) {
+            return null;
+        }
+
+        $body = json_encode(array_values($args), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $cacheKey = self::ACTION_CACHE_PREFIX . sha1($url . '|' . $actionId . '|' . $body);
+        $cached = Cache::get($cacheKey);
+        if (is_array($cached)) {
+            return $cached['body'];
+        }
+
+        if (! $this->robotsAllows($url)) {
+            return null;
+        }
+
+        $this->throttle();
+        try {
+            $response = Http::withHeaders([
+                'User-Agent'  => $this->userAgent(),
+                'Next-Action' => $actionId,
+                'Accept'      => 'text/x-component',
+            ])
+                ->timeout((int) config('departments.timeout_seconds', 10))
+                ->withOptions(['allow_redirects' => false])
+                ->withBody($body, 'text/plain;charset=UTF-8')
+                ->post($url);
+        } catch (ConnectionException $e) {
+            throw new DepartmentFetchException("Connection failed for {$url}", 0, $e);
+        }
+
+        if (in_array($response->status(), [404, 410], true)) {
+            return null;
+        }
+        // An unknown action id (site redeployed) answers with HTML or an error
+        if (! $response->successful() || ! str_contains(strtolower($response->header('Content-Type')), 'text/x-component')) {
+            throw new DepartmentFetchException("Server action failed for {$url} (HTTP {$response->status()})");
+        }
+
+        Cache::put($cacheKey, ['body' => $response->body()], $this->cacheTtl());
+
+        return $response->body();
     }
 
     public function userAgent(): string

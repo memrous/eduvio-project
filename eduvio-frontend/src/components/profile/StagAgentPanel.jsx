@@ -26,7 +26,7 @@ const AGENT_COMMANDS = [
 ]
 
 const primaryButton =
-  'cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60'
+  'cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60'
 const secondaryButton =
   'cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-3.5 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors disabled:cursor-not-allowed disabled:opacity-60'
 const dangerButton =
@@ -166,7 +166,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
       return (
         <div className="flex items-start gap-2.5 px-4 py-3 bg-success-container border border-success/30 rounded-lg">
           <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
-          <div className="text-label-sm text-success space-y-0.5">
+          <div className="text-label-sm text-on-success-container space-y-0.5">
             <p className="font-semibold">{t('stag.agent.status.title')} · {t('stag.agent.status.success')}</p>
             <p>{t('stag.agent.status.lastSync')} {lastSync}</p>
           </div>
@@ -191,7 +191,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
 
       {agentToken && isStale && (
         <p className="flex items-start gap-2 text-xs text-on-surface-variant">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <AlertCircle className="size-4 shrink-0 mt-0.5" />
           {syncedAt ? t('stag.agent.stale.old') : t('stag.agent.stale.never')}
         </p>
       )}
@@ -203,11 +203,11 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
             <p className="text-sm text-on-surface-variant">{t('stag.agent.card.subtitle')}</p>
           </div>
           {isConnected ? (
-            <span className="inline-flex items-center rounded-full bg-success-container text-success px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
+            <span className="inline-flex items-center rounded-full bg-success-container text-on-success-container px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
               {t('stag.connected.connected')}
             </span>
           ) : (
-            <span className="inline-flex items-center rounded-full bg-error-container text-error px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
+            <span className="inline-flex items-center rounded-full bg-error-container text-on-error-container px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
               {t('stag.connected.notConnected')}
             </span>
           )}

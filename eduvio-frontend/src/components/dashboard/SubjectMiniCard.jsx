@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
 
 const getScoreClasses = (score) => {
-  if (score >= 70) return 'bg-success/12 text-success'
-  if (score >= 40) return 'bg-primary/12 text-primary'
-  return 'bg-error/12 text-error'
+  if (score >= 70) return 'bg-success-container text-on-success-container'
+  if (score >= 40) return 'bg-primary-container text-on-primary-container'
+  return 'bg-error-container text-on-error-container'
 }
 
 const SubjectMiniCard = ({ subject, onSelect }) => {

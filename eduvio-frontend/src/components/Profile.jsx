@@ -184,7 +184,7 @@ const Profile = ({ user: initialUser }) => {
               ) : userInitials ? (
                 userInitials
               ) : (
-                <UserRound className="w-7 h-7 text-on-surface-variant" />
+                <UserRound className="size-6 text-on-surface-variant" />
               )}
             </div>
 
@@ -204,7 +204,7 @@ const Profile = ({ user: initialUser }) => {
 
             {isStagConnected && (
               <div className="inline-flex items-center gap-1.5 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-4">
-                <GraduationCap className="w-3.5 h-3.5" />
+                <GraduationCap className="size-4" />
                 <span>{t('sidebar.role', 'Student')}</span>
               </div>
             )}
@@ -367,7 +367,7 @@ const Profile = ({ user: initialUser }) => {
                         <span
                           className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
                             item.connected
-                              ? 'bg-success-container border border-success/30 text-success'
+                              ? 'bg-success-container border border-success/30 text-on-success-container'
                               : 'bg-surface-container border border-outline-variant text-on-surface-variant'
                           }`}
                         >
@@ -380,7 +380,7 @@ const Profile = ({ user: initialUser }) => {
                           className="cursor-pointer inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                         >
                           <span>{item.connected ? t('overview.manage') : t('overview.connect')}</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
+                          <ChevronRight className="size-4" />
                         </button>
                       </div>
                     </div>

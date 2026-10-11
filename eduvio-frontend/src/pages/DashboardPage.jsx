@@ -1,3 +1,4 @@
+import { CalendarDays } from 'lucide-react'
 import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation, Trans } from 'react-i18next'
@@ -8,8 +9,6 @@ import { useStagStatus } from '../hooks/useStagStatus'
 import { useResources } from '../hooks/useResources'
 import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
-import { Sparkles } from 'lucide-react'
-import CustomIcon from '../components/CustomIcon'
 import PageState from '../components/PageState'
 import { DashboardSkeleton } from '../components/common/Skeleton'
 
@@ -19,6 +18,8 @@ import NeedsAttention from '../components/dashboard/NeedsAttention'
 import SubjectMiniCard from '../components/dashboard/SubjectMiniCard'
 import TodaySchedule from '../components/dashboard/TodaySchedule'
 import QuickProgress from '../components/dashboard/QuickProgress'
+import RecentMaterials from '../components/RecentMaterials'
+import Icon from '../components/common/Icon'
 
 const getGreetingKey = () => {
   const hour = new Date().getHours()
@@ -144,16 +145,8 @@ const DashboardPage = () => {
     })
   }, [summary?.subjects, allSubjects])
 
-  // Subjects whose linked course pages have new files or subpages
-  const { data: resources } = useResources()
-  const subjectsWithNewMaterials = useMemo(() => {
-    const ids = new Set(
-      resources
-        .filter((r) => r.category === 'platform' && !r.hidden_at && r.page_links_new?.length > 0)
-        .map((r) => r.subjectId ?? r.subject_id ?? `link-${r.id}`)
-    )
-    return ids.size
-  }, [resources])
+  // Recent materials box; the query is invalidated after upload, delete, hide and sync
+  const { data: resources, isLoading: resourcesLoading, markResourceSeen } = useResources()
 
   const todayDeadlinesCount = useMemo(() => {
     return (summary?.todaySchedule || []).length
@@ -239,8 +232,8 @@ const DashboardPage = () => {
               {t(getGreetingKey(), { name: user?.name })}
             </h1>
             <div className="flex items-center gap-2 text-body-md text-on-surface-variant font-medium">
-              <div className="w-5 h-5 bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center rounded-sm">
-                <CustomIcon name="calendar" className="w-3.5 h-3.5" />
+              <div className="w-5 h-5 bg-error-container text-on-error-container flex items-center justify-center rounded-sm">
+                <Icon icon={CalendarDays} />
               </div>
               <span>
                 <Trans
@@ -252,18 +245,6 @@ const DashboardPage = () => {
                 />
               </span>
             </div>
-            {subjectsWithNewMaterials > 0 && (
-              <button
-                type="button"
-                onClick={() => navigate('/materials')}
-                className="flex w-fit items-center gap-2 text-body-md text-on-surface-variant font-medium bg-transparent border-0 p-0 cursor-pointer transition-colors hover:text-primary"
-              >
-                <span className="w-5 h-5 bg-primary/10 text-primary flex items-center justify-center rounded-sm">
-                  <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-                </span>
-                <span>{t('dashboardPage.newMaterials', { count: subjectsWithNewMaterials })}</span>
-              </button>
-            )}
           </div>
         </div>
 
@@ -318,6 +299,14 @@ const DashboardPage = () => {
         </div>
         <div className="order-6 lg:order-none">
           <QuickProgress progress={summary.progress} />
+        </div>
+        <div className="order-7 lg:order-none">
+          <RecentMaterials
+            resources={resources}
+            subjects={allSubjects}
+            isLoading={resourcesLoading}
+            onMarkSeen={markResourceSeen}
+          />
         </div>
       </div>
     </div>

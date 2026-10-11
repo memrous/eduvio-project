@@ -75,7 +75,7 @@ const SubjectSummaryStrip = ({ subject, requirements = [] }) => {
           <p className="mt-2.5 text-xs text-on-surface-variant">
             {t('academic:subjectDetail.metrics.passThreshold', { value: passThreshold })}
             {hasPoints && (
-              <span className={`ml-1.5 font-semibold ${thresholdMet ? 'text-success' : 'text-error'}`}>
+              <span className={`ml-1.5 font-semibold ${thresholdMet ? 'text-on-success-container' : 'text-error'}`}>
                 {thresholdMet
                   ? t('academic:subjectDetail.progress.minimumMet')
                   : t('academic:subjectDetail.metrics.missingToThreshold', { diff: passThreshold - percentage })}

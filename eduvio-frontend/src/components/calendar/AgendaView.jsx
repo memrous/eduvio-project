@@ -1,6 +1,7 @@
 import { Paperclip, MapPin, Clock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { formatRoom } from '../../utils/room'
+import { deadlineTimeLabel, getAssessmentLabel, isWebAssessment } from '../../utils/assessments'
 
 const AgendaView = ({
   currentWeekDays,
@@ -112,7 +113,7 @@ const AgendaView = ({
                     const style = getSubjectStyle(subject)
                     const Icon = getDeadlineIcon(item.type)
                     const subjectCode = subject?.code || ''
-                    const dueTime = item.time || '23:59'
+                    const dueTime = deadlineTimeLabel(item)
 
                     return (
                       <div
@@ -137,7 +138,7 @@ const AgendaView = ({
                             {item.title}
                           </span>
                           <span className={`text-xs font-semibold ${style.text}`}>
-                            {subjectCode ? `${subjectCode} · ` : ''}{t('academic:calendarGrid.deadlineSubmission')}
+                            {subjectCode ? `${subjectCode} · ` : ''}{isWebAssessment(item) ? getAssessmentLabel(item.type, t) : t('academic:calendarGrid.deadlineSubmission')}
                           </span>
                         </div>
 

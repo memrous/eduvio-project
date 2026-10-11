@@ -3,6 +3,7 @@ import { Flame, Zap, GraduationCap } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getSubjectStyle, formatDateKey } from './useCalendarState'
 import { getLocaleFromLanguage } from '../../utils/locale'
+import { getAssessmentIcon, isAssessmentType } from '../../utils/assessments'
 import MonthView from './MonthView'
 import WeekView from './WeekView'
 import AgendaView from './AgendaView'
@@ -11,6 +12,7 @@ import MobileDayDetailSheet from './MobileDayDetailSheet'
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 const getDeadlineIcon = (type) => {
+  if (isAssessmentType(type)) return getAssessmentIcon(type)
   const t = String(type || '').toLowerCase()
   if (t.includes('test') || t.includes('quiz')) return Zap
   if (t.includes('exam') || t.includes('zkouška')) return GraduationCap

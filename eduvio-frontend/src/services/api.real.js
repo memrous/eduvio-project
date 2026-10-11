@@ -249,6 +249,11 @@ export const unhideResource = async (userId, resourceId) => {
   return request(() => httpClient.post(`/materials/${resourceId}/unhide`).then((res) => res.data))
 }
 
+export const setResourceForExam = async (userId, resourceId, forExam) => {
+  const method = forExam ? 'post' : 'delete'
+  return request(() => httpClient[method](`/materials/${resourceId}/for-exam`).then((res) => res.data))
+}
+
 export const assignResourceEvent = async (userId, resourceId, eventId) => {
   return request(() => httpClient.patch(`/materials/${resourceId}`, { eventId }).then((res) => res.data))
 }
@@ -289,4 +294,35 @@ export const updateNote = async (subjectId, content) => {
 }
 export const getSubjectDetail = async (subjectId) => {
   return request(() => httpClient.get(`/subjects/${subjectId}`).then((res) => res.data))
+}
+
+// Exam: terms from STAG (read-only) and the student's topic checklist
+export const getExamTerms = async (subjectId) => {
+  return request(() => httpClient.get(`/subjects/${subjectId}/exam-terms`).then((res) => res.data))
+}
+export const getExamTopics = async (subjectId) => {
+  return request(() => httpClient.get(`/subjects/${subjectId}/exam-topics`).then((res) => res.data))
+}
+export const addExamTopics = async (subjectId, titles) => {
+  return request(() => httpClient.post(`/subjects/${subjectId}/exam-topics`, { titles }).then((res) => res.data))
+}
+export const updateExamTopic = async (topicId, fields) => {
+  return request(() => httpClient.patch(`/exam-topics/${topicId}`, fields).then((res) => res.data))
+}
+export const deleteExamTopic = async (topicId) => {
+  return request(() => httpClient.delete(`/exam-topics/${topicId}`).then((res) => res.data))
+}
+
+// Semester schedule from teachers' course pages
+export const getSyllabus = async (subjectId) => {
+  return request(() => httpClient.get(`/subjects/${subjectId}/syllabus`).then((res) => res.data))
+}
+export const getWebAssessments = async () => {
+  return request(() => httpClient.get('/syllabus/assessments').then((res) => res.data))
+}
+export const hideSyllabusItem = async (id) => {
+  return request(() => httpClient.post(`/syllabus-items/${id}/hide`).then((res) => res.data))
+}
+export const unhideSyllabusItem = async (id) => {
+  return request(() => httpClient.post(`/syllabus-items/${id}/unhide`).then((res) => res.data))
 }

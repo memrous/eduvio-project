@@ -40,7 +40,7 @@ const SecurityTab = () => {
               disabled
               className="cursor-not-allowed opacity-60 inline-flex items-center gap-1.5 bg-surface-container-low border border-outline-variant text-on-surface-variant text-xs font-semibold px-3.5 py-2 rounded-xl"
             >
-              <KeyRound className="w-3.5 h-3.5" />
+              <KeyRound className="size-4" />
               <span>{t('security.password.action')}</span>
             </button>
           </div>
@@ -59,7 +59,7 @@ const SecurityTab = () => {
               disabled
               className="cursor-not-allowed opacity-60 inline-flex items-center gap-1.5 bg-surface-container-low border border-outline-variant text-on-surface-variant text-xs font-semibold px-3.5 py-2 rounded-xl"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="size-4" />
               <span>{t('security.sessions.action')}</span>
             </button>
           </div>

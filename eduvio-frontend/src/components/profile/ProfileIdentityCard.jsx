@@ -1,5 +1,7 @@
 ﻿import { useTranslation } from 'react-i18next'
 import { GraduationCap, Mail } from 'lucide-react'
+import Avatar from '../common/Avatar'
+import Icon from '../common/Icon'
 
 const ProfileIdentityCard = ({ effectiveUser }) => {
   const { t } = useTranslation('profile')
@@ -8,13 +10,15 @@ const ProfileIdentityCard = ({ effectiveUser }) => {
     <div className="rounded-2xl border border-outline-variant bg-surface-container-low p-5 space-y-4">
       <div className="flex items-center gap-4">
         <div className="relative shrink-0">
-          <img
-            src={effectiveUser?.avatarUrl || 'src/assets/icons/user.png'}
+          <Avatar
+            name={effectiveUser?.name || effectiveUser?.username}
+            src={effectiveUser?.avatarUrl}
             alt={t('header.avatarAlt')}
-            className="w-16 h-16 rounded-full object-cover border border-outline-variant shadow-sm"
+            size="lg"
+            className="shadow-sm"
           />
-          <div className="absolute -bottom-1 -right-1 bg-primary text-white w-6 h-6 rounded-full grid place-items-center border-2 border-surface-container-low shadow-sm">
-            <GraduationCap className="w-3.5 h-3.5" />
+          <div className="absolute -bottom-1 -right-1 bg-primary text-on-primary w-6 h-6 rounded-full grid place-items-center border-2 border-surface-container-low shadow-sm">
+            <Icon icon={GraduationCap} />
           </div>
         </div>
 

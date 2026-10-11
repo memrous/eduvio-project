@@ -17,8 +17,22 @@
   "somethingWentWrong": "Něco se pokazilo",
   "errorSafeState": "Zkuste stránku znovu načíst. Aplikace byla ponechána v bezpečném stavu.",
   "reloadPage": "Znovu načíst stránku",
-  "header": {
-    "searchPlaceholder": "Hledat předměty, úkoly nebo poznámky..."
+  "search": {
+    "placeholder": "Hledat předměty a materiály",
+    "label": "Hledat v předmětech a materiálech",
+    "open": "Otevřít vyhledávání",
+    "close": "Zavřít vyhledávání",
+    "clear": "Vymazat hledání",
+    "subjects": "Předměty",
+    "materials": "Materiály",
+    "showAll": "Zobrazit všechny výsledky",
+    "noResults": "Nic jsme nenašli pro „{{query}}“",
+    "loading": "Načítám předměty a materiály…",
+    "shortcutHint": "Zkratka {{keys}}",
+    "resultsCount_zero": "Žádné výsledky",
+    "resultsCount_one": "{{count}} výsledek",
+    "resultsCount_few": "{{count}} výsledky",
+    "resultsCount_other": "{{count}} výsledků"
   },
   "sidebar": {
     "dashboard": "Nástěnka",
@@ -42,5 +56,14 @@
     "container": "Oznámení"
   },
   "awaitingFirstSync": "Čeká na první synchronizaci",
-  "awaitingFirstSyncDescription": "Token agenta je připravený. Spusťte STAG agenta na počítači připojeném k VPN UPOL a data se tu objeví."
+  "awaitingFirstSyncDescription": "Token agenta je připravený. Spusťte STAG agenta na počítači připojeném k VPN UPOL a data se tu objeví.",
+  "assessmentTypes": {
+    "test": "Písemka",
+    "credit_test": "Zápočtový test",
+    "retake": "Oprava",
+    "exam": "Zkouška",
+    "deadline": "Odevzdání",
+    "project": "Projekt"
+  },
+  "fromTeacherWeb": "Z webu vyučujícího"
 }

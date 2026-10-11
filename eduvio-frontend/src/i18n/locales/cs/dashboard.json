@@ -21,10 +21,7 @@
     "todayDeadlines_zero": "Dnes nemáte žádné termíny.",
     "todayDeadlines_one": "Na dnešek máte <strong>{{count}} termín</strong>. Jdeme na to!",
     "todayDeadlines_few": "Na dnešek máte <strong>{{count}} termíny</strong>. Jdeme na to!",
-    "todayDeadlines_other": "Na dnešek máte <strong>{{count}} termínů</strong>. Jdeme na to!",
-    "newMaterials_one": "Nové materiály u {{count}} předmětu",
-    "newMaterials_few": "Nové materiály u {{count}} předmětů",
-    "newMaterials_other": "Nové materiály u {{count}} předmětů"
+    "todayDeadlines_other": "Na dnešek máte <strong>{{count}} termínů</strong>. Jdeme na to!"
   },
   "stats": {
     "activeSubjects": "Aktivní předměty",
@@ -63,15 +60,9 @@
   },
   "recentMaterials": {
     "title": "Nedávné materiály",
-    "noResources": "Žádné materiály nejsou k dispozici.",
-    "attachment": "Příloha",
-    "resourceTypes": {
-      "PDF": "PDF",
-      "SLIDES": "Prezentace",
-      "LINK": "URL",
-      "NOTES": "Poznámky",
-      "default": "Dokument"
-    }
+    "viewAll": "Všechny materiály",
+    "empty": "Zatím tu nejsou žádné materiály.",
+    "uploadMaterial": "Nahrát materiál"
   },
   "subjectCard": {
     "mandatory": "Povinný",
@@ -101,7 +92,11 @@
     "uploadSolution": "Nahrát řešení",
     "viewDetail": "Zobrazit detail",
     "noAlerts": "Vše je v pořádku, nic nevyžaduje pozornost.",
-    "allDone": "Vše hotovo!"
+    "allDone": "Vše hotovo!",
+    "assessmentMessage_zero": "Dnes · podle webu vyučujícího",
+    "assessmentMessage_one": "Zítra · podle webu vyučujícího",
+    "assessmentMessage_few": "Za {{count}} dny · podle webu vyučujícího",
+    "assessmentMessage_other": "Za {{count}} dní · podle webu vyučujícího"
   },
   "nextUp": {
     "title": "Právě přichází",

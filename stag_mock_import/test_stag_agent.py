@@ -217,6 +217,16 @@ class LoginUrlTest(unittest.TestCase):
         )
 
 
+# getTerminyProStudenta: one registered exam term
+EXAM_TERM = {
+    "termIdno": 987654, "predmet": "AGT", "katedra": "KMI", "datum": {"value": "20.1.2027"},
+    "casOd": "9:00", "casDo": {"value": "11:00"}, "budova": "BUF", "mistnost": "3.04",
+    "ucitel": {"titulPred": "Mgr.", "jmeno": "Jan", "prijmeni": "Zkoušející", "titulZa": "Ph.D."},
+    "typTerminu": "Zkouška", "zapsan": "A", "limit": "30", "obsazeni": 12,
+    "deadlineDatumOdhlaseni": {"value": "18.1.2027"}, "poznamka": "<p>Písemná část</p>",
+}
+
+
 class RunSyncTest(unittest.TestCase):
     """Průchod run_sync s mockovanými HTTP voláními."""
 
@@ -248,7 +258,7 @@ class RunSyncTest(unittest.TestCase):
         self.assertNotIn(TOKEN, output)
         self.assertNotIn(TICKET, output)
 
-    def stag_get(self, subjects_status=200, info_status=200, student_status=200):
+    def stag_get(self, subjects_status=200, info_status=200, student_status=200, terms_status=200):
         def get(url, **kwargs):
             if url.endswith("/stag/agent/whoami"):
                 return FakeResponse(200, {"name": "Jana", "email": "jana@example.com"})
@@ -279,6 +289,10 @@ class RunSyncTest(unittest.TestCase):
                 return FakeResponse(200, dict(STUDENT_INFO, **SENSITIVE_STUDENT_INFO))
             if "getRozvrhByStudent" in url:
                 return FakeResponse(200, {"rozvrhovaAkce": []})
+            if "getTerminyProStudenta" in url:
+                if terms_status != 200:
+                    return FakeResponse(terms_status, text=f"terms denied {TICKET}")
+                return FakeResponse(200, {"termin": [EXAM_TERM]})
             raise AssertionError(f"unexpected GET {url}")
         return get
 
@@ -475,6 +489,58 @@ class RunSyncTest(unittest.TestCase):
         self.assertNotIn("info denied", self.err.getvalue())
         self.assert_no_secret_leaked(post)
 
+    def test_sync_sends_exam_terms(self):
+        stag_agent.save_ticket(TICKET, "novakj", "R12345", self.home)
+        post = mock.Mock(return_value=FakeResponse(200, {"message": "ok"}))
+
+        code = self.run_agent([], self.stag_get(), post)
+
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        sent = [c.kwargs["json"] for c in post.call_args_list if c.args[0].endswith("/stag/sync-exam-terms")]
+        self.assertEqual(len(sent), 1)
+        self.assertEqual(sent[0][0]["stagId"], "987654")
+        self.assertEqual(sent[0][0]["subjectCode"], "AGT")
+        self.assertTrue(sent[0][0]["registered"])
+        self.assertEqual(self.reports(post), [{"status": "success"}])
+
+    def test_exam_terms_failure_does_not_stop_sync_and_sends_nothing(self):
+        stag_agent.save_ticket(TICKET, "novakj", "R12345", self.home)
+        post = mock.Mock(return_value=FakeResponse(200, {"message": "ok"}))
+
+        code = self.run_agent([], self.stag_get(terms_status=500), post)
+
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        urls = [c.args[0] for c in post.call_args_list]
+        self.assertNotIn("https://eduvio.example/api/stag/sync-exam-terms", urls)
+        self.assertIn("Termíny zkoušek se nepodařilo načíst (Status: 500)", self.err.getvalue())
+        self.assertEqual(self.reports(post), [{"status": "success"}])
+        self.assert_no_secret_leaked(post)
+
+    def test_exam_terms_rejected_by_api_does_not_stop_sync(self):
+        stag_agent.save_ticket(TICKET, "novakj", "R12345", self.home)
+
+        def post(url, **kwargs):
+            if url.endswith("/stag/sync-exam-terms"):
+                return FakeResponse(422, text="invalid")
+            return FakeResponse(200, {"message": "ok"})
+        post_mock = mock.Mock(side_effect=post)
+
+        code = self.run_agent([], self.stag_get(), post_mock)
+
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        self.assertIn("Termíny zkoušek se nepodařilo odeslat (Status: 422)", self.err.getvalue())
+        self.assertEqual(self.reports(post_mock), [{"status": "success"}])
+
+    def test_dry_run_reports_exam_terms(self):
+        stag_agent.save_ticket(TICKET, "novakj", "R12345", self.home)
+        post = mock.Mock()
+
+        code = self.run_agent(["--dry-run"], self.stag_get(), post)
+
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        post.assert_not_called()
+        self.assertIn("Termíny zkoušek: 1 (zapsáno: 1)", self.out.getvalue())
+
     def test_api_url_override_must_be_https(self):
         with self.assertRaises(stag_agent.AgentError):
             self.run_agent(["--api-url", "http://eduvio.example/api"], self.stag_get(), mock.Mock())
@@ -509,6 +575,8 @@ class TestImportCompatibilityTest(unittest.TestCase):
         def get(url, **kwargs):
             if "getPredmetyByStudent" in url:
                 return FakeResponse(200, {"predmetStudenta": [{"zkratka": "A", "nazev": "A", "kredity": 1}]})
+            if "getTerminyProStudenta" in url:
+                return FakeResponse(200, {"termin": []})
             return FakeResponse(200, {"rozvrhovaAkce": []})
 
         with mock.patch.multiple(test_import, LARAVEL_API_URL="http://laravel.test/api", BEARER_TOKEN="t",
@@ -518,7 +586,9 @@ class TestImportCompatibilityTest(unittest.TestCase):
             test_import.main()
 
         self.assertEqual(ctx.exception.code, 0)
-        self.assertEqual(posted, ["http://laravel.test/api/stag/sync-subjects"])
+        # An empty term list is sent too: terms no longer in STAG are removed
+        self.assertEqual(posted, ["http://laravel.test/api/stag/sync-subjects",
+                                  "http://laravel.test/api/stag/sync-exam-terms"])
 
 
 class StudentInfoWhitelistTest(unittest.TestCase):
@@ -705,6 +775,64 @@ class GradePairingTest(unittest.TestCase):
         self.assertEqual(test_import.datum_na_iso({"value": "05.02.2027"}), "2027-02-05")
         for raw in (None, "", "31.2.2027", "zítra"):
             self.assertIsNone(test_import.datum_na_iso(raw))
+
+
+class ExamTermTransformTest(unittest.TestCase):
+    def test_full_term_is_converted(self):
+        [term] = test_import.transformuj_terminy_pro_laravel([EXAM_TERM])
+        self.assertEqual(term, {
+            "stagId": "987654", "subjectCode": "AGT", "date": "2027-01-20",
+            "startTime": "09:00", "endTime": "11:00", "kind": "exam", "room": "BUF 3.04",
+            "examiner": "Mgr. Jan Zkoušející, Ph.D.", "registered": True, "capacity": 30, "occupied": 12,
+            "deregistrationDeadline": "2027-01-18", "note": "Písemná část",
+        })
+
+    def test_kinds(self):
+        kind = test_import.druh_terminu
+        self.assertEqual(kind("Zkouška"), "exam")
+        self.assertEqual(kind("Zápočet"), "credit")
+        self.assertEqual(kind("Klasifikovaný zápočet"), "credit")
+        self.assertEqual(kind("Konzultace"), "other")
+        self.assertEqual(kind(None), "other")
+
+    def test_minimal_and_unregistered_term(self):
+        [term] = test_import.transformuj_terminy_pro_laravel([
+            {"termIdno": "5", "predmet": "AGT", "datum": "3.2.2027", "zapsan": "N", "ucitel": "Jan Novák"},
+        ])
+        self.assertFalse(term["registered"])
+        self.assertEqual(term["examiner"], "Jan Novák")
+        self.assertIsNone(term["startTime"])
+        self.assertIsNone(term["room"])
+        self.assertIsNone(term["capacity"])
+
+    def test_terms_without_id_subject_or_date_are_skipped(self):
+        rows = [
+            {"predmet": "AGT", "datum": "3.2.2027"},
+            {"termIdno": "1", "datum": "3.2.2027"},
+            {"termIdno": "2", "predmet": "AGT", "datum": "nikdy"},
+            "not a term",
+        ]
+        self.assertEqual(test_import.transformuj_terminy_pro_laravel(rows), [])
+
+    def test_invalid_times_and_negative_numbers_become_none(self):
+        [term] = test_import.transformuj_terminy_pro_laravel([
+            {"termIdno": "3", "predmet": "AGT", "datum": "3.2.2027", "casOd": "25:00", "casDo": "kolem deváté",
+             "limit": "-1", "obsazeni": "x"},
+        ])
+        self.assertIsNone(term["startTime"])
+        self.assertIsNone(term["endTime"])
+        self.assertIsNone(term["capacity"])
+        self.assertIsNone(term["occupied"])
+
+    def test_response_shapes(self):
+        def fetch(payload):
+            with mock.patch("requests.get", return_value=FakeResponse(200, payload)):
+                return test_import.nacti_terminy_ze_stagu("t", "https://stag.example/ws", "R1")
+        self.assertEqual(fetch({"termin": [EXAM_TERM]}), [EXAM_TERM])
+        self.assertEqual(fetch([EXAM_TERM]), [EXAM_TERM])
+        self.assertEqual(fetch({}), [])
+        with self.assertRaises(ValueError):
+            fetch({"neco": "jineho"})
 
 
 if __name__ == "__main__":

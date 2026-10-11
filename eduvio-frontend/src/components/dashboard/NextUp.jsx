@@ -146,14 +146,12 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
         <div className="relative overflow-hidden rounded-2xl bg-midnight p-6 text-midnight-foreground shadow-lg sm:p-8">
           {/* Header Row: Badges */}
           <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-balance ring-1 ring-inset ring-primary/40">
+            <span className="rounded-full bg-midnight-foreground/8 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-balance ring-1 ring-inset ring-midnight-foreground/15">
               {typeBadge}
             </span>
             {(minutesLeft !== null || isOngoing) && (
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
-                  isOngoing ? 'bg-live/15 text-live' : 'bg-success/15 text-success'
-                }`}
+                className={`inline-flex items-center gap-1.5 rounded-full bg-midnight-foreground/8 px-3 py-1 text-sm font-medium text-midnight-foreground ring-1 ring-inset ring-midnight-foreground/15`}
               >
                 <Clock className="size-4" aria-hidden="true" />
                 {formatCountdown()}
@@ -167,7 +165,7 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
           </h3>
 
           {/* Details Row: Room, Time, Teacher */}
-          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-midnight-foreground/70">
+          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-midnight-muted">
             <span className="inline-flex items-center gap-1.5">
               <MapPin className="size-4" aria-hidden="true" />
               {formatRoom(nextClass.room || 'CP-312', { language: i18n?.language })}

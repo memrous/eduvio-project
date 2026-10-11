@@ -20,9 +20,7 @@
     "greetingEvening": "Good evening, {{name}}!",
     "todayDeadlines_zero": "You have no events today.",
     "todayDeadlines_one": "You have <strong>{{count}} event</strong> today. Time to dive in!",
-    "todayDeadlines_other": "You have <strong>{{count}} events</strong> today. Time to dive in!",
-    "newMaterials_one": "New materials in {{count}} subject",
-    "newMaterials_other": "New materials in {{count}} subjects"
+    "todayDeadlines_other": "You have <strong>{{count}} events</strong> today. Time to dive in!"
   },
   "stats": {
     "activeSubjects": "Active Subjects",
@@ -60,16 +58,10 @@
     }
   },
   "recentMaterials": {
-    "title": "Recent Materials",
-    "noResources": "No resources available.",
-    "attachment": "Attachment",
-    "resourceTypes": {
-      "PDF": "PDF",
-      "SLIDES": "Slides",
-      "LINK": "URL",
-      "NOTES": "Notes",
-      "default": "Doc"
-    }
+    "title": "Recent materials",
+    "viewAll": "All materials",
+    "empty": "No materials yet.",
+    "uploadMaterial": "Upload material"
   },
   "subjectCard": {
     "mandatory": "Mandatory",
@@ -97,7 +89,10 @@
     "uploadSolution": "Upload solution",
     "viewDetail": "View detail",
     "noAlerts": "Everything is fine, nothing requires attention.",
-    "allDone": "All done!"
+    "allDone": "All done!",
+    "assessmentMessage_zero": "Today · from the teacher’s website",
+    "assessmentMessage_one": "Tomorrow · from the teacher’s website",
+    "assessmentMessage_other": "In {{count}} days · from the teacher’s website"
   },
   "nextUp": {
     "title": "Next Up",

@@ -18,6 +18,7 @@
  *   assignResourceEvent (id, eventId|null) => void — lesson of a material
  *   updateMaterial  (id, fields) => void    — own materials (fields, file, lesson)
  *   setResourceHidden (id, hidden) => void  — Moodle and automatic materials
+ *   setResourceForExam (id, forExam) => void — any material, "for the exam" mark
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -42,7 +43,10 @@ const extractResources = (result) => {
   return []
 }
 
-export const useResources = () => {
+/**
+ * @param {{ enabled?: boolean }} [options] enabled=false only reads the cache (no request)
+ */
+export const useResources = ({ enabled = true } = {}) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const queryKey = [RESOURCES_KEY, user?.id]
@@ -51,7 +55,7 @@ export const useResources = () => {
   const query = useQuery({
     queryKey,
     queryFn: () => api.getResources(user.id).then(extractResources),
-    enabled: !!user,
+    enabled: !!user && enabled,
   })
 
   // ── Mutation: upload / add resource ───────────────────────────
@@ -201,6 +205,30 @@ export const useResources = () => {
     },
   })
 
+  // ── Mutation: mark / unmark a material for the exam ───────────
+  const forExamMutation = useMutation({
+    mutationFn: ({ id, forExam }) => api.setResourceForExam(user.id, id, forExam).then(res => {
+      if (res.status === 'error') throw new Error(res.error)
+      return res.data
+    }),
+    onMutate: async ({ id, forExam }) => {
+      await queryClient.cancelQueries({ queryKey })
+      const previousResources = queryClient.getQueryData(queryKey)
+      queryClient.setQueryData(queryKey, (old) =>
+        (old ?? []).map((r) => (isSameId(r.id, id) ? { ...r, for_exam: forExam } : r))
+      )
+      return { previousResources }
+    },
+    onError: (err, vars, context) => {
+      if (context?.previousResources) {
+        queryClient.setQueryData(queryKey, context.previousResources)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey })
+    },
+  })
+
   return {
     /** @type {import('../contracts/material').Material[]} */
     data: query.data ?? [],
@@ -214,5 +242,6 @@ export const useResources = () => {
     assignResourceEvent: (id, eventId) => assignEventMutation.mutateAsync({ id, eventId }),
     updateMaterial: (id, fields) => updateMaterialMutation.mutateAsync({ id, fields }),
     setResourceHidden: (id, hidden) => hiddenMutation.mutateAsync({ id, hidden }),
+    setResourceForExam: (id, forExam) => forExamMutation.mutateAsync({ id, forExam }),
   }
 }

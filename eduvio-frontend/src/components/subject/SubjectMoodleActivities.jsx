@@ -21,7 +21,7 @@ const getDayDiff = (dateStr) => {
 }
 
 const getRequirementDotColor = (isCompleted, diff) => {
-  if (isCompleted) return 'bg-success'
+  if (isCompleted) return 'bg-success-soft'
   if (diff !== null && diff <= 3) return 'bg-error'
   if (diff !== null && diff > 3 && diff <= 14) return 'bg-warning'
   return 'bg-outline-variant'
@@ -103,7 +103,7 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
             )
           } else if (diff !== null && diff === 0) {
             statusEl = (
-              <span className="inline-flex items-center gap-1 rounded-full bg-error-container px-2.5 py-0.5 text-[11px] font-bold text-error">
+              <span className="inline-flex items-center gap-1 rounded-full bg-error-container px-2.5 py-0.5 text-[11px] font-bold text-on-error-container">
                 <Clock className="size-3" />
                 {t('academic:subjectDetail.requirements.statusDueToday')}
               </span>
@@ -112,7 +112,7 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
             statusEl = (
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                  diff <= 3 ? 'bg-error-container text-error' : 'bg-warning-container text-on-warning-container'
+                  diff <= 3 ? 'bg-error-container text-on-error-container' : 'bg-warning-container text-on-warning-container'
                 }`}
               >
                 <Clock className="size-3" />

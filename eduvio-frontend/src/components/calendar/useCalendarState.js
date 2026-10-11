@@ -7,8 +7,8 @@ import { getSubjectColor } from '../../utils/subjectColors'
 export { formatDateKey } from './useCalendarGrid'
 
 export const TYPE_COLOR_MAP = {
-  'Lecture': { color: 'blue', dot: 'var(--color-primary)', bg: 'bg-on-primary-container', text: 'text-primary' },
-  'Lab': { color: 'blue', dot: 'var(--color-primary)', bg: 'bg-on-primary-container', text: 'text-primary' },
+  'Lecture': { color: 'blue', dot: 'var(--color-primary)', bg: 'bg-primary-container', text: 'text-on-primary-container' },
+  'Lab': { color: 'blue', dot: 'var(--color-primary)', bg: 'bg-primary-container', text: 'text-on-primary-container' },
   'Assignment': { color: 'green', dot: 'var(--color-secondary)', bg: 'bg-secondary-container', text: 'text-on-secondary-container' },
   'Test': { color: 'orange', dot: 'var(--color-tertiary)', bg: 'bg-tertiary-container', text: 'text-on-tertiary-container' },
   'Quiz': { color: 'orange', dot: 'var(--color-tertiary)', bg: 'bg-tertiary-container', text: 'text-on-tertiary-container' },

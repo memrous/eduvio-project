@@ -1,6 +1,6 @@
 import ProgressBar from './common/ProgressBar'
 import { useMemo } from 'react'
-import { User, BookOpen, AlertTriangle, CheckCircle2, ArrowRight, Building2 } from 'lucide-react'
+import { UserRound, BookOpen, AlertTriangle, CheckCircle2, ArrowRight, Building2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useRequirements } from '../hooks/useRequirements'
 import { getSemesterShort, getStatutStyles, getStatutLabelKey, normalizeStatut } from '../utils/semester'
@@ -40,7 +40,7 @@ const SubjectOverviewCard = ({ subject, onSelect }) => {
   }, [requirements])
 
   const isUrgent = incompleteUrgentCount > 0
-  const progressColor = percentage < 50 ? 'bg-warning' : 'bg-success'
+  const progressColor = percentage < 50 ? 'bg-warning' : 'bg-success-soft'
 
   const semesterShort = getSemesterShort(subject.semester)
   const statut = normalizeStatut(subject.statut, subject.isMandatory)
@@ -97,7 +97,7 @@ const SubjectOverviewCard = ({ subject, onSelect }) => {
           <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-on-surface-variant">
             {subject.lecturer && (
               <div className="flex items-center gap-1.5 min-w-0">
-                <User className="size-3.5 shrink-0" />
+                <UserRound className="size-4 shrink-0" />
                 <span className="truncate">{subject.lecturer}</span>
               </div>
             )}
@@ -138,14 +138,14 @@ const SubjectOverviewCard = ({ subject, onSelect }) => {
             <>
               {isUrgent ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-container px-2.5 py-1 text-xs font-medium text-on-warning-container ring-1 ring-inset ring-warning/20">
-                  <AlertTriangle className="size-3.5" />
+                  <AlertTriangle className="size-4" />
                   {t('dashboard:subjectOverviewCard.urgentTasks', {
                     count: incompleteUrgentCount,
                   })}
                 </span>
               ) : allCompleted ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-success-container px-2.5 py-1 text-xs font-medium text-on-success-container ring-1 ring-inset ring-success/20">
-                  <CheckCircle2 className="size-3.5" />
+                  <CheckCircle2 className="size-4" />
                   {t('dashboard:subjectOverviewCard.allDone')}
                 </span>
               ) : null}

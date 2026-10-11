@@ -75,6 +75,28 @@ class DashboardController extends Controller
             ];
         }
 
+        // 3a'. Written tests and other assessments from teachers' course pages
+        $assessmentDays = 7;
+        $upcomingAssessments = SyllabusController::visibleAssessments($userId)
+            ->whereBetween('date', [$today->toDateString(), $today->copy()->addDays($assessmentDays)->toDateString()])
+            ->get();
+
+        foreach (SyllabusController::withoutRequirementDuplicates($userId, $upcomingAssessments) as $item) {
+            $needsAttention[] = [
+                'type'           => 'assessment',
+                'syllabusItemId' => $item->id,
+                'subjectId'      => $item->subject_id,
+                'subjectCode'    => $item->subject?->code,
+                'title'          => $item->title,
+                'dueDate'        => $item->date->format('Y-m-d'),
+                // Whole days between calendar dates (both read as UTC midnights)
+                'days'           => (int) round(Carbon::parse($today->toDateString(), 'UTC')
+                    ->diffInDays(Carbon::parse($item->date->format('Y-m-d'), 'UTC'), false)),
+                'assessmentType' => $item->assessment_type,
+                'sourceUrl'      => $item->resource?->url,
+            ];
+        }
+
         // 3b. Low-scoring subjects
         $subjects = Subject::where('user_id', $userId)
             ->with('requirements')

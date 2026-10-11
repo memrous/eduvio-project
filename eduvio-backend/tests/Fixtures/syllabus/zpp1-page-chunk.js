@@ -1,0 +1,2 @@
+/* Shortened copy of the page chunk (2026-10-11): server action references only */
+(self.webpackChunk=self.webpackChunk||[]).push([[1],{65949:(e,l,s)=>{let r=(0,n.createServerReference)("60277d62bf4c67591bc5e88383cd67eb91a981495e",n.callServer,void 0,n.findSourceMapURL,"getContentByUris"),h=(0,n.createServerReference)("40de81df67bd28814eba0c5633f167bb4927ef0cbe",n.callServer,void 0,n.findSourceMapURL,"getByStudentId"),h=(0,n.createServerReference)("4039cc83e7ae887bc3da85526231c965c8af549d4c",n.callServer,void 0,n.findSourceMapURL,"getByPersonalNumber");}}]);

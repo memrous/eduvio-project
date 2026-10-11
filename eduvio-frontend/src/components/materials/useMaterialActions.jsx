@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CalendarClock, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react'
+import { CalendarClock, Eye, EyeOff, GraduationCap, Pencil, Trash2 } from 'lucide-react'
 import { useToast } from '../../context/ToastContext'
 import { getSubjectIdOf, isPersistedId, isSameId } from '../../utils/ids'
 import { getMaterialKind, isHidden, isOwnFile, isSemesterLink } from '../../utils/materialKinds'
@@ -74,6 +74,16 @@ export const useMaterialActions = ({ subjects, events, semesterStarts, actions }
         label: t('resources:lessons.moveShort'),
         icon: CalendarClock,
         onSelect: () => setDialog({ kind: 'move', resource }),
+      })
+    }
+    // Any material can be part of the exam preparation (when the page supports it)
+    if (actions.setForExam && !isHidden(resource)) {
+      const forExam = Boolean(resource.for_exam)
+      items.push({
+        key: 'forExam',
+        label: t(forExam ? 'resources:materialActions.unmarkForExam' : 'resources:materialActions.markForExam'),
+        icon: GraduationCap,
+        onSelect: () => run(actions.setForExam(resource.id, !forExam), 'resources:materialActions.forExamFailed'),
       })
     }
     if (kind === 'manual') {

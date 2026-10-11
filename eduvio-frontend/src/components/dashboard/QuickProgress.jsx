@@ -23,7 +23,7 @@ const QuickProgress = ({ progress }) => {
       {/* Header */}
       <div className="mb-4 flex items-center gap-2">
         <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <GraduationCap className="size-4.5" aria-hidden="true" />
+          <GraduationCap className="size-5" aria-hidden="true" />
         </span>
         <h2 id="progress-heading" className="text-base font-semibold text-foreground">
           {t('quickProgress.title')}
@@ -62,7 +62,7 @@ const QuickProgress = ({ progress }) => {
             {t('quickProgress.averageScore')}
             <TrendingUp className="size-3 text-success" aria-hidden="true" />
           </p>
-          <p className="mt-0.5 text-xl font-bold tabular-nums text-success">
+          <p className="mt-0.5 text-xl font-bold tabular-nums text-on-success-container">
             {averageScore} %
           </p>
         </div>

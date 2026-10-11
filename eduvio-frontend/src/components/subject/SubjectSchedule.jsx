@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { CalendarClock, MapPin, User, ArrowRight } from 'lucide-react'
+import { CalendarClock, MapPin, UserRound, ArrowRight } from 'lucide-react'
 import { useEvents } from '../../hooks/useEvents'
 import { formatRoom } from '../../utils/room'
 import { getLocaleFromLanguage } from '../../utils/locale'
@@ -163,13 +163,13 @@ const SubjectSchedule = ({ subject }) => {
             <span className="flex flex-col gap-1 text-xs text-on-surface-variant sm:flex-row sm:flex-wrap sm:gap-x-4">
               {nextEvent.room && (
                 <span className="inline-flex items-center gap-1.5 min-w-0">
-                  <MapPin className="size-3.5 shrink-0" />
+                  <MapPin className="size-4 shrink-0" />
                   <span className="break-words">{roomLabel(nextEvent.room)}</span>
                 </span>
               )}
               {nextEvent.teacherName && (
                 <span className="inline-flex items-center gap-1.5 min-w-0">
-                  <User className="size-3.5 shrink-0" />
+                  <UserRound className="size-4 shrink-0" />
                   <span className="break-words">{nextEvent.teacherName}</span>
                 </span>
               )}
@@ -177,7 +177,7 @@ const SubjectSchedule = ({ subject }) => {
           )}
           <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
             {t('academic:subjectSchedule.openInCalendar')}
-            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </span>
         </button>
       )}
@@ -200,13 +200,13 @@ const SubjectSchedule = ({ subject }) => {
               </span>
               {g.room && (
                 <span className="inline-flex items-center gap-1.5 text-on-surface-variant min-w-0">
-                  <MapPin className="size-3.5 shrink-0" />
+                  <MapPin className="size-4 shrink-0" />
                   <span className="break-words">{roomLabel(g.room)}</span>
                 </span>
               )}
               {g.teachers.size > 0 && (
                 <span className="inline-flex items-center gap-1.5 text-on-surface-variant min-w-0">
-                  <User className="size-3.5 shrink-0" />
+                  <UserRound className="size-4 shrink-0" />
                   <span className="break-words">{[...g.teachers].join(', ')}</span>
                 </span>
               )}

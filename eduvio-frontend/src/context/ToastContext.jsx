@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useRef, useState } from 'react'
-import { CheckCircle, XCircle, Info, X } from 'lucide-react'
+import { CheckCircle2, XCircle, Info, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -14,31 +14,31 @@ const AUTO_DISMISS_MS = 4000
 const VARIANT_STYLES = {
   success: {
     container:
-      'bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-100',
+      'bg-success-container border-success/30 text-on-success-container',
     icon:
-      'text-emerald-500 dark:text-emerald-400',
+      'text-success',
     bar:
-      'bg-emerald-400 dark:bg-emerald-500',
-    Icon: CheckCircle,
+      'bg-success-soft',
+    Icon: CheckCircle2,
   },
 
   error: {
     container:
-      'bg-red-50 border-red-200 text-red-900 dark:bg-red-950/40 dark:border-red-800 dark:text-red-100',
+      'bg-error-container border-error/30 text-on-error-container',
     icon:
-      'text-red-500 dark:text-red-400',
+      'text-error',
     bar:
-      'bg-red-400 dark:bg-red-500',
+      'bg-error',
     Icon: XCircle,
   },
 
   info: {
     container:
-      'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/40 dark:border-blue-800 dark:text-blue-100',
+      'bg-primary-container border-primary/30 text-on-primary-container',
     icon:
-      'text-blue-500 dark:text-blue-400',
+      'text-primary',
     bar:
-      'bg-blue-400 dark:bg-blue-500',
+      'bg-primary',
     Icon: Info,
   },
 }

@@ -1,22 +1,22 @@
-import { AlertCircle, Clock } from 'lucide-react'
+import { AlertCircle, Clock, Bell } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import CustomIcon from './CustomIcon'
 import { getLocaleFromLanguage } from '../utils/locale'
+import Icon from './common/Icon'
 
 const getTypeStyles = (type) => {
   switch (type) {
-    case 'Assignment': return { dot: 'bg-warning', badgeBg: 'bg-warning-container', badgeText: 'text-warning' };
-    case 'Test': return { dot: 'bg-error', badgeBg: 'bg-error-container', badgeText: 'text-error' };
-    case 'Exam': return { dot: 'bg-error', badgeBg: 'bg-error-container', badgeText: 'text-error' };
+    case 'Assignment': return { dot: 'bg-warning', badgeBg: 'bg-warning-container', badgeText: 'text-on-warning-container' };
+    case 'Test': return { dot: 'bg-error', badgeBg: 'bg-error-container', badgeText: 'text-on-error-container' };
+    case 'Exam': return { dot: 'bg-error', badgeBg: 'bg-error-container', badgeText: 'text-on-error-container' };
     default: return { dot: 'bg-surface-container-highest', badgeBg: 'bg-surface-container-low', badgeText: 'text-on-surface-variant' };
   }
 };
 
 const getMobileUrgencyStyles = (type) => {
   switch (type) {
-    case 'Exam': return 'bg-error-container text-error border-error/20';
-    case 'Test': return 'bg-error-container text-error border-error/20';
-    default: return 'bg-warning-container text-warning border-warning/20';
+    case 'Exam': return 'bg-error-container text-on-error-container border-error/20';
+    case 'Test': return 'bg-error-container text-on-error-container border-error/20';
+    default: return 'bg-warning-container text-on-warning-container border-warning/20';
   }
 };
 
@@ -98,7 +98,7 @@ const Deadlines = ({ events, subjects, onDeadlineClick }) => {
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-sm shrink-0 flex items-center justify-center ${
-                      isCritical ? 'bg-error-container text-error' : 'bg-primary-container text-primary'
+                      isCritical ? 'bg-error-container text-on-error-container' : 'bg-primary-container text-on-primary-container'
                     }`}>
                       {isCritical ? <AlertCircle className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
                     </div>
@@ -124,7 +124,7 @@ const Deadlines = ({ events, subjects, onDeadlineClick }) => {
       {/* DESKTOP LAYOUT: Upcoming Deadlines */}
       <div className="hidden lg:flex bg-surface border border-outline-variant p-5 rounded-lg shadow-ambient flex-col gap-4 font-inter text-on-surface">
         <div className="flex items-center gap-2">
-          <CustomIcon name="bell" className="w-5 h-5" />
+          <Icon icon={Bell} size="md" />
           <h2 className="text-headline-md font-semibold">{t('deadlines.upcoming')}</h2>
         </div>
 

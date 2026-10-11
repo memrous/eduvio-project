@@ -36,6 +36,7 @@
   "subjectFallback": "Obecné",
   "otherSubject": "Jiné",
   "moodleBadge": "Moodle",
+  "ownBadge": "Vlastní",
   "modal": {
     "title": "Nahrát studijní materiál",
     "fields": {
@@ -177,7 +178,11 @@
     "deleteFileConfirm": "Smazat „{{title}}“? Soubor se trvale odstraní z úložiště a nepůjde obnovit.",
     "deleteLinkConfirm": "Smazat odkaz „{{title}}“? Tuto akci nejde vrátit.",
     "deleteFailed": "Materiál se nepodařilo smazat.",
-    "hideFailed": "Změnu viditelnosti se nepodařilo uložit."
+    "hideFailed": "Změnu viditelnosti se nepodařilo uložit.",
+    "markForExam": "Označit ke zkoušce",
+    "unmarkForExam": "Odebrat ze zkoušky",
+    "forExamBadge": "Ke zkoušce",
+    "forExamFailed": "Označení ke zkoušce se nepodařilo uložit."
   },
   "weekFilter": {
     "all": "Všechny týdny",

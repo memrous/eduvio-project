@@ -1,9 +1,9 @@
-import { X, MapPin } from 'lucide-react'
+import { X, MapPin, CalendarDays, Clock, UserRound, GraduationCap } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getEventStyle } from './useCalendarState'
-import CustomIcon from '../CustomIcon'
 import { getLocaleFromLanguage } from '../../utils/locale'
 import { formatRoom } from '../../utils/room'
+import Icon from '../common/Icon'
 
 const EventDetailContent = ({
   selectedDetailEvent,
@@ -66,7 +66,7 @@ const EventDetailContent = ({
 
       <dl className="flex flex-col gap-3.5 text-sm border-t border-outline-variant/30 pt-4 mt-2">
         <div className="flex items-start gap-3">
-          <CustomIcon name="calendar" className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
+          <Icon icon={CalendarDays} className="mt-0.5 text-on-surface-variant" />
           <div className="min-w-0">
             <span className="block text-xs text-on-surface-variant font-medium">{t('academic:eventModal.fields.date', 'Datum')}</span>
             <span className="font-semibold text-on-surface">
@@ -75,7 +75,7 @@ const EventDetailContent = ({
           </div>
         </div>
         <div className="flex items-start gap-3">
-          <CustomIcon name="clock" className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
+          <Icon icon={Clock} className="mt-0.5 text-on-surface-variant" />
           <div className="min-w-0">
             <span className="block text-xs text-on-surface-variant font-medium">{t('academic:eventModal.fields.startTime', 'Čas')}</span>
             <span className="font-semibold text-on-surface">
@@ -97,7 +97,7 @@ const EventDetailContent = ({
         {targetSubject && (
           <>
             <div className="flex items-start gap-3">
-              <CustomIcon name="user" className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
+              <Icon icon={UserRound} className="mt-0.5 text-on-surface-variant" />
               <div className="min-w-0">
                 <span className="block text-xs text-on-surface-variant font-medium">{t('academic:eventDetail.lecturer', 'Vyučující')}</span>
                 <span className="font-semibold text-on-surface">
@@ -106,7 +106,7 @@ const EventDetailContent = ({
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <CustomIcon name="graduation-cap" className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
+              <Icon icon={GraduationCap} className="mt-0.5 text-on-surface-variant" />
               <div className="min-w-0">
                 <span className="block text-xs text-on-surface-variant font-medium">{t('academic:eventDetail.creditsCompletion', 'Ukončení')}</span>
                 <span className="font-semibold text-on-surface">
@@ -160,7 +160,7 @@ const EventDetailContent = ({
                 }
                 onClose()
               }}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg text-sm transition-all cursor-pointer shadow-sm animate-pulse text-center"
+              className="bg-error hover:bg-error/90 text-on-error font-semibold py-2 rounded-lg text-sm transition-all cursor-pointer shadow-sm animate-pulse text-center"
             >
               {t('academic:eventDetail.areYouSure')}
             </button>
@@ -168,7 +168,7 @@ const EventDetailContent = ({
             <button
               type="button"
               onClick={() => setDeleteConfirmId(selectedDetailEvent.id)}
-              className="border border-red-200 text-red-600 hover:bg-red-50/50 font-semibold py-2 rounded-lg text-sm transition-colors cursor-pointer text-center"
+              className="border border-error/30 text-error hover:bg-error-container font-semibold py-2 rounded-lg text-sm transition-colors cursor-pointer text-center"
             >
               {t('academic:eventDetail.deleteEvent')}
             </button>

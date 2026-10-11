@@ -181,7 +181,10 @@
       "requirements": "Požadavky",
       "notes": "Moje poznámky",
       "fulfillment": "Splnění",
-      "tasks": "Úkoly"
+      "tasks": "Úkoly",
+      "exam": "Zkouška",
+      "credit": "Zápočet",
+      "syllabus": "Plán semestru"
     },
     "requirements": {
       "noRequirements": "Zatím žádné požadavky.",
@@ -281,6 +284,82 @@
       "assessment": "Způsob hodnocení",
       "examForm": "Forma zkoušky",
       "empty": "STAG k tomuto předmětu neuvádí žádné požadavky."
+    },
+    "infoPanel": {
+      "title": "Informace o předmětu",
+      "show": "Zobrazit informace o předmětu",
+      "hide": "Skrýt informace o předmětu",
+      "people": "Vyučující",
+      "links": "Odkazy",
+      "about": "Anotace, sylabus a literatura"
+    },
+    "exam": {
+      "terms": {
+        "title": "Termíny",
+        "registered": "Zapsáno",
+        "full": "Obsazeno",
+        "capacity": "{{occupied}}/{{capacity}} míst",
+        "deregisterUntil": "Odhlásit do {{date}}",
+        "kinds": {
+          "exam": "Zkouška",
+          "credit": "Zápočet",
+          "other": "Termín"
+        },
+        "nextRegistered": "Tvůj termín",
+        "available": "Vypsané termíny",
+        "past": "Proběhlé termíny ({{count}})",
+        "hidePast": "Skrýt proběhlé termíny",
+        "empty": "Ve STAGu zatím nejsou vypsané žádné termíny.",
+        "emptyHint": "Termíny se načítají ze STAGu při synchronizaci.",
+        "manualSubject": "Termíny se načítají jen u předmětů ze STAGu.",
+        "registerInStag": "Přihlásit se ve STAGu",
+        "loadError": "Termíny se nepodařilo načíst."
+      },
+      "topics": {
+        "title": "Okruhy ke zkoušce",
+        "progress": "{{done}} z {{total}} umím",
+        "empty": "Zapiš si okruhy, které je potřeba se naučit, a odškrtávej, co už umíš.",
+        "addPlaceholder": "Přidat okruh…",
+        "add": "Přidat",
+        "pasteHint": "Tip: vložením seznamu (každý okruh na řádku) přidáš víc okruhů najednou.",
+        "edit": "Upravit okruh „{{title}}“",
+        "delete": "Smazat okruh „{{title}}“",
+        "deleteConfirm": "Smazat okruh „{{title}}“?",
+        "save": "Uložit",
+        "cancel": "Zrušit",
+        "markDone": "Umím: {{title}}",
+        "saveFailed": "Okruh se nepodařilo uložit.",
+        "loadError": "Okruhy se nepodařilo načíst.",
+        "fromWeb": "Okruhy ze stránek vyučujícího"
+      },
+      "materials": {
+        "title": "Materiály ke zkoušce",
+        "empty": "Zatím tu nic není. V záložce Materiály označ, co se ti bude hodit ke zkoušce.",
+        "showMaterials": "Přejít na materiály",
+        "remove": "Odebrat „{{title}}“ ze zkoušky",
+        "open": "Otevřít „{{title}}“"
+      },
+      "conditions": "Podmínky a hodnocení",
+      "assessments": {
+        "title": "Průběžné hodnocení",
+        "upcoming": "Nadcházející",
+        "past": "Proběhlé ({{count}})",
+        "hidePast": "Skrýt proběhlé",
+        "hide": "Skrýt „{{title}}“",
+        "hideFailed": "Položku se nepodařilo skrýt.",
+        "empty": "Na webu vyučujícího zatím nejsou žádné písemky ani testy.",
+        "noSource": "K předmětu zatím nemáme stránku vyučujícího."
+      }
+    },
+    "syllabus": {
+      "title": "Plán semestru",
+      "source": "Podle webu vyučujícího",
+      "openSource": "Otevřít stránku předmětu",
+      "empty": "Na webu vyučujícího jsme harmonogram semestru nenašli.",
+      "emptyHint": "Harmonogram se načítá ze stránek předmětu na webech vyučujících při synchronizaci odkazů.",
+      "thisWeek": "Tento týden",
+      "holiday": "Volno",
+      "loadError": "Plán semestru se nepodařilo načíst."
     }
   },
   "calendarView": {

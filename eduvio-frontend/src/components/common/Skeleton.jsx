@@ -264,45 +264,55 @@ export const MaterialsSkeleton = () => {
  */
 export const SubjectDetailSkeleton = () => {
   return (
-    <div className="w-full flex flex-col gap-6 font-inter pb-16">
-      {/* Top Banner / Header Card */}
-      <div className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-6 space-y-4 shadow-sm">
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24 rounded" />
-            <Skeleton className="h-8 w-64 rounded-xl" />
-            <Skeleton className="h-4 w-40 rounded" />
-          </div>
-          <Skeleton className="h-8 w-20 rounded-md" />
+    <div className="w-full font-inter pb-16">
+      <Skeleton className="mb-4 h-5 w-36 rounded" />
+
+      {/* Same grid as SubjectDetailView: info column on the left, title and content on the right */}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] xl:gap-8 xl:grid-rows-[auto_1fr] xl:items-start">
+        {/* Title */}
+        <div className="space-y-3 xl:col-start-2 xl:row-start-1">
+          <Skeleton className="h-6 w-40 rounded-lg" />
+          <Skeleton className="h-8 w-72 max-w-full rounded-xl" />
         </div>
-      </div>
 
-      {/* Metric Strip (3-4 cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4 space-y-3 shadow-sm"
-          >
-            <Skeleton className="h-4 w-24 rounded" />
-            <Skeleton className="h-7 w-20 rounded" />
-            <Skeleton className="h-2 w-full rounded-full" />
+        {/* Info panel */}
+        <div className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-5 space-y-4 shadow-sm xl:col-start-1 xl:row-span-2 xl:row-start-1">
+          <Skeleton className="h-5 w-40 rounded" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className="h-3 w-20 rounded" />
+              <Skeleton className="h-4 w-full rounded" />
+            </div>
+          ))}
+        </div>
+
+        {/* Summary, tabs and content */}
+        <div className="flex flex-col gap-6 xl:col-start-2 xl:row-start-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4 space-y-3 shadow-sm"
+              >
+                <Skeleton className="h-4 w-24 rounded" />
+                <Skeleton className="h-7 w-20 rounded" />
+                <Skeleton className="h-2 w-full rounded-full" />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Tabs bar */}
-      <div className="flex items-center gap-4 border-b border-outline-variant/60 pb-2">
-        <Skeleton className="h-8 w-28 rounded-lg" />
-        <Skeleton className="h-8 w-28 rounded-lg" />
-        <Skeleton className="h-8 w-28 rounded-lg" />
-      </div>
+          <div className="flex items-center gap-4 border-b border-outline-variant/60 pb-2">
+            <Skeleton className="h-8 w-28 rounded-lg" />
+            <Skeleton className="h-8 w-28 rounded-lg" />
+            <Skeleton className="h-8 w-28 rounded-lg" />
+          </div>
 
-      {/* Main Tab Content */}
-      <div className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-6 space-y-4 shadow-sm min-h-[300px]">
-        <Skeleton className="h-6 w-48 rounded" />
-        <Skeleton className="h-20 w-full rounded-xl" />
-        <Skeleton className="h-20 w-full rounded-xl" />
+          <div className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-6 space-y-4 shadow-sm min-h-[300px]">
+            <Skeleton className="h-6 w-48 rounded" />
+            <Skeleton className="h-20 w-full rounded-xl" />
+            <Skeleton className="h-20 w-full rounded-xl" />
+          </div>
+        </div>
       </div>
     </div>
   )

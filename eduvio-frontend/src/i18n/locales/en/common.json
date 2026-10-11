@@ -17,8 +17,21 @@
   "somethingWentWrong": "Something went wrong",
   "errorSafeState": "Please try reloading the page. The application was kept in a safe state.",
   "reloadPage": "Reload page",
-  "header": {
-    "searchPlaceholder": "Search subjects, tasks, or notes..."
+  "search": {
+    "placeholder": "Search subjects and materials",
+    "label": "Search subjects and materials",
+    "open": "Open search",
+    "close": "Close search",
+    "clear": "Clear search",
+    "subjects": "Subjects",
+    "materials": "Materials",
+    "showAll": "Show all results",
+    "noResults": "Nothing found for “{{query}}”",
+    "loading": "Loading subjects and materials…",
+    "shortcutHint": "Shortcut {{keys}}",
+    "resultsCount_zero": "No results",
+    "resultsCount_one": "{{count}} result",
+    "resultsCount_other": "{{count}} results"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -42,5 +55,14 @@
     "container": "Notifications"
   },
   "awaitingFirstSync": "Waiting for the first sync",
-  "awaitingFirstSyncDescription": "Your agent token is ready. Run the STAG agent on a computer connected to the UPOL VPN and your data will show up here."
+  "awaitingFirstSyncDescription": "Your agent token is ready. Run the STAG agent on a computer connected to the UPOL VPN and your data will show up here.",
+  "assessmentTypes": {
+    "test": "Written test",
+    "credit_test": "Credit test",
+    "retake": "Retake",
+    "exam": "Exam",
+    "deadline": "Submission",
+    "project": "Project"
+  },
+  "fromTeacherWeb": "From the teacher’s website"
 }

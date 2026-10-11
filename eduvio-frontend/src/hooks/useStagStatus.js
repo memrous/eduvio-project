@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
 import { SUBJECTS_KEY } from './useSubjects'
 import { EVENTS_KEY } from './useEvents'
+import { EXAM_TERMS_KEY } from './useExam'
 
 export const STAG_STATUS_KEY = 'stagStatus'
 
@@ -54,6 +55,7 @@ export const useStagStatus = ({ enabled = true } = {}) => {
       queryClient.invalidateQueries({ queryKey: [EVENTS_KEY] })
       queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] })
       queryClient.invalidateQueries({ queryKey: ['subjectDetail'] })
+      queryClient.invalidateQueries({ queryKey: [EXAM_TERMS_KEY] })
     }
     previousSyncedAt.current = syncedAt ?? null
   }, [query.data, syncedAt, queryClient])

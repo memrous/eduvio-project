@@ -7,7 +7,8 @@ na tvém počítači připojeném k VPN UPOL:
 1. ověří token agenta u Eduvio API (`GET /stag/agent/whoami`),
 2. zkontroluje, že je dostupné STAG WS (= jsi na VPN),
 3. použije uložený STAG ticket, nebo tě nechá přihlásit,
-4. stáhne předměty a rozvrh, převede je a pošle na API,
+4. stáhne předměty, rozvrh a vypsané termíny zkoušek, převede je a pošle na API
+   (když se termíny načíst nepodaří, sync pokračuje a v aplikaci zůstanou ty předchozí),
 5. nahlásí výsledek (`POST /stag/agent/report`) – uvidíš ho v profilu aplikace.
 
 Data se stahují a převádějí stejným kódem jako při serverové synchronizaci

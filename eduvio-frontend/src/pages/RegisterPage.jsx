@@ -5,7 +5,7 @@ import {
   Lock,
   Eye,
   EyeOff,
-  User,
+  UserRound,
   AlertCircle,
   CalendarDays,
   BarChart3,
@@ -13,9 +13,9 @@ import {
   CheckCircle2,
   Check,
   Info,
+  BookOpen,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import CustomIcon from '../components/CustomIcon'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -24,7 +24,7 @@ import logoImg from '../assets/images/logo.png'
 
 
 const FEATURES = [
-  { icon: () => <CustomIcon name="book" className="w-5 h-5" />, key: 'features.manageSubjects' },
+  { icon: BookOpen, key: 'features.manageSubjects' },
   { icon: CalendarDays, key: 'features.calendar' },
   { icon: BarChart3, key: 'features.progress' },
 ]
@@ -38,10 +38,10 @@ const getStrength = (pw) => {
   if (/[^A-Za-z0-9]/.test(pw)) score++
   const map = [
     { level: 0, color: '' },
-    { level: 1, color: 'bg-red-400' },
-    { level: 2, color: 'bg-amber-400' },
-    { level: 3, color: 'bg-emerald-400' },
-    { level: 4, color: 'bg-emerald-500' },
+    { level: 1, color: 'bg-error' },
+    { level: 2, color: 'bg-warning' },
+    { level: 3, color: 'bg-success-soft' },
+    { level: 4, color: 'bg-success' },
   ]
   return map[score] ?? map[0]
 }
@@ -174,9 +174,9 @@ const RegisterPage = () => {
 
   // ── Style tokens ─────────────────────────────────────────────────
   const inputBase =
-    'w-full pl-10 pr-4 py-2.5 bg-[#F8F9FB] rounded-lg border text-body-md text-gray-900 focus:outline-none focus:bg-white transition-colors'
-  const inputOk = `${inputBase} border-[#E2E8F0] focus:border-[#004ac6]`
-  const inputErr = `${inputBase} border-red-400 focus:border-red-500 bg-red-50`
+    'w-full pl-10 pr-4 py-2.5 bg-surface-container-low rounded-lg border text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest transition-colors'
+  const inputOk = `${inputBase} border-outline-variant focus:border-primary`
+  const inputErr = `${inputBase} border-error focus:border-error bg-error-container`
   const busy = checking || submitting
 
   // ── JSX ──────────────────────────────────────────────────────────
@@ -187,29 +187,22 @@ const RegisterPage = () => {
       </div>
       {/* ─── Left branding panel (UNTOUCHED) ─────────────────────── */}
       <div
-        className="hidden lg:flex lg:w-[480px] xl:w-[540px] shrink-0 flex-col justify-between p-12 relative overflow-hidden"
-        style={{ background: 'linear-gradient(145deg, #001a5e 0%, #003ab0 55%, #0057e8 100%)' }}
-      >
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #7eb8ff, transparent 70%)' }} />
-        <div className="absolute -bottom-32 -left-16 w-96 h-96 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #a78bfa, transparent 70%)' }} />
-
+        className="hidden lg:flex lg:w-[480px] xl:w-[540px] shrink-0 flex-col justify-between p-12 relative overflow-hidden bg-midnight"      >
         <div className="flex items-center gap-3 relative z-10">
           <img
             src={logoImg}
             alt="Eduvio"
             className="w-10 h-10 object-contain"
           />
-          <span className="font-geist font-bold text-xl text-white tracking-tight">Eduvio</span>
+          <span className="font-geist font-bold text-xl text-midnight-foreground tracking-tight">Eduvio</span>
         </div>
 
         <div className="relative z-10 flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <h1 className="text-4xl font-bold text-white leading-tight tracking-tight">
+            <h1 className="text-4xl font-bold text-midnight-foreground leading-tight tracking-tight">
               {t('register.hero.headline')}
             </h1>
-            <p className="text-blue-200 text-base leading-relaxed">
+            <p className="text-midnight-muted text-base leading-relaxed">
               {t('register.hero.subtitle')}
             </p>
           </div>
@@ -217,22 +210,22 @@ const RegisterPage = () => {
           <div className="flex flex-col gap-4">
             {FEATURES.map(({ icon: Icon, key }) => (
               <div key={key} className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Icon className="w-4 h-4 text-blue-200" />
+                <div className="w-8 h-8 rounded-lg bg-midnight-foreground/8 border border-midnight-foreground/15 flex items-center justify-center shrink-0 mt-0.5">
+                  <Icon className="w-4 h-4 text-midnight-muted" />
                 </div>
-                <p className="text-sm text-blue-100 leading-snug">{t(key)}</p>
+                <p className="text-sm text-midnight-foreground leading-snug">{t(key)}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-blue-300/60 text-xs relative z-10">
+        <p className="text-midnight-muted text-xs relative z-10">
           {t('login.footerCopyright')}
         </p>
       </div>
 
       {/* ─── Right form panel ────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-start lg:justify-center bg-white px-6 pt-20 pb-12 sm:pt-24 lg:pt-12 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-start lg:justify-center bg-surface-container-lowest px-6 pt-20 pb-12 sm:pt-24 lg:pt-12 overflow-y-auto">
         <div className="w-full max-w-[400px] flex flex-col gap-7">
           {/* Mobile logo */}
           <div className="flex lg:hidden items-center gap-3">
@@ -241,24 +234,24 @@ const RegisterPage = () => {
               alt="Eduvio"
               className="w-9 h-9 object-contain"
             />
-            <span className="font-geist font-bold text-xl text-gray-900 tracking-tight">Eduvio</span>
+            <span className="font-geist font-bold text-xl text-on-surface tracking-tight">Eduvio</span>
           </div>
 
           {/* ── Title ──────────────────────────────────────────── */}
           <div className="flex flex-col gap-1.5">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+            <h2 className="text-2xl font-bold text-on-surface tracking-tight">
               {t('register.title')}
             </h2>
-            <p className="text-body-md text-gray-500">
+            <p className="text-body-md text-on-surface-variant">
               {t('register.subtitle')}
             </p>
           </div>
 
           {/* Server error */}
           {serverError && (
-            <div className="flex items-start gap-2.5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-              <p className="text-label-sm text-red-700">{t(serverError)}</p>
+            <div className="flex items-start gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
+              <p className="text-label-sm text-on-error-container">{t(serverError)}</p>
             </div>
           )}
 
@@ -268,11 +261,11 @@ const RegisterPage = () => {
             {/* ═══════════════ Account details ═══════════════ */}
             {/* Full name */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-name">
+              <label className="text-label-md font-semibold text-on-surface" htmlFor="reg-name">
                 {t('register.fields.name.label')}
               </label>
               <div className="relative">
-                <User className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <UserRound className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="reg-name"
                   type="text"
@@ -284,7 +277,7 @@ const RegisterPage = () => {
                 />
               </div>
               {errors.name && (
-                <p className="text-label-sm text-red-600 flex items-center gap-1">
+                <p className="text-label-sm text-error flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" /> {formatError(t, errors.name)}
                 </p>
               )}
@@ -292,11 +285,11 @@ const RegisterPage = () => {
 
             {/* Username */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-username">
+              <label className="text-label-md font-semibold text-on-surface" htmlFor="reg-username">
                 {t('register.fields.username.label')}
               </label>
               <div className="relative">
-                <User className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <UserRound className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="reg-username"
                   type="text"
@@ -308,7 +301,7 @@ const RegisterPage = () => {
                 />
               </div>
               {errors.username && (
-                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                <p className="text-error text-sm mt-1 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" /> {formatError(t, errors.username)}
                 </p>
               )}
@@ -316,11 +309,11 @@ const RegisterPage = () => {
 
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-email">
+              <label className="text-label-md font-semibold text-on-surface" htmlFor="reg-email">
                 {t('register.fields.email.label')}
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Mail className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="reg-email"
                   type="email"
@@ -332,7 +325,7 @@ const RegisterPage = () => {
                 />
               </div>
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                <p className="text-error text-sm mt-1 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" /> {formatError(t, errors.email)}
                 </p>
               )}
@@ -340,11 +333,11 @@ const RegisterPage = () => {
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-password">
+              <label className="text-label-md font-semibold text-on-surface" htmlFor="reg-password">
                 {t('register.fields.password.label')}
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Lock className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="reg-password"
                   type={showPass ? 'text' : 'password'}
@@ -357,7 +350,7 @@ const RegisterPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
                   aria-label={showPass ? t('register.aria.hidePassword') : t('register.aria.showPassword')}
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -371,19 +364,19 @@ const RegisterPage = () => {
                       <div
                         key={n}
                         className={`h-1 flex-1 rounded-full transition-colors ${
-                          n <= strength.level ? strength.color : 'bg-[#E2E8F0]'
+                          n <= strength.level ? strength.color : 'bg-outline-variant'
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-[11px] font-semibold text-gray-500 shrink-0">
+                  <span className="text-[11px] font-semibold text-on-surface-variant shrink-0">
                     {strengthLabelKey ? t(strengthLabelKey) : ''}
                   </span>
                 </div>
               )}
 
               {errors.password && (
-                <p className="text-label-sm text-red-600 flex items-center gap-1">
+                <p className="text-label-sm text-error flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" /> {formatError(t, errors.password)}
                 </p>
               )}
@@ -391,11 +384,11 @@ const RegisterPage = () => {
 
             {/* Confirm password */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-label-md font-semibold text-gray-900" htmlFor="reg-confirm">
+              <label className="text-label-md font-semibold text-on-surface" htmlFor="reg-confirm">
                 {t('register.fields.confirmPassword.label')}
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Lock className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="reg-confirm"
                   type={showConfirm ? 'text' : 'password'}
@@ -408,18 +401,18 @@ const RegisterPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
                   aria-label={showConfirm ? t('register.aria.hidePassword') : t('register.aria.showPassword')}
                 >
                   {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
 
                 {form.confirmPassword && form.password === form.confirmPassword && (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 absolute right-9 top-1/2 -translate-y-1/2" />
+                  <CheckCircle2 className="w-4 h-4 text-success absolute right-9 top-1/2 -translate-y-1/2" />
                 )}
               </div>
               {errors.confirmPassword && (
-                <p className="text-label-sm text-red-600 flex items-center gap-1">
+                <p className="text-label-sm text-error flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" /> {formatError(t, errors.confirmPassword)}
                 </p>
               )}
@@ -430,7 +423,7 @@ const RegisterPage = () => {
               <button
                 type="submit"
                 disabled={busy}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-[#004ac6] hover:bg-[#003ea8] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg text-label-md transition-all shadow-sm cursor-pointer"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-primary hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-on-primary font-semibold rounded-lg text-label-md transition-all shadow-sm cursor-pointer"
               >
                 {checking ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> {t('register.actions.checking')}</>
@@ -444,15 +437,15 @@ const RegisterPage = () => {
           </form>
 
           {/* Study details are not entered by hand; they come from STAG */}
-          <p className="flex items-start gap-2 text-sm text-gray-500 leading-relaxed">
-            <Info className="w-4 h-4 text-[#004ac6] shrink-0 mt-0.5" />
+          <p className="flex items-start gap-2 text-sm text-on-surface-variant leading-relaxed">
+            <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             <span>{t('register.stagNote')}</span>
           </p>
 
           {/* Sign in link */}
-          <p className="text-body-md text-gray-500 text-center">
+          <p className="text-body-md text-on-surface-variant text-center">
             {t('register.links.haveAccount')}{' '}
-            <Link to="/login" className="text-[#004ac6] font-semibold hover:underline">
+            <Link to="/login" className="text-primary font-semibold hover:underline">
               {t('register.links.signIn')}
             </Link>
           </p>

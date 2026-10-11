@@ -513,6 +513,159 @@ def odesli_predmety_do_laravelu(api_url: str, bearer_token: str, data: list):
         sys.exit(1)
 
 
+# ── Termíny zkoušek a zápočtů ───────────────────────────────────────
+
+# Názvy polí se mezi verzemi STAG WS liší, proto se zkouší víc variant
+_KLICE_SEZNAMU_TERMINU = ("termin", "terminy", "terminProStudenta", "terminyProStudenta")
+
+
+def nacti_terminy_ze_stagu(ticket: str, base_url: str, student_id: str) -> list:
+    """Vypsané termíny zkoušek a zápočtů předmětů studenta (terminy/getTerminyProStudenta).
+
+    Vyhazuje StagWsError (stav != 200), ValueError (neočekávaná odpověď)
+    nebo requests.RequestException (síť).
+    """
+    url = f"{base_url.rstrip('/')}/services/rest2/terminy/getTerminyProStudenta"
+    params = {"osCislo": student_id, "outputFormat": "JSON"}
+    response = requests.get(url, params=params, auth=(ticket, ""), timeout=15)
+    if response.status_code != 200:
+        raise StagWsError(response.status_code, response.text)
+    data = response.json()
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        for klic in _KLICE_SEZNAMU_TERMINU:
+            if isinstance(data.get(klic), list):
+                return data[klic]
+        if not data:
+            return []
+    raise ValueError("getTerminyProStudenta vrátilo neočekávaná data")
+
+
+def _hodnota(hodnota):
+    """STAG někdy balí hodnoty do {'value': ...}; jiné objekty (např. učitel) zůstávají."""
+    if isinstance(hodnota, dict) and "value" in hodnota:
+        return hodnota["value"]
+    return hodnota
+
+
+def _prvni(radek: dict, *klice):
+    for klic in klice:
+        hodnota = _hodnota(radek.get(klic))
+        if hodnota not in (None, ""):
+            return hodnota
+    return None
+
+
+def cas_na_hhmm(hodnota):
+    """'9:00', '09:00:00', '9.00' nebo {'value': ...} → '09:00'; jinak None."""
+    s = _text_nebo_none(_hodnota(hodnota))
+    m = re.match(r"^(\d{1,2})[:.](\d{2})", s or "")
+    if not m or int(m.group(1)) > 23 or int(m.group(2)) > 59:
+        return None
+    return f"{int(m.group(1)):02d}:{m.group(2)}"
+
+
+def druh_terminu(hodnota) -> str:
+    """'Zkouška' → exam, 'Zápočet' / 'Klasifikovaný zápočet' → credit, jinak other."""
+    text = _bez_diakritiky(str(hodnota or "")).lower()
+    if "zk" in text or "exam" in text:
+        return "exam"
+    if "zap" in text or "credit" in text:
+        return "credit"
+    return "other"
+
+
+def jmeno_zkousejiciho(hodnota):
+    """Jméno z objektu učitele (tituly, jméno, příjmení) nebo z textu."""
+    hodnota = _hodnota(hodnota)
+    if isinstance(hodnota, dict):
+        casti = [_text_nebo_none(hodnota.get(k)) for k in ("titulPred", "jmeno", "prijmeni")]
+        jmeno = " ".join(c for c in casti if c)
+        titul_za = _text_nebo_none(hodnota.get("titulZa"))
+        if jmeno and titul_za:
+            jmeno = f"{jmeno}, {titul_za}"
+        return jmeno or None
+    if isinstance(hodnota, list):
+        return osoby_na_text(*[jmeno_zkousejiciho(h) for h in hodnota])
+    return _text_nebo_none(hodnota)
+
+
+def _nezaporne_cislo(hodnota):
+    cislo = _cislo(_hodnota(hodnota))
+    return cislo if cislo is not None and cislo >= 0 else None
+
+
+def transformuj_terminy_pro_laravel(surove_terminy: list) -> list:
+    """Převede termíny ze STAGu na data pro /api/stag/sync-exam-terms.
+
+    Termín bez id, předmětu nebo platného data se přeskočí; předmět se
+    na backendu páruje podle zkratky.
+    """
+    vysledek = []
+    for radek in surove_terminy or []:
+        if not isinstance(radek, dict):
+            continue
+        stag_id = _text_nebo_none(_prvni(radek, "termIdno", "terminIdno", "idTerminu", "id"))
+        kod = _text_nebo_none(_prvni(radek, "predmet", "zkratka", "predmetZkratka"))
+        datum = datum_na_iso(_prvni(radek, "datum", "datumTerminu"))
+        if not (stag_id and kod and datum):
+            continue
+
+        mistnost = " ".join(
+            filter(None, (_text_nebo_none(_prvni(radek, "budova")), _text_nebo_none(_prvni(radek, "mistnost"))))
+        )
+        poznamka = html_na_text(_prvni(radek, "poznamka", "poznamkaTerminu"))
+        vysledek.append({
+            "stagId": zkrat(stag_id, 64),
+            "subjectCode": zkrat(kod),
+            "date": datum,
+            "startTime": cas_na_hhmm(_prvni(radek, "casOd", "hodinaOd")),
+            "endTime": cas_na_hhmm(_prvni(radek, "casDo", "hodinaDo")),
+            "kind": druh_terminu(_prvni(radek, "typTerminu", "typ", "druhTerminu")),
+            "room": zkrat(mistnost or None),
+            "examiner": zkrat(jmeno_zkousejiciho(_prvni(radek, "ucitel", "zkousejici", "ucitelJmeno"))),
+            "registered": _ano_ne(_prvni(radek, "zapsan", "studentZapsan", "jeZapsan")) is True,
+            "capacity": _nezaporne_cislo(_prvni(radek, "limit", "limitUcastniku", "kapacita")),
+            "occupied": _nezaporne_cislo(_prvni(radek, "obsazeni", "pocetZapsanych")),
+            "deregistrationDeadline": datum_na_iso(_prvni(radek, "deadlineDatumOdhlaseni", "datumOdhlaseniDo")),
+            "note": zkrat(poznamka, 2000),
+        })
+    return vysledek
+
+
+def nacti_terminy_bezpecne(ticket: str, base_url: str, student_id: str):
+    """Termíny pro Laravel, nebo None, pokud se je načíst nepodařilo (sync tím nespadne)."""
+    print("📡 Načítám termíny zkoušek ze STAG WS...")
+    try:
+        return transformuj_terminy_pro_laravel(nacti_terminy_ze_stagu(ticket, base_url, student_id))
+    except (StagWsError, ValueError, requests.RequestException) as e:
+        print(f"⚠️ Termíny zkoušek se nepodařilo načíst ({_popis_chyby(e)}), přeskakuji.", file=sys.stderr)
+        return None
+
+
+def posli_terminy(api_url: str, bearer_token: str, terminy: list):
+    """Odešle termíny na /api/stag/sync-exam-terms. Vyhazuje ApiError nebo requests.RequestException."""
+    response = requests.post(f"{api_url}/stag/sync-exam-terms", json=terminy,
+                             headers=_api_headers(bearer_token), timeout=15)
+    if response.status_code != 200:
+        raise ApiError("Chyba při synchronizaci termínů zkoušek", response.status_code, "")
+
+
+def odesli_terminy_bezpecne(api_url: str, bearer_token: str, terminy) -> bool:
+    """Odešle termíny (i prázdný seznam: ve STAGu už nejsou). None = nenačteno, nic se neposílá."""
+    if terminy is None:
+        return False
+    try:
+        posli_terminy(api_url, bearer_token, terminy)
+    except (ApiError, requests.RequestException) as e:
+        status = f"Status: {e.status_code}" if isinstance(e, ApiError) else type(e).__name__
+        print(f"⚠️ Termíny zkoušek se nepodařilo odeslat ({status}), přeskakuji.", file=sys.stderr)
+        return False
+    print(f"🗓️ Odesláno {len(terminy)} termínů zkoušek.")
+    return True
+
+
 def nacti_rozvrh_ze_stagu(ticket: str, student_id: str, base_url: str, semestr: str) -> list:
     """Načte rozvrhové akce studenta ze STAG Web Services."""
     url = f"{base_url.rstrip('/')}/services/rest2/rozvrhy/getRozvrhByStudent"
@@ -694,6 +847,10 @@ def main():
     # 5. Studijní údaje (jen whitelist polí); selhání se jen přeskočí
     info_studenta = nacti_info_studenta_bezpecne(STAG_TICKET, STAG_WS_BASE_URL, STAG_STUDENT_ID)
     odesli_info_studenta_bezpecne(LARAVEL_API_URL, BEARER_TOKEN, info_studenta)
+
+    # 6. Termíny zkoušek a zápočtů; selhání se jen přeskočí
+    terminy = nacti_terminy_bezpecne(STAG_TICKET, STAG_WS_BASE_URL, STAG_STUDENT_ID)
+    odesli_terminy_bezpecne(LARAVEL_API_URL, BEARER_TOKEN, terminy)
 
     sys.exit(0)
 

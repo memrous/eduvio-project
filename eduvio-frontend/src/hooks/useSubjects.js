@@ -36,7 +36,10 @@ const extractSubjects = (result) => {
   return []
 }
 
-export const useSubjects = () => {
+/**
+ * @param {{ enabled?: boolean }} [options] enabled=false only reads the cache (no request)
+ */
+export const useSubjects = ({ enabled = true } = {}) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const queryKey = [SUBJECTS_KEY, user?.id]
@@ -45,7 +48,7 @@ export const useSubjects = () => {
   const query = useQuery({
     queryKey,
     queryFn: () => api.getSubjects(user.id).then(extractSubjects),
-    enabled: !!user,
+    enabled: !!user && enabled,
   })
 
   // ── Mutation: add subject ─────────────────────────────────────

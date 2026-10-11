@@ -13,7 +13,7 @@ const CalendarFilterChips = ({
   return (
     <div className="flex flex-wrap items-center gap-2 px-4 pb-3 md:px-6">
       <span className="flex items-center gap-1.5 text-xs font-medium text-on-surface-variant">
-        <Filter className="size-3.5" />
+        <Filter className="size-4" />
         {t('academic:calendarView.filterLabel', 'Filtr:')}
       </span>
       {SUBJECTS.map((subj) => {

@@ -181,7 +181,10 @@
       "materials": "Materials & Links",
       "notes": "My Notes",
       "fulfillment": "Requirements",
-      "tasks": "Tasks"
+      "tasks": "Tasks",
+      "exam": "Exam",
+      "credit": "Credit",
+      "syllabus": "Semester plan"
     },
     "requirements": {
       "noRequirements": "No requirements yet.",
@@ -266,6 +269,82 @@
       "assessment": "Assessment methods",
       "examForm": "Exam form",
       "empty": "STAG lists no requirements for this subject."
+    },
+    "infoPanel": {
+      "title": "Subject information",
+      "show": "Show subject information",
+      "hide": "Hide subject information",
+      "people": "Teachers",
+      "links": "Links",
+      "about": "Annotation, syllabus and literature"
+    },
+    "exam": {
+      "terms": {
+        "title": "Terms",
+        "registered": "Registered",
+        "full": "Full",
+        "capacity": "{{occupied}}/{{capacity}} places",
+        "deregisterUntil": "Deregister by {{date}}",
+        "kinds": {
+          "exam": "Exam",
+          "credit": "Credit",
+          "other": "Term"
+        },
+        "nextRegistered": "Your term",
+        "available": "Available terms",
+        "past": "Past terms ({{count}})",
+        "hidePast": "Hide past terms",
+        "empty": "No terms have been published in STAG yet.",
+        "emptyHint": "Terms are loaded from STAG during synchronization.",
+        "manualSubject": "Terms are only loaded for subjects from STAG.",
+        "registerInStag": "Register in STAG",
+        "loadError": "Could not load the terms."
+      },
+      "topics": {
+        "title": "Exam topics",
+        "progress": "{{done}} of {{total}} learned",
+        "empty": "Write down the topics you need to learn and tick off the ones you know.",
+        "addPlaceholder": "Add a topic…",
+        "add": "Add",
+        "pasteHint": "Tip: paste a list (one topic per line) to add several topics at once.",
+        "edit": "Edit topic “{{title}}”",
+        "delete": "Delete topic “{{title}}”",
+        "deleteConfirm": "Delete topic “{{title}}”?",
+        "save": "Save",
+        "cancel": "Cancel",
+        "markDone": "Learned: {{title}}",
+        "saveFailed": "Could not save the topic.",
+        "loadError": "Could not load the topics.",
+        "fromWeb": "Topics from the teacher’s pages"
+      },
+      "materials": {
+        "title": "Materials for the exam",
+        "empty": "Nothing here yet. In the Materials tab, mark what will help you with the exam.",
+        "showMaterials": "Go to materials",
+        "remove": "Remove “{{title}}” from the exam",
+        "open": "Open “{{title}}”"
+      },
+      "conditions": "Requirements and assessment",
+      "assessments": {
+        "title": "Continuous assessment",
+        "upcoming": "Upcoming",
+        "past": "Past ({{count}})",
+        "hidePast": "Hide past",
+        "hide": "Hide “{{title}}”",
+        "hideFailed": "Could not hide the item.",
+        "empty": "There are no written tests on the teacher’s website yet.",
+        "noSource": "We do not have the teacher’s page for this subject yet."
+      }
+    },
+    "syllabus": {
+      "title": "Semester plan",
+      "source": "From the teacher’s website",
+      "openSource": "Open the course page",
+      "empty": "We did not find a semester schedule on the teacher’s website.",
+      "emptyHint": "The schedule is read from the teachers’ course pages when the links are synchronized.",
+      "thisWeek": "This week",
+      "holiday": "No classes",
+      "loadError": "Could not load the semester plan."
     }
   },
   "calendarView": {

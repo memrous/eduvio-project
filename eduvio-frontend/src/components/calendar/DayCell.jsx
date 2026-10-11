@@ -1,5 +1,7 @@
 import { Flame, Zap, GraduationCap } from 'lucide-react'
 import { getSubjectStyle } from './useCalendarState'
+import { useTranslation } from 'react-i18next'
+import { deadlineTitle } from '../../utils/assessments'
 
 const getDeadlineIcon = (type) => {
   const t = String(type || '').toLowerCase()
@@ -19,6 +21,7 @@ const DayCell = ({
   onOpenMobileDetail,
   subjects = [],
 }) => {
+  const { t } = useTranslation()
   const MAX_ITEMS_MOBILE = 1
   const MAX_ITEMS_DESKTOP = 3
   const allItems = [
@@ -53,7 +56,7 @@ const DayCell = ({
       {/* Day number */}
       <div className="flex justify-between items-start mb-1">
         {isToday ? (
-          <span className="w-6 h-6 bg-primary text-white font-bold rounded-full flex items-center justify-center text-xs shadow-sm">
+          <span className="w-6 h-6 bg-primary text-on-primary font-bold rounded-full flex items-center justify-center text-xs shadow-sm">
             {day.dayNum}
           </span>
         ) : (
@@ -78,10 +81,10 @@ const DayCell = ({
               <div
                 key={`d-${item.id ?? idx}`}
                 onClick={(e) => { e.stopPropagation() }}
-                title={item.title}
-                className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded truncate border border-rose-400/30 dark:border-rose-500/30 cursor-default ${style.bg} ${style.text}`}
+                title={deadlineTitle(item, t)}
+                className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded truncate border border-error/30 cursor-default ${style.bg} ${style.text}`}
               >
-                <Icon className="w-2.5 h-2.5 shrink-0 text-rose-600 dark:text-rose-300" />
+                <Icon className="w-2.5 h-2.5 shrink-0 text-error" />
                 <span className="truncate">{item.title}</span>
               </div>
             )
@@ -122,7 +125,7 @@ const DayCell = ({
           }}
           className={`sm:hidden mt-1 flex items-center justify-center gap-1 min-w-[22px] h-[22px] px-1.5 rounded-full text-[10px] font-bold border transition-colors ${
             hasDeadline
-              ? 'bg-rose-500/10 border-rose-400/40 text-rose-600 dark:text-rose-300'
+              ? 'bg-error-container border-error/30 text-on-error-container'
               : 'bg-primary/10 border-primary/20 text-primary'
           }`}
         >

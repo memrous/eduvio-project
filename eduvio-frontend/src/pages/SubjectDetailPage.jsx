@@ -31,6 +31,7 @@ const SubjectDetailPage = () => {
     assignResourceEvent,
     updateMaterial,
     setResourceHidden,
+    setResourceForExam,
     isLoading: resourcesLoading,
   } = useResources()
   // Lessons for "Move to a week / lesson"
@@ -61,6 +62,7 @@ const SubjectDetailPage = () => {
         updateSemesterLink: updateResource,
         deleteResource,
         setHidden: setResourceHidden,
+        setForExam: setResourceForExam,
       }}
       onBack={() => navigate('/subjects')}
       onCreateRequirement={createRequirement}

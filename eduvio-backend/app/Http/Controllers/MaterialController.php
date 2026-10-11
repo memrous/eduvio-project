@@ -221,6 +221,29 @@ class MaterialController extends Controller
     }
 
     /**
+     * Marks any material (own, Moodle, automatic) as exam preparation, or unmarks it.
+     */
+    public function markForExam(Request $request, $id)
+    {
+        return $this->setForExam($request, $id, true);
+    }
+
+    public function unmarkForExam(Request $request, $id)
+    {
+        return $this->setForExam($request, $id, false);
+    }
+
+    private function setForExam(Request $request, $id, bool $forExam)
+    {
+        $material = $this->findOwned($request->user()->id, $id);
+
+        $material->for_exam = $forExam;
+        $material->save();
+
+        return response()->json($material);
+    }
+
+    /**
      * The user looked at a semester link: new files on its page are no longer new.
      */
     public function seen(Request $request, $id)

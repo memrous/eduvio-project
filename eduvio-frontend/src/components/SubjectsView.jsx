@@ -5,12 +5,13 @@ import {
   Plus,
   X,
   ChevronDown,
+  BookOpen,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Dropdown from './common/Dropdown'
 import SubjectOverviewCard from './SubjectOverviewCard'
-import CustomIcon from './CustomIcon'
 import { parseSemester, normalizeStatut } from '../utils/semester'
+import Icon from './common/Icon'
 
 // ─── Add Manually Card ───────────────────────────────────────
 const AddManuallyCard = ({ onAdd, label }) => (
@@ -66,10 +67,10 @@ const CreateSubjectModal = ({ onClose, onSave }) => {
   const labelCls = 'text-label-md font-bold text-on-surface-variant'
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-scrim/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
       <div className="bg-surface rounded-lg shadow-2xl border border-outline-variant w-full max-w-lg overflow-hidden font-inter">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] bg-surface">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface">
           <h2 className="text-headline-md font-bold text-on-surface">{t('academic:subjectsView.modalTitle')}</h2>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-surface-container transition-colors text-on-surface-variant hover:text-on-surface cursor-pointer">
             <X className="w-5 h-5" />
@@ -143,9 +144,9 @@ const CreateSubjectModal = ({ onClose, onSave }) => {
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-end pt-4 border-t border-[#E2E8F0] mt-2">
+          <div className="flex flex-col sm:flex-row gap-3 justify-end pt-4 border-t border-outline-variant mt-2">
             <button type="button" onClick={onClose} className="w-full sm:w-auto px-4 py-2 border border-outline-variant rounded-md text-label-md font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors cursor-pointer">{t('academic:subjectsView.actions.cancel')}</button>
-            <button type="submit" className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary-container text-on-primary rounded-md text-label-md font-semibold shadow-sm transition-colors cursor-pointer">{t('academic:subjectsView.actions.saveSubject')}</button>
+            <button type="submit" className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-md text-label-md font-semibold shadow-sm transition-colors cursor-pointer">{t('academic:subjectsView.actions.saveSubject')}</button>
           </div>
         </form>
       </div>
@@ -300,7 +301,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-1 min-w-0">
             <h1 className="text-display text-on-surface">{t('academic:subjectsView.page.title')}</h1>
-            <p className="text-body-md text-[#737686]">{t('academic:subjectsView.page.subtitle')}</p>
+            <p className="text-body-md text-on-surface-variant">{t('academic:subjectsView.page.subtitle')}</p>
           </div>
 
           {/* Filter + Sort Controls */}
@@ -329,14 +330,14 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
         {/* Entirely Empty State */}
         {subjects.length === 0 ? (
           <div className="flex flex-col gap-5">
-            <div className="bg-white border border-[#E2E8F0] rounded-lg p-16 text-center flex flex-col items-center gap-3 shadow-ambient">
-              <div className="w-12 h-12 bg-[#eeefff] text-primary rounded-full flex items-center justify-center">
-                <CustomIcon name="book" className="w-6 h-6" />
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-16 text-center flex flex-col items-center gap-3 shadow-ambient">
+              <div className="w-12 h-12 bg-primary-container text-primary rounded-full flex items-center justify-center">
+                <Icon icon={BookOpen} size="lg" />
               </div>
               <p className="text-headline-md font-semibold text-on-surface">
                 {t('academic:subjectsView.emptyState.noDataTitle')}
               </p>
-              <p className="text-body-md text-[#737686]">
+              <p className="text-body-md text-on-surface-variant">
                 {t('academic:subjectsView.emptyState.noDataDescription')}
               </p>
             </div>
@@ -347,14 +348,14 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
         ) : displayed.length === 0 ? (
           /* Filter produced 0 results */
           <div className="flex flex-col gap-5">
-            <div className="bg-white border border-[#E2E8F0] rounded-lg p-16 text-center flex flex-col items-center gap-3 shadow-ambient">
-              <div className="w-12 h-12 bg-[#eeefff] text-primary rounded-full flex items-center justify-center">
-                <CustomIcon name="book" className="w-6 h-6" />
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-16 text-center flex flex-col items-center gap-3 shadow-ambient">
+              <div className="w-12 h-12 bg-primary-container text-primary rounded-full flex items-center justify-center">
+                <Icon icon={BookOpen} size="lg" />
               </div>
               <p className="text-headline-md font-semibold text-on-surface">
                 {t('academic:subjectsView.emptyState.noMatchingTitle')}
               </p>
-              <p className="text-body-md text-[#737686]">
+              <p className="text-body-md text-on-surface-variant">
                 {t('academic:subjectsView.emptyState.noMatchingDescription')}
               </p>
             </div>
@@ -364,7 +365,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
           <div className="flex flex-col gap-10">
             {/* 1. Winter Semester Section (Active) */}
             <section className="flex flex-col gap-6">
-              <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+              <div className="flex items-center justify-between pb-3 border-b border-outline-variant">
                 <div className="flex items-center gap-3 flex-wrap">
                   <h2 className="text-xl font-bold text-on-surface tracking-tight">
                     {t('academic:subjectsView.semesters.winter')}
@@ -372,7 +373,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                   <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">
                     {t('academic:subjectsView.semesters.activeBadge')}
                   </span>
-                  <span className="text-xs font-medium text-[#737686]">
+                  <span className="text-xs font-medium text-on-surface-variant">
                     {t('academic:subjectsView.semesters.subjectsCount', { count: winterSubjects.length })} · {t('academic:subjectsView.semesters.creditsCount', { count: winterCredits })}
                   </span>
                 </div>
@@ -396,7 +397,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                           <h3 className="text-label-md font-bold text-on-surface-variant uppercase tracking-wider text-xs">
                             {section.title}
                           </h3>
-                          <span className="text-xs font-medium text-[#737686]">
+                          <span className="text-xs font-medium text-on-surface-variant">
                             ({section.items.length})
                           </span>
                         </div>
@@ -413,7 +414,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                   </div>
                 ) : (
                   <div className="p-8 text-center bg-surface-container-lowest border border-dashed border-outline-variant rounded-2xl">
-                    <p className="text-body-md text-[#737686]">
+                    <p className="text-body-md text-on-surface-variant">
                       {filterType !== 'all'
                         ? t('academic:subjectsView.semesters.emptyFilter')
                         : t('academic:subjectsView.semesters.emptyWinter')}
@@ -425,12 +426,12 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
 
             {/* 2. Summer Semester Section */}
             <section className="flex flex-col gap-6">
-              <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+              <div className="flex items-center justify-between pb-3 border-b border-outline-variant">
                 <div className="flex items-center gap-3 flex-wrap">
                   <h2 className="text-xl font-bold text-on-surface tracking-tight">
                     {t('academic:subjectsView.semesters.summer')}
                   </h2>
-                  <span className="text-xs font-medium text-[#737686]">
+                  <span className="text-xs font-medium text-on-surface-variant">
                     {t('academic:subjectsView.semesters.subjectsCount', { count: summerSubjects.length })} · {t('academic:subjectsView.semesters.creditsCount', { count: summerCredits })}
                   </span>
                 </div>
@@ -454,7 +455,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                           <h3 className="text-label-md font-bold text-on-surface-variant uppercase tracking-wider text-xs">
                             {section.title}
                           </h3>
-                          <span className="text-xs font-medium text-[#737686]">
+                          <span className="text-xs font-medium text-on-surface-variant">
                             ({section.items.length})
                           </span>
                         </div>
@@ -468,7 +469,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                   </div>
                 ) : (
                   <div className="p-8 text-center bg-surface-container-lowest border border-dashed border-outline-variant rounded-2xl">
-                    <p className="text-body-md text-[#737686]">
+                    <p className="text-body-md text-on-surface-variant">
                       {filterType !== 'all'
                         ? t('academic:subjectsView.semesters.emptyFilter')
                         : t('academic:subjectsView.semesters.emptySummer')}
@@ -480,7 +481,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
           </div>
         )}
 
-        <footer className="text-center text-body-md text-[#737686] pt-4 border-t border-[#E2E8F0]">
+        <footer className="text-center text-body-md text-on-surface-variant pt-4 border-t border-outline-variant">
           {t('academic:subjectsView.page.footer')}
         </footer>
       </div>

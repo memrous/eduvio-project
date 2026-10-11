@@ -1,7 +1,7 @@
 
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { getSubjectColor } from '../../utils/subjectColors'
+import { getSubjectStyle } from './useCalendarState'
 
 const EventModal = ({
   isOpen,
@@ -26,7 +26,7 @@ const EventModal = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-opacity animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-scrim/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-opacity animate-in fade-in duration-200">
       <div className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant w-full max-w-md overflow-hidden relative font-inter animate-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low/20">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-on-surface-variant">
@@ -75,14 +75,7 @@ const EventModal = ({
             <div className="grid grid-cols-2 gap-2">
               {SUBJECTS.map(subj => {
                 const isSelected = newSubject === subj.name
-                const colorObj = getSubjectColor(subj)
-                let dotColor = '#737686'
-                if (colorObj.bg === 'bg-primary-container') dotColor = '#1e64ef'
-                else if (colorObj.bg === 'bg-secondary-container') dotColor = '#505f76'
-                else if (colorObj.bg === 'bg-tertiary-container') dotColor = '#943700'
-                else if (colorObj.bg === 'bg-success-container') dotColor = '#35c26d'
-                else if (colorObj.bg === 'bg-warning-container') dotColor = '#d97706'
-                else if (colorObj.bg === 'bg-error-container') dotColor = '#ba1a1a'
+                const { dot: dotColor } = getSubjectStyle(subj)
 
                 return (
                   <button

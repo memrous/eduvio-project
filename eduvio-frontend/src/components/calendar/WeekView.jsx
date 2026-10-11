@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, Paperclip, MapPin } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { deadlineTimeLabel, deadlineTitle } from '../../utils/assessments'
 import { formatRoom } from '../../utils/room'
 
 const WEEKDAYS_LONG = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
@@ -57,7 +58,7 @@ const WeekView = ({
                   {longName}
                 </span>
                 <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                  isToday ? 'bg-primary text-white shadow-sm' : 'text-on-surface'
+                  isToday ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface'
                 }`}>
                   {day.dayNum}
                 </span>
@@ -86,10 +87,10 @@ const WeekView = ({
                 return (
                   <div
                     key={req.id}
-                    className={`flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded border border-rose-400/50 truncate ${style.bg} ${style.text}`}
+                    className={`flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded border border-error/30 truncate ${style.bg} ${style.text}`}
                   >
-                    <Icon className="w-3 h-3 shrink-0 text-rose-600" />
-                    <span className="shrink-0 tabular-nums opacity-80">{req.time || '23:59'}</span>
+                    <Icon className="w-3 h-3 shrink-0 text-error" />
+                    <span className="shrink-0 tabular-nums opacity-80">{deadlineTimeLabel(req)}</span>
                     <span className="truncate">{req.title}</span>
                   </div>
                 )
@@ -193,7 +194,7 @@ const WeekView = ({
                 {t(`academic:calendarGrid.days.${day.dayName}`)}
               </span>
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                isToday ? 'bg-primary text-white shadow-sm' : isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-surface-container text-on-surface'
+                isToday ? 'bg-primary text-on-primary shadow-sm' : isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-surface-container text-on-surface'
               }`}>
                 {day.dayNum}
               </span>
@@ -222,11 +223,11 @@ const WeekView = ({
                   return (
                     <div
                       key={req.id}
-                      title={`${req.time || '23:59'} ${req.title}`}
-                      className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded border border-rose-400/50 dark:border-rose-500/40 truncate hover:brightness-95 transition-all ${style.bg} ${style.text}`}
+                      title={`${deadlineTimeLabel(req)} ${deadlineTitle(req, t)}`.trim()}
+                      className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded border border-error/30 truncate hover:brightness-95 transition-all ${style.bg} ${style.text}`}
                     >
-                      <Icon className="w-2.5 h-2.5 shrink-0 text-rose-600 dark:text-rose-300" />
-                      <span className="shrink-0 tabular-nums opacity-90">{req.time || '23:59'}</span>
+                      <Icon className="w-2.5 h-2.5 shrink-0 text-error" />
+                      <span className="shrink-0 tabular-nums opacity-90">{deadlineTimeLabel(req)}</span>
                       <span className="truncate">{req.title}</span>
                     </div>
                   )

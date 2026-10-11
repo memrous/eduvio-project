@@ -1,5 +1,6 @@
+import { BookOpen, ListChecks, Clock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import CustomIcon from './CustomIcon'
+import Icon from './common/Icon'
 
 const StatsRow = ({ subjects, events }) => {
   const { t } = useTranslation('dashboard')
@@ -22,7 +23,7 @@ const StatsRow = ({ subjects, events }) => {
         {/* Active Subjects Card */}
         <div className="bg-surface border border-outline-variant p-4 rounded-lg shadow-ambient min-w-[130px] flex-1 flex flex-col items-start justify-between">
           <div className="w-8 h-8 bg-primary-container text-primary flex items-center justify-center rounded-sm">
-            <CustomIcon name="book" className="w-4 h-4" />
+            <Icon icon={BookOpen} />
           </div>
           <div className="mt-4">
             <span className="text-display font-semibold text-on-surface leading-none">{activeSubjectsCount}</span>
@@ -33,7 +34,7 @@ const StatsRow = ({ subjects, events }) => {
         {/* Pending Tasks Card */}
         <div className="bg-surface border border-outline-variant p-4 rounded-lg shadow-ambient min-w-[130px] flex-1 flex flex-col items-start justify-between">
           <div className="w-8 h-8 bg-surface-container-low text-on-surface-variant flex items-center justify-center rounded-sm">
-            <CustomIcon name="planning" className="w-4 h-4" />
+            <Icon icon={ListChecks} />
           </div>
           <div className="mt-4">
             <span className="text-display font-semibold text-on-surface leading-none">{pendingTasksCount}</span>
@@ -43,8 +44,8 @@ const StatsRow = ({ subjects, events }) => {
 
         {/* Upcoming Exams Card */}
         <div className="bg-surface border border-outline-variant p-4 rounded-lg shadow-ambient min-w-[130px] flex-1 flex flex-col items-start justify-between">
-          <div className="w-8 h-8 bg-warning-container text-warning flex items-center justify-center rounded-sm">
-            <CustomIcon name="clock" className="w-4 h-4" />
+          <div className="w-8 h-8 bg-warning-container text-on-warning-container flex items-center justify-center rounded-sm">
+            <Icon icon={Clock} />
           </div>
           <div className="mt-4">
             <span className="text-display font-semibold text-on-surface leading-none">{upcomingExamsCount}</span>
@@ -58,7 +59,7 @@ const StatsRow = ({ subjects, events }) => {
         {/* Active Subjects Card */}
         <div className="bg-surface border border-outline-variant p-5 rounded-lg shadow-ambient flex items-center gap-4">
           <div className="w-12 h-12 bg-surface-container text-primary flex items-center justify-center rounded-md shrink-0">
-            <CustomIcon name="book" className="w-6 h-6" />
+            <Icon icon={BookOpen} size="lg" />
           </div>
           <div className="flex flex-col">
             <span className="text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">{t('stats.activeSubjects')}</span>
@@ -69,7 +70,7 @@ const StatsRow = ({ subjects, events }) => {
         {/* Pending Tasks Card */}
         <div className="bg-surface border border-outline-variant p-5 rounded-lg shadow-ambient flex items-center gap-4">
           <div className="w-12 h-12 bg-surface-container-low text-on-surface-variant flex items-center justify-center rounded-md shrink-0">
-            <CustomIcon name="planning" className="w-6 h-6" />
+            <Icon icon={ListChecks} size="lg" />
           </div>
           <div className="flex flex-col">
             <span className="text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">{t('stats.pendingTasks')}</span>
@@ -79,8 +80,8 @@ const StatsRow = ({ subjects, events }) => {
 
         {/* Upcoming Exams Card */}
         <div className="bg-surface border border-outline-variant p-5 rounded-lg shadow-ambient flex items-center gap-4">
-          <div className="w-12 h-12 bg-surface-container text-warning flex items-center justify-center rounded-md shrink-0">
-            <CustomIcon name="clock" className="w-6 h-6" />
+          <div className="w-12 h-12 bg-surface-container text-on-warning-container flex items-center justify-center rounded-md shrink-0">
+            <Icon icon={Clock} size="lg" />
           </div>
           <div className="flex flex-col">
             <span className="text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">{t('stats.upcomingExams')}</span>

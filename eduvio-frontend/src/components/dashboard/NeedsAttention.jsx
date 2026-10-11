@@ -1,8 +1,9 @@
 import { AlertTriangle, TrendingDown, Upload, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { getAssessmentIcon, getAssessmentLabel } from '../../utils/assessments'
 
 const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
-  const { t } = useTranslation('dashboard')
+  const { t } = useTranslation(['dashboard', 'common'])
 
   const isEmpty = !alerts || alerts.length === 0
 
@@ -22,7 +23,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
           {t('needsAttention.title')}
         </h2>
         {!isEmpty && (
-          <span className="flex size-5 items-center justify-center rounded-full bg-error-container text-xs font-bold text-error">
+          <span className="flex size-5 items-center justify-center rounded-full bg-error-container text-xs font-bold text-on-error-container">
             {alerts.length}
           </span>
         )}
@@ -30,7 +31,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
 
       {isEmpty ? (
         <div className="flex items-center gap-4 rounded-xl border border-success/30 bg-success-container/40 p-5">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-success-container text-success">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-success-container text-on-success-container">
             <CheckCircle2 className="size-6" aria-hidden="true" />
           </div>
           <div>
@@ -45,20 +46,31 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
           {alerts.map((alert, index) => {
             const subjectCode = getSubjectCode(alert)
             const isDeadline = alert.type === 'deadline'
-            const Icon = isDeadline ? AlertTriangle : TrendingDown
+            // Written test etc. from the teacher's course page
+            const isAssessment = alert.type === 'assessment'
+            const Icon = isAssessment ? getAssessmentIcon(alert.assessmentType) : isDeadline ? AlertTriangle : TrendingDown
 
             return (
               <div
                 key={`${alert.type}-${alert.requirementId ?? alert.subjectId}-${index}`}
-                className="flex items-start gap-4 rounded-xl border border-outline-variant border-l-4 border-l-error bg-surface-container-lowest p-4 shadow-sm"
+                className={`flex items-start gap-4 rounded-xl border border-outline-variant border-l-4 bg-surface-container-lowest p-4 shadow-sm ${
+                  isAssessment ? 'border-l-primary' : 'border-l-error'
+                }`}
               >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-error-container text-error">
+                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${
+                  isAssessment ? 'bg-primary-container text-on-primary-container' : 'bg-error-container text-on-error-container'
+                }`}>
                   <Icon className="size-5" aria-hidden="true" />
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold text-foreground">{alert.title}</h3>
+                    {isAssessment && (
+                      <span className="rounded-md bg-primary-container px-1.5 py-0.5 text-[11px] font-semibold text-on-primary-container">
+                        {getAssessmentLabel(alert.assessmentType, t)}
+                      </span>
+                    )}
                     {subjectCode && (
                       <span className="rounded-md bg-surface-container-high px-1.5 py-0.5 font-mono text-[11px] font-semibold text-on-surface-variant">
                         {subjectCode}
@@ -66,9 +78,11 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
                     )}
                   </div>
                   <p className="mt-0.5 text-sm text-on-surface-variant">
-                    {isDeadline
-                      ? t('needsAttention.deadlineMessage', { count: alert.days })
-                      : t('needsAttention.lowScoreMessage', { score: alert.score })}
+                    {isAssessment
+                      ? t('needsAttention.assessmentMessage', { count: alert.days })
+                      : isDeadline
+                        ? t('needsAttention.deadlineMessage', { count: alert.days })
+                        : t('needsAttention.lowScoreMessage', { score: alert.score })}
                   </p>
 
                   <div className="mt-3">
@@ -78,7 +92,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
                         onClick={() => onUploadClick?.(alert)}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 cursor-pointer"
                       >
-                        <Upload className="size-3.5" aria-hidden="true" />
+                        <Upload className="size-4" aria-hidden="true" />
                         {t('needsAttention.uploadSolution')}
                       </button>
                     ) : (
@@ -88,7 +102,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
                         className="inline-flex items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container-high cursor-pointer"
                       >
                         {t('needsAttention.viewDetail')}
-                        <ArrowRight className="size-3.5" aria-hidden="true" />
+                        <ArrowRight className="size-4" aria-hidden="true" />
                       </button>
                     )}
                   </div>

@@ -2,75 +2,40 @@ import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ArrowLeft,
-  GraduationCap,
-  Award,
-  UserCog,
-  Layers,
+  CalendarRange,
   FolderOpen,
+  GraduationCap,
   NotebookPen,
   Download,
   ExternalLink,
-  FileText,
   Info,
   X,
   ListChecks,
-  Building2,
   Trash2,
-  ClipboardCheck,
-  Presentation,
-  Users,
 } from 'lucide-react'
 
 import SubjectSummaryStrip from './subject/SubjectSummaryStrip'
 import SubjectMoodleActivities from './subject/SubjectMoodleActivities'
-import SubjectFulfillment from './subject/SubjectFulfillment'
-import SubjectSchedule from './subject/SubjectSchedule'
+import SubjectInfoPanel from './subject/SubjectInfoPanel'
+import SubjectExamTab from './subject/SubjectExamTab'
+import SubjectSyllabusTab from './subject/SubjectSyllabusTab'
 import ExpandableText from './common/ExpandableText'
-import { formatSemesterLabel, normalizeStatut, getStatutLabelKey } from '../utils/semester'
-import { getOwnDescription, getSafeHttpUrl, getSafeHttpsUrl, normalizeText, summarizePeople } from '../utils/subjectDetails'
+import Icon from './common/Icon'
+import { formatSemesterLabel } from '../utils/semester'
+import { getOwnDescription, getSafeHttpUrl, normalizeText } from '../utils/subjectDetails'
 import { getSemesterLinkSourceLabel, getSemesterLinkTitle, isAutoSemesterLink } from '../utils/semesterLinks'
 import { getSubjectIdOf, isSameId } from '../utils/ids'
 import { isHidden } from '../utils/materialKinds'
 import { buildSemesterStarts } from '../utils/lessons'
 import MaterialActionsMenu from './materials/MaterialActionsMenu'
+import MaterialTypeIcon from './materials/MaterialTypeIcon'
 import { useMaterialActions } from './materials/useMaterialActions'
+import { useToast } from '../context/ToastContext'
+import { useSyllabus } from '../hooks/useSyllabus'
 
-// ─── Helpers ─────────────────────────────────────────────────
+// ─── Title ───────────────────────────────────────────────────
 
-const renderCompletionType = (value, t) => {
-  switch (value) {
-    case 'Credit':
-      return t('academic:subjectsView.options.credit')
-    case 'Exam':
-      return t('academic:subjectsView.options.exam')
-    case 'Credit + Exam':
-      return t('academic:subjectsView.options.creditPlusExam')
-    default:
-      return value || '—'
-  }
-}
-
-// ─── Meta Row ────────────────────────────────────────────────
-
-const MetaItem = ({ icon: Icon, label, value, title, note }) => (
-  <div className="flex items-center gap-2 rounded-xl bg-surface-container-low/60 px-3 py-2 min-w-0">
-    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant">
-      <Icon className="size-3.5" />
-    </div>
-    <div className="min-w-0">
-      <p className="text-[10px] uppercase tracking-wide text-on-surface-variant font-semibold">{label}</p>
-      <p className="truncate text-xs font-semibold text-foreground" title={title || undefined}>{value}</p>
-      {note && <p className="text-[11px] text-on-surface-variant">{note}</p>}
-    </div>
-  </div>
-)
-
-// Lecturer values that only mean "not known"
-const PLACEHOLDER_LECTURERS = new Set(['nespecifikováno', 'bude upřesněno', 'tba'])
-
-// ─── Header Section ──────────────────────────────────────────
-
-const SubjectHeader = ({ subject, requirements, onShowInfo, hasAbout, semesterLinks = [] }) => {
+const SubjectTitle = ({ subject, requirements }) => {
   const { t } = useTranslation(['academic', 'dashboard'])
 
   const { totalGained, totalMax, hasPoints } = useMemo(() => {
@@ -79,152 +44,38 @@ const SubjectHeader = ({ subject, requirements, onShowInfo, hasAbout, semesterLi
     return { totalGained: gained, totalMax: max, hasPoints: max > 0 }
   }, [requirements])
 
-  const completionType = subject.completion_type || subject.completionType
-  const creditBeforeExam = subject.credit_before_exam === true && completionType === 'Credit + Exam'
-
   const statusKey = !subject.status || subject.status === 'in_progress' ? 'inProgress' : subject.status
   const statusLabel = t(`academic:subjectDetail.status.${statusKey}`, t('academic:subjectDetail.status.inProgress'))
 
-  const statut = normalizeStatut(subject.statut, subject.isMandatory ?? subject.is_mandatory)
-  const stagUrl = getSafeHttpsUrl(subject.stag_url)
-
-  // People from STAG; a manually entered lecturer only when STAG has none
-  const people = [
-    { key: 'guarantor', icon: UserCog, value: subject.guarantor },
-    { key: 'lecturers', icon: Presentation, value: subject.lecturers },
-    { key: 'tutors', icon: Users, value: subject.tutors },
-  ]
-    .map((p) => ({ ...p, summary: summarizePeople(p.value) }))
-    .filter((p) => p.summary)
-  if (people.length === 0 && subject.lecturer && !PLACEHOLDER_LECTURERS.has(subject.lecturer.trim().toLowerCase())) {
-    people.push({ key: 'lecturer', icon: UserCog, summary: summarizePeople(subject.lecturer) })
-  }
-
   return (
-    <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm page-section">
-      {/* TOP BAR: BADGES */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="rounded-lg bg-primary/15 px-2.5 py-1 font-mono text-xs font-bold text-primary">
-            {subject.code}
-          </span>
-          <span className="text-xs font-medium text-on-surface-variant">
-            {formatSemesterLabel(subject.semester, t)}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Points from continuous assessment */}
+    <header className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-lg bg-primary/10 px-2.5 py-1 font-mono text-xs font-bold text-primary">
+          {subject.code}
+        </span>
+        <span className="text-xs font-medium text-on-surface-variant">
+          {formatSemesterLabel(subject.semester, t)}
+        </span>
+        <span className="ml-auto flex flex-wrap items-center gap-2">
           {hasPoints && (
             <span className="rounded-lg bg-surface-container px-3 py-1 font-mono text-xs font-bold text-foreground">
               {totalGained} / {totalMax} PTS
             </span>
           )}
-
           {subject.stag_removed_at && (
             <span className="rounded-lg border border-outline-variant bg-surface-container-lowest px-2.5 py-1 text-xs font-bold text-on-surface-variant">
               {t('academic:stagRemoved.badge')}
             </span>
           )}
-
-          {/* Status badge */}
           <span className="rounded-lg border border-outline-variant bg-surface-container-lowest px-2.5 py-1 text-xs font-bold text-on-surface-variant">
             {statusLabel}
           </span>
-        </div>
+        </span>
       </div>
-
-      {/* TITLE, STAG LINK & ABOUT BUTTON */}
-      <div className="mt-4 flex items-start justify-between gap-4">
-        <h1 className="min-w-0 text-2xl font-extrabold tracking-tight text-foreground text-balance break-words">
-          {subject.name}
-        </h1>
-        <div className="flex shrink-0 items-center gap-2">
-          {stagUrl && (
-            <a
-              href={stagUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t('academic:subjectDetail.openInStag')}
-              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-outline-variant px-3 text-sm font-medium text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary"
-            >
-              <ExternalLink className="size-4" />
-              <span className="hidden sm:inline">{t('academic:subjectDetail.openInStag')}</span>
-            </a>
-          )}
-          {hasAbout && (
-            <button
-              onClick={onShowInfo}
-              aria-label={t('academic:subjectDetail.showInfo')}
-              title={t('academic:subjectDetail.showInfo')}
-              className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-outline-variant text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary cursor-pointer"
-            >
-              <Info className="size-4" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* WHERE TO FIND MORE: semester links of the subject (e.g. teacher's course page) */}
-      {semesterLinks.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-on-surface-variant">{t('academic:subjectDetail.moreInfo')}</span>
-          {semesterLinks.map((link) => {
-            // The subject is already in the heading: automatic links show only the label and person
-            const label = getSemesterLinkSourceLabel(link, t) ?? getSemesterLinkTitle(link, subject, t)
-            return (
-              <a
-                key={link.id ?? link.url}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={isAutoSemesterLink(link) ? `${t('resources:semesterLinks.departmentBadge')}: ${label}` : label}
-                className="inline-flex h-8 max-w-full items-center gap-1.5 rounded-xl border border-outline-variant px-3 text-sm font-medium text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary"
-              >
-                <ExternalLink className="size-3.5 shrink-0" aria-hidden="true" />
-                <span className="truncate">{label}</span>
-              </a>
-            )
-          })}
-        </div>
-      )}
-
-      {/* META STRIP */}
-      <div className="mt-5 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-        <MetaItem
-          icon={GraduationCap}
-          label={t('academic:subjectDetail.creditsLabel')}
-          value={t('academic:subjectDetail.creditsEcts', { count: subject.credits })}
-        />
-        <MetaItem
-          icon={Award}
-          label={t('academic:subjectDetail.completionLabel')}
-          value={renderCompletionType(completionType, t)}
-          note={creditBeforeExam ? t('academic:subjectDetail.creditBeforeExam') : null}
-        />
-        <MetaItem
-          icon={Layers}
-          label={t('academic:subjectDetail.typeLabel')}
-          value={t(getStatutLabelKey(statut))}
-        />
-        {subject.department && (
-          <MetaItem
-            icon={Building2}
-            label={t('academic:subjectDetail.departmentLabel', 'Katedra')}
-            value={subject.department}
-          />
-        )}
-        {people.map((p) => (
-          <MetaItem
-            key={p.key}
-            icon={p.icon}
-            label={t(`academic:subjectDetail.people.${p.key}`, { count: p.summary.count })}
-            value={p.summary.short}
-            title={p.summary.full}
-          />
-        ))}
-      </div>
-    </div>
+      <h1 className="min-w-0 text-2xl font-extrabold tracking-tight text-foreground text-balance break-words">
+        {subject.name}
+      </h1>
+    </header>
   )
 }
 
@@ -240,7 +91,7 @@ const StagRemovedNotice = ({ subject, onDelete }) => {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface-container-low/60 p-4 sm:flex-row sm:items-center sm:justify-between page-section">
+    <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface-container-low/60 p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-start gap-3">
         <Info className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
         <p className="text-sm text-on-surface-variant">{t('academic:stagRemoved.description')}</p>
@@ -250,7 +101,7 @@ const StagRemovedNotice = ({ subject, onDelete }) => {
           onClick={handleDelete}
           className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-on-surface-variant transition-colors hover:border-error-container/50 hover:bg-error-container/40 hover:text-error cursor-pointer"
         >
-          <Trash2 className="size-3.5" />
+          <Trash2 className="size-4" />
           {t('academic:stagRemoved.delete')}
         </button>
       )}
@@ -258,14 +109,10 @@ const StagRemovedNotice = ({ subject, onDelete }) => {
   )
 }
 
-// ─── TAB 2: Materials ────────────────────────────────────────
+// ─── TAB: Materials ──────────────────────────────────────────
 
-const MaterialsTab = ({ subject, resources, menuFor }) => {
-  const { t } = useTranslation('academic')
-
-  // Everything of the subject, as on the Materials page: own files and links,
-  // Moodle imports, materials of lessons or requirements, semester links
-  const subjectMaterials = (resources || []).filter((r) => isSameId(getSubjectIdOf(r), subject.id))
+const MaterialsTab = ({ subject, materials, menuFor, onSetForExam }) => {
+  const { t } = useTranslation(['academic', 'resources'])
 
   // Same labels as the Materials page
   const badgesOf = (res) => {
@@ -282,18 +129,17 @@ const MaterialsTab = ({ subject, resources, menuFor }) => {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-on-surface-variant">
-        {t('academic:subjectDetail.materialsUploaded', { count: subjectMaterials.length })}
+        {t('academic:subjectDetail.materialsUploaded', { count: materials.length })}
       </p>
 
-      {subjectMaterials.length === 0 ? (
+      {materials.length === 0 ? (
         <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-12 text-center text-sm text-on-surface-variant italic">
           {t('academic:subjectDetail.noMaterials')}
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {subjectMaterials.map((res) => {
+          {materials.map((res) => {
             const isLink = res.type === 'LINK'
-            const Icon = isLink ? ExternalLink : FileText
             // Semester links: automatic ones have no stored title (subject is the page itself)
             const isSemesterLink = res.category === 'platform'
             const heading = isSemesterLink
@@ -301,19 +147,23 @@ const MaterialsTab = ({ subject, resources, menuFor }) => {
               : res.title
             const caption = isSemesterLink ? null : res.description
             const menu = menuFor?.(res)
+            const forExam = Boolean(res.for_exam)
 
             return (
               <div
                 key={res.id ?? res.url}
-                className="flex items-center justify-between gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 transition-shadow hover:shadow-md"
+                className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant">
-                    <Icon className="size-5" />
-                  </div>
+                  <MaterialTypeIcon resource={res} tile="lg" />
                   <div className="min-w-0">
                     <h4 className="truncate text-sm font-semibold leading-tight text-foreground">{heading}</h4>
                     <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      {forExam && (
+                        <span className="inline-flex items-center rounded-full bg-primary-container px-2 py-0.5 text-[11px] font-semibold text-on-primary-container">
+                          {t('resources:materialActions.forExamBadge')}
+                        </span>
+                      )}
                       {badgesOf(res).map((badge) => (
                         <span key={badge} className="inline-flex items-center rounded-full bg-surface-container-low px-2 py-0.5 text-[11px] font-semibold text-on-surface-variant">
                           {badge}
@@ -326,13 +176,29 @@ const MaterialsTab = ({ subject, resources, menuFor }) => {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
+                  {onSetForExam && (
+                    <button
+                      type="button"
+                      onClick={() => onSetForExam(res.id, !forExam)}
+                      aria-pressed={forExam}
+                      title={t(forExam ? 'resources:materialActions.unmarkForExam' : 'resources:materialActions.markForExam')}
+                      className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
+                        forExam
+                          ? 'border-primary/30 bg-primary/10 text-primary'
+                          : 'border-outline-variant bg-transparent text-foreground hover:bg-surface-container'
+                      }`}
+                    >
+                      <Icon icon={GraduationCap} />
+                      <span>{t('resources:materialActions.forExamBadge')}</span>
+                    </button>
+                  )}
                   <a
                     href={res.url || '#'}
                     target={isLink ? '_blank' : '_self'}
                     rel="noreferrer"
                     className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container"
                   >
-                    {isLink ? <ExternalLink className="size-3.5" /> : <Download className="size-3.5" />}
+                    {isLink ? <ExternalLink className="size-4" /> : <Download className="size-4" />}
                     <span>{isLink ? t('academic:subjectDetail.preview') : t('academic:subjectDetail.download')}</span>
                   </a>
                   {menu && <MaterialActionsMenu label={menu.label} items={menu.items} />}
@@ -346,7 +212,7 @@ const MaterialsTab = ({ subject, resources, menuFor }) => {
   )
 }
 
-// ─── TAB 3: Notes ────────────────────────────────────────────
+// ─── TAB: Notes ──────────────────────────────────────────────
 
 const NotesTab = ({ note, onSaveNote }) => {
   const { t } = useTranslation('academic')
@@ -373,7 +239,7 @@ const NotesTab = ({ note, onSaveNote }) => {
       />
       <div className="flex items-center justify-between gap-3">
         {saved ? (
-          <span className="text-xs font-semibold text-success">
+          <span className="text-xs font-semibold text-on-success-container">
             ✓ {t('academic:subjectDetail.notes.saved')}
           </span>
         ) : note?.updated_at ? (
@@ -399,7 +265,8 @@ const NotesTab = ({ note, onSaveNote }) => {
 // ─── Tab config ──────────────────────────────────────────────
 
 const TABS = [
-  { key: 'fulfillment', Icon: ClipboardCheck },
+  { key: 'exam', Icon: GraduationCap },
+  { key: 'syllabus', Icon: CalendarRange },
   { key: 'tasks', Icon: ListChecks },
   { key: 'materials', Icon: FolderOpen },
   { key: 'notes', Icon: NotebookPen },
@@ -421,11 +288,16 @@ const SubjectDetailView = ({
   onSaveNote,
   onDeleteSubject,
 }) => {
-  const { t } = useTranslation(['academic', 'dashboard'])
-  const [activeTab, setActiveTab] = useState('fulfillment')
+  const { t } = useTranslation(['academic', 'dashboard', 'resources'])
+  const toast = useToast()
+  const [activeTab, setActiveTab] = useState('exam')
   const [showInfo, setShowInfo] = useState(false)
+  // Semester schedule from the teacher's course page (also feeds the exam tab)
+  const syllabus = useSyllabus(subject?.id)
+  const hideSyllabusItem = (item) =>
+    syllabus.hideItem(item.id).catch(() => toast.error(t('academic:subjectDetail.exam.assessments.hideFailed')))
 
-  // Same material actions as on the Materials page (edit, move, delete, hide)
+  // Same material actions as on the Materials page (edit, move, delete, hide, for the exam)
   const semesterStarts = useMemo(() => buildSemesterStarts(events, subjects), [events, subjects])
   const actions = useMaterialActions({ subjects, events, semesterStarts, actions: materialActions })
   const menuFor = (resource) => {
@@ -433,9 +305,10 @@ const SubjectDetailView = ({
     const items = actions.getMenuItems(resource)
     return items.length > 0 ? { label: actions.getMenuLabel(resource), items } : null
   }
-
-  // Hidden Moodle / automatic materials are only listed on the Materials page
-  const visibleResources = resources.filter((r) => !isHidden(r))
+  const setForExam = materialActions.setForExam
+    ? (id, forExam) =>
+        materialActions.setForExam(id, forExam).catch(() => toast.error(t('resources:materialActions.forExamFailed')))
+    : null
 
   if (!subject) {
     return (
@@ -453,6 +326,14 @@ const SubjectDetailView = ({
     )
   }
 
+  // Hidden Moodle / automatic materials are only listed on the Materials page.
+  // Everything of the subject, as on the Materials page: own files and links,
+  // Moodle imports, materials of lessons or requirements, semester links
+  const subjectMaterials = resources.filter((r) => !isHidden(r) && isSameId(getSubjectIdOf(r), subject.id))
+  const examMaterials = subjectMaterials.filter((r) => r.for_exam)
+  // Topic lists the teacher published on the course pages
+  const webTopics = subjectMaterials.filter((r) => r.is_exam_topics)
+
   // "About the subject": STAG texts and the user's own description (never the import placeholder)
   const annotation = normalizeText(subject.stag_annotation)
   const ownDescription = getOwnDescription(subject.description)
@@ -464,85 +345,118 @@ const SubjectDetailView = ({
   ].filter((section) => section.text)
 
   // Semester links of this subject (course pages found on department websites or added by hand)
-  const semesterLinks = visibleResources
-    .filter((r) => r.category === 'platform' && isSameId(getSubjectIdOf(r), subject.id))
+  const semesterLinks = subjectMaterials
+    .filter((r) => r.category === 'platform')
     .map((r) => ({ ...r, url: getSafeHttpUrl(r.url) }))
     .filter((r) => r.url)
 
+  // A credit-only subject has a "Credit" tab instead of "Exam"
+  const completionType = subject.completion_type || subject.completionType
+  const tabLabel = (key) =>
+    key === 'exam' && completionType === 'Credit'
+      ? t('academic:subjectDetail.tabs.credit')
+      : t(`academic:subjectDetail.tabs.${key}`)
+
   return (
-    <div className="w-full space-y-6 pb-16">
+    <div className="w-full pb-16">
       {/* BACK BUTTON */}
       {onBack && (
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface-variant transition-colors hover:text-foreground"
+          className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-on-surface-variant transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
           {t('academic:subjectDetail.backToSubjects')}
         </button>
       )}
 
-      {/* 1. HEADER SECTION */}
-      <SubjectHeader
-        subject={subject}
-        requirements={requirements}
-        onShowInfo={() => setShowInfo(true)}
-        hasAbout={aboutSections.length > 0}
-        semesterLinks={semesterLinks}
-      />
+      {/*
+        Small screens: title, (collapsed) info, then the main content.
+        Wide screens (xl): info and schedule in a sticky left column, title and content on the right.
+      */}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] xl:gap-8 xl:grid-rows-[auto_1fr] xl:items-start">
+        <div className="page-section xl:col-start-2 xl:row-start-1">
+          <SubjectTitle subject={subject} requirements={requirements} />
+        </div>
 
-      {subject.stag_removed_at && <StagRemovedNotice subject={subject} onDelete={onDeleteSubject} />}
+        <aside className="page-section xl:sticky xl:top-0 xl:col-start-1 xl:row-span-2 xl:row-start-1 xl:max-h-[calc(180vh-9rem)] xl:overflow-y-auto">
+          <SubjectInfoPanel
+            subject={subject}
+            semesterLinks={semesterLinks}
+            hasAbout={aboutSections.length > 0}
+            onShowInfo={() => setShowInfo(true)}
+          />
+        </aside>
 
-      {/* SCHEDULE */}
-      <div className="page-section empty:hidden"><SubjectSchedule subject={subject} /></div>
+        <div className="flex min-w-0 flex-col gap-6 xl:col-start-2 xl:row-start-2">
+          {subject.stag_removed_at && (
+            <div className="page-section"><StagRemovedNotice subject={subject} onDelete={onDeleteSubject} /></div>
+          )}
 
-      {/* 2. SUMMARY STRIP (2-3 METRIC CARDS) */}
-      <div className="page-section"><SubjectSummaryStrip subject={subject} requirements={requirements} /></div>
+          {/* PROGRESS SUMMARY */}
+          <div className="page-section"><SubjectSummaryStrip subject={subject} requirements={requirements} /></div>
 
-      {/* TABS NAVIGATION */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-outline-variant no-scrollbar pt-2 page-section">
-        {TABS.map(({ key, Icon }) => {
-          const active = activeTab === key
-          return (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={`relative inline-flex items-center gap-2 whitespace-nowrap px-4 py-3 text-sm font-semibold transition-colors ${
-                active ? 'text-foreground' : 'text-on-surface-variant hover:text-foreground'
-              }`}
-            >
-              <Icon className="size-4" />
-              {t(`academic:subjectDetail.tabs.${key}`)}
-              {active && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-primary" />}
-            </button>
-          )
-        })}
+          {/* TABS NAVIGATION */}
+          <div role="tablist" className="flex items-center gap-1 overflow-x-auto border-b border-outline-variant no-scrollbar page-section">
+            {TABS.map(({ key, Icon: TabIcon }) => {
+              const active = activeTab === key
+              return (
+                <button
+                  key={key}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setActiveTab(key)}
+                  className={`relative inline-flex items-center gap-2 whitespace-nowrap px-4 py-3 text-sm font-semibold transition-colors ${
+                    active ? 'text-foreground' : 'text-on-surface-variant hover:text-foreground'
+                  }`}
+                >
+                  <TabIcon className="size-4" />
+                  {tabLabel(key)}
+                  {active && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-primary" />}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* TAB CONTENTS */}
+          <div role="tabpanel" className="page-section">
+            {activeTab === 'exam' && (
+              <SubjectExamTab
+                subject={subject}
+                materials={examMaterials}
+                webTopics={webTopics}
+                syllabus={syllabus.data}
+                syllabusLoading={syllabus.isLoading}
+                sourceUrl={semesterLinks[0]?.url ?? null}
+                onHideSyllabusItem={hideSyllabusItem}
+                onSetForExam={setForExam}
+                onShowMaterials={() => setActiveTab('materials')}
+              />
+            )}
+            {activeTab === 'syllabus' && (
+              <SubjectSyllabusTab
+                items={syllabus.data}
+                isLoading={syllabus.isLoading}
+                error={syllabus.error}
+                sourceUrl={semesterLinks[0]?.url ?? null}
+              />
+            )}
+            {activeTab === 'tasks' && <SubjectMoodleActivities requirements={requirements} resources={resources} />}
+            {activeTab === 'materials' && (
+              <MaterialsTab subject={subject} materials={subjectMaterials} menuFor={menuFor} onSetForExam={setForExam} />
+            )}
+            {activeTab === 'notes' && <NotesTab note={note} onSaveNote={onSaveNote} />}
+          </div>
+        </div>
       </div>
 
-      {/* TAB CONTENTS */}
-      {activeTab === 'fulfillment' && (
-        <div className="page-section">
-          {/* 3. WHAT IS NEEDED TO PASS + OFFICIAL STAG RESULT */}
-          <SubjectFulfillment subject={subject} />
-        </div>
-      )}
-
-      {activeTab === 'tasks' && (
-        <div className="page-section">
-          {/* 4. MOODLE CONTINUOUS EVALUATION SECTION */}
-          <SubjectMoodleActivities requirements={requirements} resources={resources} />
-        </div>
-      )}
-
-      {activeTab === 'materials' && <div className="page-section"><MaterialsTab subject={subject} resources={visibleResources} menuFor={menuFor} /></div>}
-      {activeTab === 'notes' && <div className="page-section"><NotesTab note={note} onSaveNote={onSaveNote} /></div>}
-
-      {/* ABOUT DIALOG */}
+      {/* MATERIAL DIALOGS */}
       {actions.modals}
 
+      {/* ABOUT DIALOG */}
       {showInfo && aboutSections.length > 0 && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-scrim/60 p-4 backdrop-blur-sm"
           onClick={() => setShowInfo(false)}
         >
           <div

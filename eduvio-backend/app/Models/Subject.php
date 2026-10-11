@@ -104,6 +104,21 @@ class Subject extends Model
         return $this->hasOne(Note::class);
     }
 
+    public function examTerms()
+    {
+        return $this->hasMany(ExamTerm::class);
+    }
+
+    public function examTopics()
+    {
+        return $this->hasMany(ExamTopic::class);
+    }
+
+    public function syllabusItems()
+    {
+        return $this->hasMany(SyllabusItem::class);
+    }
+
     public function getCompletionTypeAttribute()
     {
         return $this->attributes['completion_type'] ?? null;

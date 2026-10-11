@@ -16,6 +16,7 @@ const MaterialsPage = () => {
     assignResourceEvent: handleAssignEvent,
     updateMaterial: handleUpdateMaterial,
     setResourceHidden: handleSetHidden,
+    setResourceForExam: handleSetForExam,
     isLoading: resourcesLoading,
   } = useResources()
   const { data: events, isLoading: eventsLoading } = useEvents()
@@ -39,6 +40,7 @@ const MaterialsPage = () => {
       onAssignEvent={handleAssignEvent}
       onUpdateMaterial={handleUpdateMaterial}
       onSetHidden={handleSetHidden}
+      onSetForExam={handleSetForExam}
       departmentLinks={departmentLinks}
     />
   )

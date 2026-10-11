@@ -7,6 +7,7 @@ use App\Models\Subject;
 use App\Models\User;
 use App\Services\Department\CourseLinkFinder;
 use App\Services\Department\PageLinkTracker;
+use App\Services\Department\SyllabusSync;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -85,7 +86,7 @@ class DepartmentLinksSyncJob implements ShouldQueue, ShouldBeUnique
             ->get();
     }
 
-    public function handle(CourseLinkFinder $finder, PageLinkTracker $tracker): void
+    public function handle(CourseLinkFinder $finder, PageLinkTracker $tracker, SyllabusSync $syllabus): void
     {
         $this->setStatus('pending');
 
@@ -107,18 +108,19 @@ class DepartmentLinksSyncJob implements ShouldQueue, ShouldBeUnique
             }
         }
 
-        $newLinks = $this->checkPages($tracker);
+        $newLinks = $this->checkPages($tracker, $syllabus);
 
         $this->setStatus($failures > 0 && $failures === $subjects->count() ? 'failed' : 'success');
         Log::info("Department links sync for user {$this->user->id}: {$found} links, {$newLinks} new page links");
     }
 
     /**
-     * Look for new files and subpages on every semester link. Besides the
-     * configured domains, only hosts of automatic links (found on department
-     * pages) are fetched — a manual link elsewhere is never requested.
+     * Look for new files and subpages on every semester link, and read its
+     * semester schedule and exam-topic links. Besides the configured domains,
+     * only hosts of automatic links (found on department pages) are fetched —
+     * a manual link elsewhere is never requested.
      */
-    private function checkPages(PageLinkTracker $tracker): int
+    private function checkPages(PageLinkTracker $tracker, SyllabusSync $syllabus): int
     {
         $links = self::semesterLinks($this->user);
         $extraHosts = $links
@@ -130,6 +132,8 @@ class DepartmentLinksSyncJob implements ShouldQueue, ShouldBeUnique
             ->all();
 
         $newLinks = 0;
+        // Exam-topic links per subject; null when one of its pages could not be read
+        $topics = [];
         foreach ($links as $material) {
             try {
                 $newLinks += $tracker->check($material, $extraHosts);
@@ -137,6 +141,30 @@ class DepartmentLinksSyncJob implements ShouldQueue, ShouldBeUnique
                 Log::warning("Page check failed for material {$material->id}", [
                     'error' => mb_substr($e->getMessage(), 0, 300),
                 ]);
+            }
+
+            if ($material->subject_id === null) {
+                continue;
+            }
+            try {
+                // The page comes from the client's cache, the tracker has just fetched it
+                $pageTopics = $syllabus->syncLink($material, $extraHosts);
+            } catch (\Throwable $e) {
+                $pageTopics = null;
+                Log::warning("Syllabus sync failed for material {$material->id}", [
+                    'error' => mb_substr($e->getMessage(), 0, 300),
+                ]);
+            }
+            $subjectId = $material->subject_id;
+            $unreadable = $pageTopics === null || (array_key_exists($subjectId, $topics) && $topics[$subjectId] === null);
+            $topics[$subjectId] = $unreadable ? null : array_merge($topics[$subjectId] ?? [], $pageTopics);
+        }
+
+        // Topic links of a subject change only when all its pages were read
+        foreach ($topics as $subjectId => $subjectTopics) {
+            $subject = $this->user->subjects()->find($subjectId);
+            if ($subject && $subjectTopics !== null) {
+                $syllabus->syncTopics($subject, $subjectTopics);
             }
         }
 

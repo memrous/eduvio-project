@@ -14,6 +14,9 @@ use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentLinksController;
+use App\Http\Controllers\ExamTermController;
+use App\Http\Controllers\ExamTopicController;
+use App\Http\Controllers\SyllabusController;
 use App\Http\Controllers\MoodleConnectController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +32,7 @@ Route::middleware(['auth:sanctum', 'ability:stag:sync', 'throttle:30,1'])->group
     Route::post('/stag/sync-schedule', [StagController::class, 'syncSchedule']);
     Route::post('/stag/sync-subjects', [StagController::class, 'syncSubjects']);
     Route::post('/stag/sync-student',  [StagStudentController::class, 'sync']);
+    Route::post('/stag/sync-exam-terms', [ExamTermController::class, 'sync']);
     Route::post('/stag/agent/report',  [StagAgentController::class, 'report']);
     Route::get('/stag/agent/whoami',   [StagAgentController::class, 'whoami']);
 });
@@ -46,6 +50,19 @@ Route::middleware(['auth:sanctum', 'full-access'])->group(function () {
     Route::delete('/subjects/{subject}', [SubjectController::class, 'destroy']);
     Route::get('/subjects/{subjectId}/note', [NoteController::class, 'show']);
     Route::put('/subjects/{subjectId}/note', [NoteController::class, 'update']);
+
+    // Exam: terms from STAG (read-only) and the student's own topic checklist
+    Route::get('/subjects/{subjectId}/exam-terms', [ExamTermController::class, 'index']);
+    Route::get('/subjects/{subjectId}/exam-topics', [ExamTopicController::class, 'index']);
+    Route::post('/subjects/{subjectId}/exam-topics', [ExamTopicController::class, 'store']);
+    Route::patch('/exam-topics/{topicId}', [ExamTopicController::class, 'update']);
+    Route::delete('/exam-topics/{topicId}', [ExamTopicController::class, 'destroy']);
+
+    // Semester schedule from teachers' course pages
+    Route::get('/subjects/{subjectId}/syllabus', [SyllabusController::class, 'index']);
+    Route::get('/syllabus/assessments', [SyllabusController::class, 'assessments']);
+    Route::post('/syllabus-items/{id}/hide', [SyllabusController::class, 'hide']);
+    Route::post('/syllabus-items/{id}/unhide', [SyllabusController::class, 'unhide']);
 
     // Events
     Route::get('/events', [EventController::class, 'index']);
@@ -68,6 +85,8 @@ Route::middleware(['auth:sanctum', 'full-access'])->group(function () {
     Route::post('/materials/{material}/hide', [MaterialController::class, 'hide']);
     Route::post('/materials/{material}/unhide', [MaterialController::class, 'unhide']);
     Route::post('/materials/{material}/seen', [MaterialController::class, 'seen']);
+    Route::post('/materials/{material}/for-exam', [MaterialController::class, 'markForExam']);
+    Route::delete('/materials/{material}/for-exam', [MaterialController::class, 'unmarkForExam']);
     Route::delete('/materials/{material}', [MaterialController::class, 'destroy']);
 
     // Dashboard

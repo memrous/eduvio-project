@@ -1,17 +1,17 @@
-import { User, Trash2, Building2 } from 'lucide-react'
+import { UserRound, Trash2, Building2, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import CustomIcon from './CustomIcon'
 import { formatSemesterLabel } from '../utils/semester'
+import Icon from './common/Icon'
 
-const SubjectIcon = () => <CustomIcon name="book" className="w-5 h-5" />
+const SubjectIcon = () => <Icon icon={BookOpen} size="md" />
 
 const SubjectCard = ({ subject, onSelect, onDelete }) => {
   const { t } = useTranslation('dashboard')
 
   const getScoreColorClass = (score) => {
-    if (score >= 70) return 'bg-success-container text-success'
-    if (score >= 40) return 'bg-warning-container text-warning'
-    return 'bg-error-container text-error'
+    if (score >= 70) return 'bg-success-container text-on-success-container'
+    if (score >= 40) return 'bg-warning-container text-on-warning-container'
+    return 'bg-error-container text-on-error-container'
   }
 
   const gained = subject.gainedPoints !== undefined ? subject.gainedPoints : subject.gained_points
@@ -33,8 +33,8 @@ const SubjectCard = ({ subject, onSelect, onDelete }) => {
           )}
           <span className={`text-label-sm font-bold px-2.5 py-0.5 rounded-sm ${
             subject.isMandatory 
-              ? 'bg-surface-container-highest text-primary' 
-              : 'bg-surface-container-low text-emerald-700'
+              ? 'bg-primary-container text-on-primary-container' 
+              : 'bg-success-container text-on-success-container'
           }`}>
             {subject.isMandatory ? t('subjectCard.mandatory') : t('subjectCard.elective')}
           </span>
@@ -71,7 +71,7 @@ const SubjectCard = ({ subject, onSelect, onDelete }) => {
       <div className="flex items-center justify-between gap-2 text-body-md text-on-surface-variant mt-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0">
-            <User className="w-3.5 h-3.5 shrink-0 text-on-surface-variant" />
+            <UserRound className="size-4 shrink-0 text-on-surface-variant" />
             <span className="truncate text-[13px] font-medium" title={subject.lecturer}>
               {subject.lecturer}
             </span>
@@ -116,7 +116,7 @@ const SubjectCard = ({ subject, onSelect, onDelete }) => {
           )}
           <button 
             onClick={() => onSelect?.(subject)}
-            className="bg-primary hover:bg-primary-container active:scale-[0.98] text-on-primary font-semibold px-4 py-2 rounded-md text-label-md transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+            className="bg-primary hover:bg-primary/90 active:scale-[0.98] text-on-primary font-semibold px-4 py-2 rounded-md text-label-md transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
           >
             {t('subjectCard.openSubject')}
           </button>

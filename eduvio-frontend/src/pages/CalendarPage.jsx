@@ -1,10 +1,11 @@
 import { CalendarSkeleton } from '../components/common/Skeleton'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSubjects } from '../hooks/useSubjects'
 import { useEvents } from '../hooks/useEvents'
 import { useRequirements } from '../hooks/useRequirements'
+import { useWebAssessments } from '../hooks/useSyllabus'
 import CalendarView from '../components/CalendarView'
 import PageState from '../components/PageState'
 
@@ -33,6 +34,21 @@ const CalendarPage = () => {
     error: requirementsError,
     refetch: refetchRequirements
   } = useRequirements()
+
+  // Written tests from teachers' course pages; a failure only leaves them out
+  const { data: webAssessments } = useWebAssessments()
+
+  // The API sends dueDate; the calendar groups deadlines by "date". A row from a
+  // teacher's page on a day the subject already has a requirement is left out.
+  const calendarRequirements = useMemo(() => {
+    const own = (requirements ?? []).map((r) => ({
+      ...r,
+      date: String(r.date ?? r.dueDate ?? r.due_date ?? '').slice(0, 10) || null,
+    }))
+    const taken = new Set(own.map((r) => `${r.subjectId ?? r.subject_id}|${r.date}`))
+    const web = webAssessments.filter((a) => !taken.has(`${a.subjectId}|${a.date}`))
+    return [...own, ...web]
+  }, [requirements, webAssessments])
 
   const currentSubjects = subjects ?? []
   const currentEvents = events ?? []
@@ -81,7 +97,7 @@ const CalendarPage = () => {
     <CalendarView
       events={currentEvents}
       subjects={currentSubjects}
-      requirements={requirements}
+      requirements={calendarRequirements}
       onCreateEvent={handleCreateEvent}
       onEditEvent={handleEditEvent}
       onDeleteEvent={handleDeleteEvent}

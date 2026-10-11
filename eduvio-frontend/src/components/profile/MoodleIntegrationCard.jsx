@@ -341,7 +341,7 @@ const MoodleIntegrationCard = ({
       <button
         type="submit"
         disabled={manualSubmitting || !manualToken.trim()}
-        className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+        className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {manualSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
         {t('moodle.actions.connectManual')}
@@ -353,8 +353,8 @@ const MoodleIntegrationCard = ({
     <div className="space-y-4">
       {isMoodleConnected && moodleSyncStatus === 'pending' && (
         <div className="flex items-start gap-2.5 px-4 py-3 bg-primary-container border border-primary/30 rounded-lg">
-          <Loader2 className="w-4 h-4 text-on-primary shrink-0 mt-0.5 animate-spin" />
-          <p className="text-label-sm text-on-primary">{t('moodle.status.syncing')}</p>
+          <Loader2 className="w-4 h-4 text-primary shrink-0 mt-0.5 animate-spin" />
+          <p className="text-label-sm text-on-primary-container">{t('moodle.status.syncing')}</p>
         </div>
       )}
 
@@ -362,7 +362,7 @@ const MoodleIntegrationCard = ({
         <div className="flex items-center justify-between gap-3 px-4 py-3 bg-success-container border border-success/30 rounded-lg">
           <div className="flex items-start gap-2.5">
             <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
-            <p className="text-label-sm text-success">{t('moodle.status.success')}</p>
+            <p className="text-label-sm text-on-success-container">{t('moodle.status.success')}</p>
           </div>
         </div>
       )}
@@ -381,11 +381,11 @@ const MoodleIntegrationCard = ({
             <p className="text-sm text-on-surface-variant">{t('moodle.card.subtitle')}</p>
           </div>
           {isMoodleConnected ? (
-            <span className="inline-flex items-center rounded-full bg-success-container text-success px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
+            <span className="inline-flex items-center rounded-full bg-success-container text-on-success-container px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
               {t('moodle.connected.connected')}
             </span>
           ) : (
-            <span className="inline-flex items-center rounded-full bg-error-container text-error px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
+            <span className="inline-flex items-center rounded-full bg-error-container text-on-error-container px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
               {t('moodle.connected.notConnected')}
             </span>
           )}
@@ -411,7 +411,7 @@ const MoodleIntegrationCard = ({
                   onClick={handleConnectMoodle}
                   disabled={launchStarting}
                   aria-busy={launchStarting}
-                  className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
                   {t('moodle.actions.connect')}
@@ -459,11 +459,11 @@ const MoodleIntegrationCard = ({
           <div className="space-y-4">
             <div className="grid gap-3 rounded-xl border border-success/30 bg-success-container/10 p-4 sm:grid-cols-2">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-success">{t('moodle.labels.username')}</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('moodle.labels.username')}</p>
                 <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.moodle_display_name || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-success">{t('moodle.labels.password')}</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('moodle.labels.password')}</p>
                 <p className="mt-1 text-sm font-semibold tracking-[0.25em] text-on-surface">••••••••</p>
               </div>
             </div>
@@ -473,7 +473,7 @@ const MoodleIntegrationCard = ({
                 type="button"
                 onClick={handleResyncMoodle}
                 disabled={moodleResyncLoading || moodleSyncStatus === 'pending' || moodleCooldownSecs > 0}
-                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {moodleResyncLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

@@ -7,7 +7,7 @@ import { normalizeText } from '../../utils/subjectDetails'
 const Section = ({ icon: Icon, title, children }) => (
   <div className="flex gap-3">
     <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant">
-      <Icon className="size-3.5" />
+      <Icon className="size-4" />
     </div>
     <div className="min-w-0 flex-1">
       <h3 className="text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">{title}</h3>

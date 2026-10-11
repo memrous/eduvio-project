@@ -92,7 +92,7 @@ const SubjectStagResultCard = ({ subject }) => {
         </div>
 
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
-          <Landmark className="size-3.5" />
+          <Landmark className="size-4" />
           {t('academic:subjectDetail.sections.stagBadge')}
         </span>
       </div>

@@ -31,10 +31,10 @@ const Dropdown = ({
         onClick={() => setOpen((prev) => !prev)}
         className={`flex items-center gap-1.5 px-3.5 py-2 bg-surface border border-outline-variant rounded-xl text-sm font-medium text-on-surface hover:border-primary/40 transition-colors cursor-pointer ${buttonClassName}`}
       >
-        {Icon && <Icon className="w-3.5 h-3.5 text-on-surface-variant shrink-0" />}
+        {Icon && <Icon className="size-4 text-on-surface-variant shrink-0" />}
         <span>{label}</span>
         <ChevronDown
-          className={`w-3.5 h-3.5 text-on-surface-variant transition-transform duration-200 ${
+          className={`size-4 text-on-surface-variant transition-transform duration-200 ${
             open ? 'rotate-180' : ''
           }`}
         />
@@ -59,7 +59,7 @@ const Dropdown = ({
               }`}
             >
               <span>{opt.label}</span>
-              {value === opt.value && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
+              {value === opt.value && <Check className="size-4 text-primary shrink-0" />}
             </button>
           ))}
         </div>

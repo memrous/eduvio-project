@@ -36,8 +36,8 @@ const MOCK_USER_DB = [
     stag_ticket_expires_at: null,
     stag_user_name: null,
     role: 'student',
-    avatarUrl:
-      'src/assets/icons/user.png',
+    // No photo: the UI shows the initials
+    avatarUrl: null,
   },
 ]
 const mockRegisteredUsers = [...MOCK_USER_DB]
@@ -162,8 +162,8 @@ export const register = async (...args) => {
     stag_ticket_expires_at: null,
     stag_user_name: null,
     role: 'student',
-    avatarUrl:
-      'src/assets/icons/user.png',
+    // No photo: the UI shows the initials
+    avatarUrl: null,
   }
 
   mockRegisteredUsers.push(newUser)
@@ -671,6 +671,11 @@ export const unhideResource = async (userId, resourceId) => {
   return updateStoredResource(userId, resourceId, () => ({ hidden_at: null }))
 }
 
+export const setResourceForExam = async (userId, resourceId, forExam) => {
+  await delay(100)
+  return updateStoredResource(userId, resourceId, () => ({ for_exam: Boolean(forExam) }))
+}
+
 export const assignResourceEvent = async (userId, resourceId, eventId) => {
   await delay(100)
   const key = getNamespacedKey(userId, 'materials')
@@ -895,6 +900,159 @@ export const updateNote = async (subjectId, content) => {
   const key = getNamespacedKey(userId, `note:${subjectId}`)
   localStorage.setItem(key, content)
   return success({ content })
+}
+
+// ── Exam ────────────────────────────────────────────────────────
+
+const mockUserId = () => getCurrentMockUser()?.id ?? 'fallback'
+
+const isoDateInDays = (days) => {
+  const d = new Date()
+  d.setDate(d.getDate() + days)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/** Two sample STAG terms per subject (the first one registered), so the UI can be tried out. */
+export const getExamTerms = async (subjectId) => {
+  await delay(MOCK_DELAY)
+  const base = Number(subjectId) || 1
+  return success([
+    {
+      id: base * 10 + 1, subject_id: base, stag_id: `mock-${base}-1`, date: isoDateInDays(14), start_time: '09:00',
+      end_time: '11:00', kind: 'exam', room: 'BUF 3.04', examiner: 'Mgr. Jan Novák, Ph.D.', is_registered: true,
+      capacity: 30, occupied: 18, deregistration_deadline: isoDateInDays(12), note: null,
+    },
+    {
+      id: base * 10 + 2, subject_id: base, stag_id: `mock-${base}-2`, date: isoDateInDays(28), start_time: '13:00',
+      end_time: '15:00', kind: 'exam', room: 'BUF 2.10', examiner: 'Mgr. Jan Novák, Ph.D.', is_registered: false,
+      capacity: 30, occupied: 30, deregistration_deadline: null, note: 'Opravný termín',
+    },
+  ])
+}
+
+const topicsKey = (subjectId) => getNamespacedKey(mockUserId(), `exam-topics:${subjectId}`)
+const readTopics = (subjectId) => JSON.parse(localStorage.getItem(topicsKey(subjectId)) || '[]')
+const writeTopics = (subjectId, topics) => localStorage.setItem(topicsKey(subjectId), JSON.stringify(topics))
+
+/** Finds which subject a topic belongs to (topic ids are unique across subjects). */
+const findTopicSubject = (topicId) => {
+  const prefix = getNamespacedKey(mockUserId(), 'exam-topics:')
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (!key?.startsWith(prefix)) continue
+    const subjectId = key.slice(prefix.length)
+    if (readTopics(subjectId).some((t) => isSameId(t.id, topicId))) return subjectId
+  }
+  return null
+}
+
+export const getExamTopics = async (subjectId) => {
+  await delay(MOCK_DELAY)
+  return success(readTopics(subjectId))
+}
+
+export const addExamTopics = async (subjectId, titles) => {
+  await delay(100)
+  const topics = readTopics(subjectId)
+  let position = topics.reduce((max, t) => Math.max(max, t.position ?? 0), 0)
+  const created = (titles || [])
+    .map((title) => String(title ?? '').replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .map((title) => ({ id: Date.now() + Math.random(), subject_id: Number(subjectId), title, is_done: false, position: ++position }))
+  if (created.length === 0) return failure('The titles must not be empty.')
+  writeTopics(subjectId, [...topics, ...created])
+  return success(created)
+}
+
+export const updateExamTopic = async (topicId, fields) => {
+  await delay(100)
+  const subjectId = findTopicSubject(topicId)
+  if (subjectId == null) return failure('not_found')
+  let updated = null
+  writeTopics(subjectId, readTopics(subjectId).map((t) => {
+    if (!isSameId(t.id, topicId)) return t
+    updated = { ...t, ...fields }
+    return updated
+  }))
+  return success(updated)
+}
+
+export const deleteExamTopic = async (topicId) => {
+  await delay(100)
+  const subjectId = findTopicSubject(topicId)
+  if (subjectId == null) return failure('not_found')
+  writeTopics(subjectId, readTopics(subjectId).filter((t) => !isSameId(t.id, topicId)))
+  return success({ id: topicId })
+}
+
+// ── Semester schedule (sample plan for every subject, like a teacher's page) ──
+
+const MOCK_SYLLABUS = [
+  [-14, 'Úvod a základní pojmy', 'session', null, 'Organizace předmětu, základní pojmy.'],
+  [-7, '1. písemná práce (20 min) + větvení programu', 'assessment', 'test', 'Krátká písemná práce z probraného učiva.'],
+  [0, 'Cykly a funkce', 'session', null, null],
+  [3, '2. písemná práce (20 min) + řetězce', 'assessment', 'test', 'Krátká písemná práce z probraného učiva.'],
+  [10, 'Státní svátek', 'holiday', null, null],
+  [24, 'Zápočtová písemka', 'assessment', 'credit_test', null],
+  [31, 'Oprava zápočtové písemky', 'assessment', 'retake', null],
+]
+
+const hiddenSyllabusKey = () => getNamespacedKey(mockUserId(), 'syllabus-hidden')
+const readHiddenSyllabus = () => JSON.parse(localStorage.getItem(hiddenSyllabusKey()) || '[]')
+
+const mockSyllabusFor = (subjectId) => {
+  const base = Number(subjectId) || 1
+  return MOCK_SYLLABUS.map(([days, title, kind, assessmentType, description], index) => ({
+    id: base * 100 + index,
+    subject_id: base,
+    resource_id: null,
+    date: isoDateInDays(days),
+    title,
+    description,
+    links: [],
+    kind,
+    assessment_type: assessmentType,
+    source_url: 'https://www.inf.upol.cz/',
+    hidden: false,
+  }))
+}
+
+export const getSyllabus = async (subjectId) => {
+  await delay(MOCK_DELAY)
+  const hidden = readHiddenSyllabus()
+  return success(mockSyllabusFor(subjectId).filter((item) => !hidden.includes(item.id)))
+}
+
+export const getWebAssessments = async () => {
+  await delay(MOCK_DELAY)
+  const key = getNamespacedKey(mockUserId(), 'subjects')
+  const subjects = JSON.parse(localStorage.getItem(key) || 'null') ?? INITIAL_SUBJECTS
+  const hidden = readHiddenSyllabus()
+  return success(subjects.flatMap((subject) =>
+    mockSyllabusFor(subject.id)
+      .filter((item) => item.kind === 'assessment' && !hidden.includes(item.id))
+      .map((item) => ({
+        id: `web-${item.id}`, syllabusItemId: item.id, source: 'web', subjectId: subject.id, subject_id: subject.id,
+        subjectCode: subject.code, title: item.title, description: item.description, type: item.assessment_type,
+        assessmentType: item.assessment_type, date: item.date, dueDate: item.date, completed: false, sourceUrl: item.source_url,
+      }))
+  ))
+}
+
+const setSyllabusHidden = (id, hidden) => {
+  const list = readHiddenSyllabus().filter((x) => x !== Number(id))
+  localStorage.setItem(hiddenSyllabusKey(), JSON.stringify(hidden ? [...list, Number(id)] : list))
+  return success({ id: Number(id), hidden })
+}
+
+export const hideSyllabusItem = async (id) => {
+  await delay(100)
+  return setSyllabusHidden(id, true)
+}
+
+export const unhideSyllabusItem = async (id) => {
+  await delay(100)
+  return setSyllabusHidden(id, false)
 }
 
 export const getSubjectDetail = async (subjectId) => {

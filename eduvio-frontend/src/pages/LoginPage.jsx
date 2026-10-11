@@ -10,16 +10,16 @@ import {
   BarChart3,
   ArrowRight,
   Loader2,
+  BookOpen,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import CustomIcon from '../components/CustomIcon'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useAuth } from '../context/AuthContext'
 import logoImg from '../assets/images/logo.png'
 
 // ── Left brand panel feature list ────────────────────────────────
 const FEATURES = [
-  { icon: () => <CustomIcon name="book" className="w-5 h-5" />, key: 'features.manageSubjects' },
+  { icon: BookOpen, key: 'features.manageSubjects' },
   { icon: CalendarDays, key: 'features.calendar' },
   { icon: BarChart3, key: 'features.progress' },
 ]
@@ -72,9 +72,9 @@ const LoginPage = () => {
   }
 
   const inputBase =
-    'w-full pl-10 pr-4 py-2.5 bg-[#F8F9FB] rounded-lg border text-body-md text-gray-900 focus:outline-none focus:bg-white transition-colors'
-  const inputOk  = `${inputBase} border-[#E2E8F0] focus:border-[#004ac6]`
-  const inputErr = `${inputBase} border-red-400 focus:border-red-500 bg-red-50`
+    'w-full pl-10 pr-4 py-2.5 bg-surface-container-low rounded-lg border text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest transition-colors'
+  const inputOk  = `${inputBase} border-outline-variant focus:border-primary`
+  const inputErr = `${inputBase} border-error focus:border-error bg-error-container`
 
   return (
     <div className="min-h-screen flex font-inter relative">
@@ -83,14 +83,7 @@ const LoginPage = () => {
       </div>
 
       {/* ── Left brand panel (desktop only) ───────────────────── */}
-      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] shrink-0 flex-col justify-between p-12 relative overflow-hidden"
-        style={{ background: 'linear-gradient(145deg, #001a5e 0%, #003ab0 55%, #0057e8 100%)' }}>
-
-        {/* Decorative blobs */}
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #7eb8ff, transparent 70%)' }} />
-        <div className="absolute -bottom-32 -left-16 w-96 h-96 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #a78bfa, transparent 70%)' }} />
+      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] shrink-0 flex-col justify-between p-12 relative overflow-hidden bg-midnight">
 
         {/* Logo */}
         <div className="flex items-center gap-3 relative z-10">
@@ -99,13 +92,13 @@ const LoginPage = () => {
             alt="Eduvio"
             className="w-10 h-10 object-contain"
           />
-          <span className="font-geist font-bold text-xl text-white tracking-tight">Eduvio</span>
+          <span className="font-geist font-bold text-xl text-midnight-foreground tracking-tight">Eduvio</span>
         </div>
 
         {/* Headline */}
         <div className="relative z-10 flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <h1 className="text-4xl font-bold text-white leading-tight tracking-tight">
+            <h1 className="text-4xl font-bold text-midnight-foreground leading-tight tracking-tight">
               {t('login.headline').split('\n').map((line, index, lines) => (
                 <span key={`${line}-${index}`}>
                   {line}
@@ -113,7 +106,7 @@ const LoginPage = () => {
                 </span>
               ))}
             </h1>
-            <p className="text-blue-200 text-base leading-relaxed">
+            <p className="text-midnight-muted text-base leading-relaxed">
               {t('login.subtitle')}
             </p>
           </div>
@@ -121,23 +114,23 @@ const LoginPage = () => {
           <div className="flex flex-col gap-4">
             {FEATURES.map(({ icon: Icon, key }) => (
               <div key={key} className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Icon className="w-4 h-4 text-blue-200" />
+                <div className="w-8 h-8 rounded-lg bg-midnight-foreground/8 border border-midnight-foreground/15 flex items-center justify-center shrink-0 mt-0.5">
+                  <Icon className="w-4 h-4 text-midnight-muted" />
                 </div>
-                <p className="text-sm text-blue-100 leading-snug">{t(key)}</p>
+                <p className="text-sm text-midnight-foreground leading-snug">{t(key)}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Footer credit */}
-        <p className="text-blue-300/60 text-xs relative z-10">
+        <p className="text-midnight-muted text-xs relative z-10">
           {t('login.footerCopyright')}
         </p>
       </div>
 
       {/* ── Right form panel ──────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-start lg:justify-center bg-white px-6 pt-20 pb-12 sm:pt-24 lg:pt-12">
+      <div className="flex-1 flex flex-col items-center justify-start lg:justify-center bg-surface-container-lowest px-6 pt-20 pb-12 sm:pt-24 lg:pt-12">
         <div className="w-full max-w-[400px] flex flex-col gap-8">
 
           {/* Mobile logo (hidden on desktop) */}
@@ -147,19 +140,19 @@ const LoginPage = () => {
               alt="Eduvio"
               className="w-9 h-9 object-contain"
             />
-            <span className="font-geist font-bold text-xl text-gray-900 tracking-tight">Eduvio</span>
+            <span className="font-geist font-bold text-xl text-on-surface tracking-tight">Eduvio</span>
           </div>
 
           {/* Heading */}
           <div className="flex flex-col gap-1.5">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{t('login.welcomeBack')}</h2>
-            <p className="text-body-md text-gray-500">{t('login.welcomeSubtitle')}</p>
+            <h2 className="text-2xl font-bold text-on-surface tracking-tight">{t('login.welcomeBack')}</h2>
+            <p className="text-body-md text-on-surface-variant">{t('login.welcomeSubtitle')}</p>
           </div>
 
           {/* Mock credentials hint */}
-          <div className="flex items-start gap-2.5 px-4 py-3 bg-[#eeefff] border border-[#c5caff] rounded-lg">
-            <AlertCircle className="w-4 h-4 text-[#004ac6] shrink-0 mt-0.5" />
-            <p className="text-label-sm text-[#004ac6] leading-snug">
+          <div className="flex items-start gap-2.5 px-4 py-3 bg-primary-container border border-primary/30 rounded-lg">
+            <AlertCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <p className="text-label-sm text-on-primary-container leading-snug">
               <span className="font-bold">{t('login.demoCredentials.label')} </span>
               student@eduvio.cz · password
             </p>
@@ -167,9 +160,9 @@ const LoginPage = () => {
 
           {/* Server error banner */}
           {serverError && (
-            <div className="flex items-start gap-2.5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-              <p className="text-label-sm text-red-700">{t(serverError)}</p>
+            <div className="flex items-start gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
+              <p className="text-label-sm text-on-error-container">{t(serverError)}</p>
             </div>
           )}
 
@@ -178,11 +171,11 @@ const LoginPage = () => {
 
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-label-md font-semibold text-gray-900" htmlFor="login-email">
+              <label className="text-label-md font-semibold text-on-surface" htmlFor="login-email">
                 {t('login.fields.email.label')}
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Mail className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="login-email"
                   type="email"
@@ -194,7 +187,7 @@ const LoginPage = () => {
                 />
               </div>
               {errors.email && (
-                <p className="text-label-sm text-red-600 flex items-center gap-1">
+                <p className="text-label-sm text-error flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" /> {t(errors.email)}
                 </p>
               )}
@@ -203,12 +196,12 @@ const LoginPage = () => {
             {/* Password */}
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-label-md font-semibold text-gray-900" htmlFor="login-password">
+                <label className="text-label-md font-semibold text-on-surface" htmlFor="login-password">
                   {t('login.fields.password.label')}
                 </label>
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Lock className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="login-password"
                   type={showPass ? 'text' : 'password'}
@@ -221,14 +214,14 @@ const LoginPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
                   aria-label={showPass ? t('login.aria.hidePassword') : t('login.aria.showPassword')}
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-label-sm text-red-600 flex items-center gap-1">
+                <p className="text-label-sm text-error flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" /> {t(errors.password)}
                 </p>
               )}
@@ -238,7 +231,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#004ac6] hover:bg-[#003ea8] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg text-label-md transition-all shadow-sm mt-1 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-primary hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-on-primary font-semibold rounded-lg text-label-md transition-all shadow-sm mt-1 cursor-pointer"
             >
               {submitting ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> {t('login.actions.signingIn')}</>
@@ -249,9 +242,9 @@ const LoginPage = () => {
           </form>
 
           {/* Register link */}
-          <p className="text-body-md text-gray-500 text-center">
+          <p className="text-body-md text-on-surface-variant text-center">
             {t('login.links.noAccount')}{' '}
-            <Link to="/register" className="text-[#004ac6] font-semibold hover:underline">
+            <Link to="/register" className="text-primary font-semibold hover:underline">
               {t('login.links.createOne')}
             </Link>
           </p>

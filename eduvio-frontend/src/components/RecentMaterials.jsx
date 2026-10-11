@@ -1,146 +1,156 @@
-import { ExternalLink, Download } from 'lucide-react'
+import { lazy, Suspense, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import pdfIcon from '../assets/icons/pdf.png'
-import bookIcon from '../assets/icons/book.png'
-import imageIcon from '../assets/icons/image.png'
-import fileIcon from '../assets/icons/file.png'
-import folderIcon from '../assets/icons/folder.png'
-import CustomIcon from './CustomIcon'
+import { FolderOpen } from 'lucide-react'
+import Icon from './common/Icon'
+import MaterialTypeIcon from './materials/MaterialTypeIcon'
+import MaterialSourceBadge from './materials/MaterialSourceBadge'
+import { isHidden } from '../utils/materialKinds'
+import { getPreviewInfo } from '../utils/materialPreview'
+import { getSubjectIdOf, isSameId } from '../utils/ids'
+import { getLocaleFromLanguage } from '../utils/locale'
+import { formatDateTime, formatRelativeTime } from '../utils/relativeTime'
 
-const MATERIAL_ICONS = {
-  PDF: pdfIcon,
-  NOTES: bookIcon,
-  SLIDES: imageIcon,
-  LINK: folderIcon,
-  default: fileIcon,
+// Loaded on first open, so docx-preview stays out of the dashboard chunk
+const ResourcePreviewModal = lazy(() => import('./materials/ResourcePreviewModal'))
+
+const MAX_ITEMS = 5
+
+const isWebUrl = (url) => /^https?:\/\//i.test(url ?? '')
+
+/**
+ * Newest materials (by created_at) and new items on linked course pages
+ * (by content_changed_at), newest first. Hidden materials and locked Moodle
+ * sections are left out.
+ */
+const buildRecentItems = (resources) => {
+  const items = []
+
+  for (const res of resources ?? []) {
+    if (isHidden(res) || res.moodle_section_id != null) continue
+
+    if (res.category === 'platform') {
+      for (const link of res.page_links_new ?? []) {
+        if (!isWebUrl(link?.url)) continue
+        items.push({ key: `page-${res.id}-${link.url}`, resource: res, isPageLink: true, title: link.text || link.url, url: link.url, date: res.content_changed_at })
+      }
+    } else if ((res.category ?? 'file') === 'file') {
+      // Optimistic uploads only have uploadedAt until the refetch
+      items.push({ key: `material-${res.id}`, resource: res, isPageLink: false, title: res.title, url: res.url, date: res.created_at ?? res.uploadedAt })
+    }
+  }
+
+  const time = (item) => (item.date ? new Date(item.date).getTime() : 0)
+  return items.sort((a, b) => time(b) - time(a)).slice(0, MAX_ITEMS)
 }
 
-const MaterialTypeIcon = ({ type, className = 'w-5 h-5' }) => (
-  <img
-    src={MATERIAL_ICONS[type] || MATERIAL_ICONS.default}
-    alt=""
-    aria-hidden="true"
-    className={`${className} object-contain`}
-  />
-)
+const RecentMaterials = ({ resources, subjects, isLoading, onMarkSeen }) => {
+  const { t, i18n } = useTranslation(['dashboard', 'resources'])
+  const locale = getLocaleFromLanguage(i18n.language)
+  const [previewResource, setPreviewResource] = useState(null)
 
-const getResourceTypeStyles = (type, t) => {
-  switch (type) {
-    case 'PDF': return { bg: 'bg-error-container text-error', label: t('recentMaterials.resourceTypes.PDF') };
-    case 'SLIDES': return { bg: 'bg-primary-container text-primary', label: t('recentMaterials.resourceTypes.SLIDES') };
-    case 'LINK': return { bg: 'bg-success-container text-success', label: t('recentMaterials.resourceTypes.LINK') };
-    case 'NOTES': return { bg: 'bg-secondary-container text-secondary', label: t('recentMaterials.resourceTypes.NOTES') };
-    default: return { bg: 'bg-surface-container-low text-on-surface-variant', label: t('recentMaterials.resourceTypes.default') };
+  const items = useMemo(() => buildRecentItems(resources), [resources])
+
+  const getSubjectName = (res) => {
+    const subjectId = getSubjectIdOf(res)
+    if (subjectId == null) return t('resources:otherSubject')
+    return (subjects ?? []).find((s) => isSameId(s.id, subjectId))?.name ?? ''
   }
-};
 
-const RecentMaterials = ({ resources, subjects }) => {
-  const { t } = useTranslation('dashboard')
-  // Desktop materials (up to 3)
-  const recentListDesktop = [...(resources || [])]
-    .sort((a, b) => (b.uploadedAt || '').localeCompare(a.uploadedAt || ''))
-    .slice(0, 3);
+  // Links and files without an in-app preview open in a new tab
+  const opensInNewTab = (item) =>
+    item.isPageLink || item.resource.type === 'LINK' || !getPreviewInfo(item.resource).canPreview
 
-  // Mobile materials (up to 2)
-  const recentListMobile = [...(resources || [])]
-    .sort((a, b) => (b.uploadedAt || '').localeCompare(a.uploadedAt || ''))
-    .slice(0, 2);
+  const rowClass = 'flex w-full min-w-0 items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-surface-container-low cursor-pointer bg-transparent border-0'
+
+  const renderRowContent = (item) => {
+    const subjectName = getSubjectName(item.resource)
+    return (
+      <>
+        <MaterialTypeIcon resource={item.resource} tile="md" />
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="truncate text-sm font-medium text-on-surface" title={item.title}>
+            {item.title}
+          </span>
+          <span className="flex min-w-0 items-center gap-1.5 text-xs text-on-surface-variant">
+            <MaterialSourceBadge resource={item.resource} />
+            {subjectName && <span className="min-w-0 truncate">{subjectName}</span>}
+            {item.date && (
+              <time dateTime={item.date} title={formatDateTime(item.date, locale)} className="shrink-0">
+                {subjectName && '· '}{formatRelativeTime(item.date, locale)}
+              </time>
+            )}
+          </span>
+        </span>
+      </>
+    )
+  }
 
   return (
-    <>
-      {/* MOBILE LAYOUT: Recent Materials */}
-      <section className="flex lg:hidden flex-col gap-3 font-inter text-on-surface">
-        <h3 className="text-headline-md font-semibold">{t('recentMaterials.title')}</h3>
-        
-        <div className="flex flex-col gap-3">
-          {recentListMobile.length === 0 ? (
-            <div className="bg-surface border border-outline-variant p-4 rounded-lg text-center text-body-md text-on-surface-variant italic">
-              {t('recentMaterials.noResources')}
-            </div>
-          ) : (
-            recentListMobile.map(res => {
-              const subject = (subjects || []).find(s => s.id === res.subjectId);
-              const subCode = subject ? subject.code : (res.subjectId == null ? t('resources:otherSubject') : '');
-              const styles = getResourceTypeStyles(res.type, t);
-              const isExternal = res.type === 'LINK';
-
-              return (
-                <div 
-                  key={res.id} 
-                  className="bg-surface border border-outline-variant p-4 rounded-lg shadow-ambient flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className={`w-10 h-10 ${styles.bg} flex items-center justify-center rounded-md shrink-0`}>
-                      <MaterialTypeIcon type={res.type} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="text-label-md font-semibold truncate" title={res.title}>
-                        {res.title}
-                      </h4>
-                      <span className="text-label-sm text-on-surface-variant block mt-0.5 truncate">
-                        {subCode ? `${subCode} • ` : ''}{styles.label}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <a 
-                    href={res.url}
-                    target={isExternal ? '_blank' : '_self'}
-                    rel="noreferrer"
-                    className="p-2 border border-outline-variant hover:bg-surface-container rounded-sm text-on-surface-variant hover:text-on-surface shrink-0 transition-colors cursor-pointer ml-2 animate-none"
-                  >
-                    {isExternal ? <ExternalLink className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-                  </a>
-                </div>
-              );
-            })
-          )}
+    <section
+      aria-labelledby="recent-materials-heading"
+      className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-ambient w-full"
+    >
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Icon icon={FolderOpen} size="md" />
+          </span>
+          <h2 id="recent-materials-heading" className="truncate text-base font-semibold text-foreground">
+            {t('recentMaterials.title')}
+          </h2>
         </div>
-      </section>
-
-      {/* DESKTOP LAYOUT: Recent Materials */}
-      <div className="hidden lg:flex bg-surface border border-outline-variant p-5 rounded-lg shadow-ambient flex-col gap-4 relative font-inter text-on-surface">
-        <div className="flex items-center gap-2">
-          <CustomIcon name="folder" className="w-5 h-5" />
-          <h2 className="text-headline-md font-semibold">{t('recentMaterials.title')}</h2>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          {recentListDesktop.length === 0 ? (
-            <p className="text-body-md text-on-surface-variant italic text-center py-2">{t('recentMaterials.noResources')}</p>
-          ) : (
-            recentListDesktop.map(res => {
-              const subject = (subjects || []).find(s => s.id === res.subjectId);
-              const subName = subject ? subject.name : (res.subjectId == null ? t('resources:otherSubject') : '');
-              const styles = getResourceTypeStyles(res.type, t);
-              const isExternal = res.type === 'LINK';
-
-              return (
-                <a 
-                  key={res.id} 
-                  href={res.url} 
-                  target={isExternal ? '_blank' : '_self'}
-                  rel="noreferrer"
-                  className="flex items-center gap-3 p-3 bg-surface rounded-md border border-outline-variant hover:bg-surface-container transition-colors cursor-pointer"
-                >
-                  <div className={`w-9 h-9 ${styles.bg} flex items-center justify-center rounded-md shrink-0`}>
-                    <MaterialTypeIcon type={res.type} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-label-md font-semibold truncate" title={res.title}>
-                      {res.title}
-                    </h4>
-                    <span className="text-label-sm text-on-surface-variant">
-                      {res.size || t('recentMaterials.attachment')} • {styles.label} {subName && `• ${subName}`}
-                    </span>
-                  </div>
-                </a>
-              );
-            })
-          )}
-        </div>
+        <Link to="/materials" className="shrink-0 text-label-md font-semibold text-primary hover:underline">
+          {t('recentMaterials.viewAll')}
+        </Link>
       </div>
-    </>
+
+      {isLoading ? (
+        <ul className="flex flex-col gap-2" aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <li key={i} className="flex items-center gap-3 py-2">
+              <span className="size-9 shrink-0 animate-pulse rounded-lg bg-surface-container-low" />
+              <span className="h-4 flex-1 animate-pulse rounded bg-surface-container-low" />
+            </li>
+          ))}
+        </ul>
+      ) : items.length === 0 ? (
+        <div className="flex flex-col items-start gap-2 py-1">
+          <p className="text-sm text-on-surface-variant">{t('recentMaterials.empty')}</p>
+          <Link to="/materials" className="text-label-md font-semibold text-primary hover:underline">
+            {t('recentMaterials.uploadMaterial')}
+          </Link>
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-1">
+          {items.map((item) => (
+            <li key={item.key} className="min-w-0">
+              {opensInNewTab(item) ? (
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={item.isPageLink ? () => onMarkSeen?.(item.resource.id) : undefined}
+                  className={rowClass}
+                >
+                  {renderRowContent(item)}
+                </a>
+              ) : (
+                <button type="button" onClick={() => setPreviewResource(item.resource)} className={rowClass}>
+                  {renderRowContent(item)}
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {previewResource && (
+        <Suspense fallback={null}>
+          <ResourcePreviewModal resource={previewResource} onClose={() => setPreviewResource(null)} />
+        </Suspense>
+      )}
+    </section>
   )
 }
 

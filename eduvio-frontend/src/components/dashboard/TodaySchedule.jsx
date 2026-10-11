@@ -62,7 +62,7 @@ const TodaySchedule = ({ schedule }) => {
 
   const getDotColorClass = (event) => {
     if (isEventDone(event)) {
-      return 'bg-success'
+      return 'bg-success-soft'
     }
 
     if (isEventActive(event)) {
@@ -80,7 +80,7 @@ const TodaySchedule = ({ schedule }) => {
       case 'Deadline':
         return 'bg-error'
       case 'Assignment':
-        return 'bg-success'
+        return 'bg-success-soft'
       default:
         return 'bg-outline'
     }
@@ -106,7 +106,7 @@ const TodaySchedule = ({ schedule }) => {
           {t('todaySchedule.title')}
         </h2>
         <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-outline-variant bg-surface-container-low px-4 py-8 text-center">
-          <PartyPopper className="size-7 text-primary" aria-hidden="true" />
+          <PartyPopper className="size-6 text-primary" aria-hidden="true" />
           <p className="text-sm font-semibold text-foreground">{t('todaySchedule.noClassesTitle')}</p>
           <p className="max-w-[15rem] text-xs text-on-surface-variant text-pretty">
             {t('todaySchedule.noClassesSubtitle')}
@@ -163,7 +163,7 @@ const TodaySchedule = ({ schedule }) => {
         aria-hidden="true"
       >
         <span
-          className="block w-full bg-success transition-[height] duration-500 ease-out motion-reduce:transition-none"
+          className="block w-full bg-success-soft transition-[height] duration-500 ease-out motion-reduce:transition-none"
           style={{ height: `${getSegmentProgress(index) * 100}%` }}
         />
       </span>
@@ -211,7 +211,7 @@ const TodaySchedule = ({ schedule }) => {
                     )}
                   </p>
                   {(item.data.type === 'Test' || item.data.type === 'Exam') && (
-                    <span className="rounded-md bg-warning/15 px-1.5 py-0.5 text-[11px] font-semibold text-warning">
+                    <span className="rounded-md bg-warning-container px-1.5 py-0.5 text-[11px] font-semibold text-on-warning-container">
                       {t(`timetable.eventTypes.${item.data.type}`)}
                     </span>
                   )}
@@ -238,7 +238,7 @@ const TodaySchedule = ({ schedule }) => {
                   isGapLive
                     ? 'border-live animate-[eduvio-live-pulse-subtle_1.8s_ease-in-out_infinite]'
                     : isGapDone
-                    ? 'border-success'
+                    ? 'border-success-soft'
                     : 'border-dashed border-outline-variant'
                 }`}
                 aria-hidden="true"
@@ -248,7 +248,7 @@ const TodaySchedule = ({ schedule }) => {
                   isGapLive ? 'border-live/40' : 'border-dashed border-outline-variant'
                 }`}
               >
-                <Coffee className="size-3.5 shrink-0" aria-hidden="true" />
+                <Coffee className="size-4 shrink-0" aria-hidden="true" />
                 <span className="text-xs font-medium">{formatGap(item.minutes)}</span>
               </div>
             </li>
@@ -258,7 +258,7 @@ const TodaySchedule = ({ schedule }) => {
 
       {isDayDone && (
         <p className="mt-4 flex items-center gap-1.5 pl-8 text-xs font-medium text-on-surface-variant">
-          <Check className="size-3.5 shrink-0 text-success" aria-hidden="true" />
+          <Check className="size-4 shrink-0 text-success" aria-hidden="true" />
           {t('todaySchedule.allDone')}
         </p>
       )}
