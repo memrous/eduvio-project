@@ -8,6 +8,7 @@ const AgendaView = ({
   filteredEvents,
   requirements = [],
   handleEventSelect,
+  handleDeadlineSelect,
   subjects = [],
   locale,
   t,
@@ -118,7 +119,8 @@ const AgendaView = ({
                     return (
                       <div
                         key={`d-${item.id}-${idx}`}
-                        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-container-low/40"
+                        onClick={() => handleDeadlineSelect?.(item)}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-container-low/40 cursor-pointer"
                       >
                         {/* Time */}
                         <span className="w-12 shrink-0 text-xs font-semibold tabular-nums text-on-surface-variant">

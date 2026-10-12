@@ -70,6 +70,7 @@ const CalendarView = ({
     selectedDayEvents,
     hourlySlots,
     handleEventSelect,
+    handleDeadlineSelect,
     handleSubjectToggle,
     handlePrev,
     handleNext,
@@ -148,6 +149,7 @@ const CalendarView = ({
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             handleEventSelect={handleEventSelect}
+            handleDeadlineSelect={handleDeadlineSelect}
             currentWeekDays={currentWeekDays}
             selectedDayEvents={selectedDayEvents}
             hourlySlots={hourlySlots}
@@ -208,7 +210,7 @@ const CalendarView = ({
               todayEvents={todayEvents}
               upcomingDeadlines={upcomingDeadlines}
               onEventClick={handleEventSelect}
-              onDeadlineClick={null}
+              onDeadlineClick={handleDeadlineSelect}
               locale={locale}
               subjects={currentSubjects}
             />

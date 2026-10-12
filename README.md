@@ -114,16 +114,14 @@ cd eduvio-backend
 
 Backend obsahuje dedikované konfigurace a controllery pro napojení na univerzitní systémy:
 
-- **STAG** — `config/stag.php`, `StagController`, `StagAuthController`, `StagConnectController` — synchronizace rozvrhu, předmětů a výsledků, cooldown na manuální resync, OAuth-like redirect flow (`STAG_WS_BASE_URL`).
-- **Moodle** — `config/moodle.php`, `MoodleConnectController`, `MoodleSyncJob`, `app/Services/Moodle` — připojení přes Moodle mobile launch (wstoken), synchronizace úkolů a materiálů z kurzů voláním Moodle Web Services přímo z PHP, cooldown na manuální resync (`MOODLE_BASE_URL`).
+- **STAG** — `config/stag.php`, `StagController`, `StagAuthController`, `StagConnectController` — synchronizace rozvrhu, předmětů a výsledků, OAuth-like redirect flow (`STAG_WS_BASE_URL`).
+- **Moodle** — `config/moodle.php`, `MoodleConnectController`, `MoodleSyncJob`, `app/Services/Moodle` — připojení přes Moodle mobile launch (wstoken), synchronizace úkolů a materiálů z kurzů voláním Moodle Web Services přímo z PHP (`MOODLE_BASE_URL`).
 
 Relevantní proměnné prostředí (`.env`):
 
 ```
 MOODLE_BASE_URL=https://moodle.upol.cz
 STAG_WS_BASE_URL=https://stag-ws.upol.cz/ws
-STAG_RESYNC_COOLDOWN_MINUTES=30
-MOODLE_RESYNC_COOLDOWN_MINUTES=30
 FRONTEND_URL=http://localhost:5173
 ```
 

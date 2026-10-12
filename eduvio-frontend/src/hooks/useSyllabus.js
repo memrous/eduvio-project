@@ -3,7 +3,8 @@
  *
  * Semester schedule found on teachers' course pages.
  *
- *   useSyllabus(subjectId)  — rows of one subject: data, isLoading, error, hideItem(id)
+ *   useSyllabus(subjectId)  — rows of one subject: data (visible), hidden, isLoading,
+ *                             error, hideItem(id), unhideItem(id)
  *   useWebAssessments()     — written tests etc. of all subjects in the shape of
  *                             requirements (source "web"), for the calendar
  */
@@ -25,21 +26,22 @@ export const useSyllabus = (subjectId) => {
   const queryClient = useQueryClient()
   const queryKey = [SYLLABUS_KEY, String(subjectId)]
 
+  // Hidden rows come along so they can be shown again
   const query = useQuery({
     queryKey,
-    queryFn: () => api.getSyllabus(subjectId).then(unwrap),
+    queryFn: () => api.getSyllabus(subjectId, { withHidden: true }).then(unwrap),
     enabled: !!subjectId,
   })
 
-  const hideMutation = useMutation({
-    mutationFn: (id) => api.hideSyllabusItem(id).then(unwrap),
-    onMutate: async (id) => {
+  const hiddenMutation = useMutation({
+    mutationFn: ({ id, hidden }) => (hidden ? api.hideSyllabusItem(id) : api.unhideSyllabusItem(id)).then(unwrap),
+    onMutate: async ({ id, hidden }) => {
       await queryClient.cancelQueries({ queryKey })
       const previous = queryClient.getQueryData(queryKey)
-      queryClient.setQueryData(queryKey, (old) => (old ?? []).filter((item) => !isSameId(item.id, id)))
+      queryClient.setQueryData(queryKey, (old) => (old ?? []).map((item) => (isSameId(item.id, id) ? { ...item, hidden } : item)))
       return { previous }
     },
-    onError: (err, id, context) => {
+    onError: (err, vars, context) => {
       if (context?.previous) queryClient.setQueryData(queryKey, context.previous)
     },
     onSettled: () => {
@@ -49,11 +51,15 @@ export const useSyllabus = (subjectId) => {
     },
   })
 
+  const rows = query.data ?? []
+
   return {
-    data: query.data ?? [],
+    data: rows.filter((item) => !item.hidden),
+    hidden: rows.filter((item) => item.hidden),
     isLoading: query.isLoading,
     error: query.error?.message ?? null,
-    hideItem: (id) => hideMutation.mutateAsync(id),
+    hideItem: (id) => hiddenMutation.mutateAsync({ id, hidden: true }),
+    unhideItem: (id) => hiddenMutation.mutateAsync({ id, hidden: false }),
   }
 }
 

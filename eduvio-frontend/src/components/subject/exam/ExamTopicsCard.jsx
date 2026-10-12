@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileText, ListChecks, Pencil, Plus, Trash2 } from 'lucide-react'
 import Icon from '../../common/Icon'
@@ -7,13 +7,22 @@ import { useExamTopics } from '../../../hooks/useExam'
 import { useToast } from '../../../context/ToastContext'
 import { parseTopicList } from '../../../utils/examTopics'
 
-const iconButton =
-  'flex size-8 shrink-0 items-center justify-center rounded-lg border-0 bg-transparent text-on-surface-variant transition-colors hover:bg-surface-container hover:text-foreground cursor-pointer'
+const iconButtonBase =
+  'flex size-8 shrink-0 items-center justify-center rounded-lg border-0 transition-colors cursor-pointer'
+const iconButton = `${iconButtonBase} bg-transparent text-on-surface-variant hover:bg-surface-container hover:text-foreground`
 
 const TopicRow = ({ topic, onToggle, onRename, onDelete }) => {
   const { t } = useTranslation('academic')
   const [draft, setDraft] = useState(null)
   const isEditing = draft !== null
+  // Delete takes two clicks: the first turns the bin red, the second deletes
+  const [armed, setArmed] = useState(false)
+
+  useEffect(() => {
+    if (!armed) return
+    const timer = setTimeout(() => setArmed(false), 3000)
+    return () => clearTimeout(timer)
+  }, [armed])
 
   const save = () => {
     const title = draft.replace(/\s+/g, ' ').trim()
@@ -55,7 +64,7 @@ const TopicRow = ({ topic, onToggle, onRename, onDelete }) => {
         </span>
       )}
       {!isEditing && (
-        <span className="flex shrink-0 items-center gap-0.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
+        <span className={`flex shrink-0 items-center gap-0.5 opacity-100 transition-opacity md:group-hover:opacity-100 md:group-focus-within:opacity-100 ${armed ? '' : 'md:opacity-0'}`}>
           <button
             type="button"
             onClick={() => setDraft(topic.title)}
@@ -66,9 +75,16 @@ const TopicRow = ({ topic, onToggle, onRename, onDelete }) => {
           </button>
           <button
             type="button"
-            onClick={onDelete}
-            aria-label={t('academic:subjectDetail.exam.topics.delete', { title: topic.title })}
-            className={`${iconButton} hover:text-error`}
+            onClick={() => (armed ? onDelete() : setArmed(true))}
+            onBlur={() => setArmed(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setArmed(false)
+            }}
+            aria-label={t(armed ? 'academic:subjectDetail.exam.topics.deleteArmed' : 'academic:subjectDetail.exam.topics.delete', { title: topic.title })}
+            title={armed ? t('academic:subjectDetail.exam.topics.deleteArmed', { title: topic.title }) : undefined}
+            className={armed
+              ? `${iconButtonBase} bg-error-container text-error ring-1 ring-error hover:bg-error-container`
+              : `${iconButton} hover:text-error`}
           >
             <Icon icon={Trash2} />
           </button>
@@ -96,11 +112,7 @@ const ExamTopicsCard = ({ subjectId, webTopics = [] }) => {
     report(addTopics(titles).then(() => setNewTitle('')))
   }
 
-  const handleDelete = (topic) => {
-    if (window.confirm(t('academic:subjectDetail.exam.topics.deleteConfirm', { title: topic.title }))) {
-      report(deleteTopic(topic.id))
-    }
-  }
+  const handleDelete = (topic) => report(deleteTopic(topic.id))
 
   return (
     <section className="flex flex-col rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">

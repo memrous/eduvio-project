@@ -1,9 +1,32 @@
 import { ChevronLeft, ChevronRight, Paperclip, MapPin } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { deadlineTimeLabel, deadlineTitle } from '../../utils/assessments'
+import { deadlineTimeLabel, deadlineTitle, getAssessmentLabel, isAssessmentType, isWebAssessment } from '../../utils/assessments'
 import { formatRoom } from '../../utils/room'
+import Icon from '../common/Icon'
 
 const WEEKDAYS_LONG = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+/** Deadline / written test of one day: "ZPP1 · Písemka", full title on hover. */
+const DeadlineChip = ({ req, subjects, getDeadlineIcon, getSubjectStyle, onSelect, t, className = '' }) => {
+  const subject = subjects.find(s => s.id === req.subjectId || s.id === req.subject_id)
+  const style = getSubjectStyle(subject)
+  const TypeIcon = getDeadlineIcon(req.type)
+  const code = subject?.code || req.subjectCode
+  const label = isWebAssessment(req) || isAssessmentType(req.type) ? getAssessmentLabel(req.type, t) : req.title
+  const time = deadlineTimeLabel(req)
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect?.(req)}
+      title={`${time} ${code ? `${code} · ` : ''}${deadlineTitle(req, t)}`.trim()}
+      className={`flex w-full min-w-0 items-center gap-1 rounded border border-error/40 px-1.5 py-1 text-left text-[11px] font-semibold leading-tight cursor-pointer transition-all hover:brightness-95 hover:shadow-sm ${style.bg} ${style.text} ${className}`}
+    >
+      <Icon icon={TypeIcon} className="size-3 shrink-0 text-error" />
+      <span className="truncate">{code ? `${code} · ${label}` : label}</span>
+      {time && <span className="ml-auto shrink-0 tabular-nums opacity-80">{time}</span>}
+    </button>
+  )
+}
 
 const WeekView = ({
   filteredEvents,
@@ -11,6 +34,7 @@ const WeekView = ({
   selectedDate,
   setSelectedDate,
   handleEventSelect,
+  handleDeadlineSelect,
   currentWeekDays,
   hourlySlots,
   subjects = [],
@@ -80,21 +104,18 @@ const WeekView = ({
           if (!dayDeadlines.length) return null
           return (
             <div className="flex flex-col gap-1 px-3 py-2 border-b border-outline-variant bg-surface-container-low/30">
-              {dayDeadlines.map(req => {
-                const subject = subjects.find(s => s.id === req.subjectId || s.id === req.subject_id)
-                const style = getSubjectStyle(subject)
-                const Icon = getDeadlineIcon(req.type)
-                return (
-                  <div
-                    key={req.id}
-                    className={`flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded border border-error/30 truncate ${style.bg} ${style.text}`}
-                  >
-                    <Icon className="w-3 h-3 shrink-0 text-error" />
-                    <span className="shrink-0 tabular-nums opacity-80">{deadlineTimeLabel(req)}</span>
-                    <span className="truncate">{req.title}</span>
-                  </div>
-                )
-              })}
+              {dayDeadlines.map(req => (
+                <DeadlineChip
+                  key={req.id}
+                  req={req}
+                  subjects={subjects}
+                  getDeadlineIcon={getDeadlineIcon}
+                  getSubjectStyle={getSubjectStyle}
+                  onSelect={handleDeadlineSelect}
+                  t={t}
+                  className="text-xs"
+                />
+              ))}
             </div>
           )
         })()}
@@ -176,67 +197,49 @@ const WeekView = ({
       <div className="hidden md:block w-full border border-outline-variant rounded-xl overflow-x-auto bg-surface-container-lowest">
       <div className="flex flex-col min-w-[700px]">
 
-      {/* Day headers */}
-      <div className="grid grid-cols-[56px_repeat(7,1fr)] min-w-[700px] border-b border-outline-variant bg-surface-container-low/50 py-2.5 text-center font-semibold">
+      {/* Day headers — deadlines and written tests sit right under their day */}
+      <div className="grid grid-cols-[56px_repeat(7,1fr)] min-w-[700px] border-b border-outline-variant bg-surface-container-low/50 py-2.5 font-semibold">
         <div className="border-r border-outline-variant/30" />
         {currentWeekDays.map(day => {
           const isSelected = formatDateKey(selectedDate) === day.dateKey
           const isToday = formatDateKey(new Date()) === day.dateKey
+          const dayDeadlines = requirements.filter(r => r.date === day.dateKey && !r.completed)
           return (
             <div
               key={day.dateKey}
-              onClick={() => setSelectedDate(day.date)}
-              className={`flex items-baseline justify-between gap-2 border-r border-outline-variant/30 px-2.5 py-1 cursor-pointer transition-colors last:border-r-0 hover:bg-surface-container-low/30 ${
-                isSelected ? 'text-primary' : 'text-on-surface'
-              } ${isToday ? 'bg-primary/5' : ''}`}
+              className={`flex min-w-0 flex-col gap-1.5 border-r border-outline-variant/30 px-1.5 py-1 last:border-r-0 ${isToday ? 'bg-primary/5' : ''}`}
             >
-              <span className="text-xs font-semibold uppercase text-on-surface-variant">
-                {t(`academic:calendarGrid.days.${day.dayName}`)}
-              </span>
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                isToday ? 'bg-primary text-on-primary shadow-sm' : isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-surface-container text-on-surface'
-              }`}>
-                {day.dayNum}
-              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedDate(day.date)}
+                className={`flex items-baseline justify-between gap-2 rounded-md border-0 bg-transparent px-1 py-0.5 cursor-pointer transition-colors hover:bg-surface-container-low/60 ${
+                  isSelected ? 'text-primary' : 'text-on-surface'
+                }`}
+              >
+                <span className="text-xs font-semibold uppercase text-on-surface-variant">
+                  {t(`academic:calendarGrid.days.${day.dayName}`)}
+                </span>
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  isToday ? 'bg-primary text-on-primary shadow-sm' : isSelected ? 'bg-primary/10 text-primary' : 'text-on-surface'
+                }`}>
+                  {day.dayNum}
+                </span>
+              </button>
+              {dayDeadlines.map(req => (
+                <DeadlineChip
+                  key={req.id}
+                  req={req}
+                  subjects={subjects}
+                  getDeadlineIcon={getDeadlineIcon}
+                  getSubjectStyle={getSubjectStyle}
+                  onSelect={handleDeadlineSelect}
+                  t={t}
+                />
+              ))}
             </div>
           )
         })}
       </div>
-
-      {/* CELÝ DEN — all-day deadline banner */}
-      {currentWeekDays.some(d => requirements.some(r => r.date === d.dateKey && !r.completed)) && (
-        <div className="grid grid-cols-[56px_repeat(7,1fr)] min-w-[700px] border-b border-outline-variant bg-surface-container-low/30">
-          <div className="flex items-center justify-end pr-2.5 py-1.5 border-r border-outline-variant/30">
-            <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">
-              {t('academic:calendarGrid.allDay')}
-            </span>
-          </div>
-          {currentWeekDays.map(day => {
-            const dayDeadlines = requirements.filter(r => r.date === day.dateKey && !r.completed)
-            const isToday = formatDateKey(new Date()) === day.dateKey
-            return (
-              <div key={day.dateKey} className={`p-1 flex flex-col gap-1 min-h-[32px] border-r border-outline-variant/30 last:border-r-0 ${isToday ? 'bg-primary/5' : ''}`}>
-                {dayDeadlines.map(req => {
-                  const subject = subjects.find(s => s.id === req.subjectId || s.id === req.subject_id)
-                  const style = getSubjectStyle(subject)
-                  const Icon = getDeadlineIcon(req.type)
-                  return (
-                    <div
-                      key={req.id}
-                      title={`${deadlineTimeLabel(req)} ${deadlineTitle(req, t)}`.trim()}
-                      className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded border border-error/30 truncate hover:brightness-95 transition-all ${style.bg} ${style.text}`}
-                    >
-                      <Icon className="w-2.5 h-2.5 shrink-0 text-error" />
-                      <span className="shrink-0 tabular-nums opacity-90">{deadlineTimeLabel(req)}</span>
-                      <span className="truncate">{req.title}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })}
-        </div>
-      )}
 
       {/* Hourly event grid */}
       <div className="grid grid-cols-[56px_repeat(7,1fr)] min-w-[700px] bg-surface divide-x divide-outline-variant/30 max-h-[480px] overflow-y-auto">

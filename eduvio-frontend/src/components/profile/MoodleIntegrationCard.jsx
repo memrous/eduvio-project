@@ -39,8 +39,6 @@ const MoodleIntegrationCard = ({
   const [moodleDisconnecting, setMoodleDisconnecting] = useState(false)
   const [moodleResyncLoading, setMoodleResyncLoading] = useState(false)
   const [moodleSyncStatus, setMoodleSyncStatus] = useState(effectiveUser?.moodle_sync_status ?? null)
-  const [moodleNextAllowedAt, setMoodleNextAllowedAt] = useState(null)
-  const [moodleCooldownSecs, setMoodleCooldownSecs] = useState(0)
 
   // eslint-disable-next-line no-unused-vars
   const [moodleSyncPolling, setMoodleSyncPolling] = useState(false)
@@ -84,9 +82,6 @@ const MoodleIntegrationCard = ({
         if (moodleStatusRes.data?.moodle_sync_status) {
           setMoodleSyncStatus(moodleStatusRes.data.moodle_sync_status)
         }
-        if (moodleStatusRes.data?.next_allowed_at) {
-          setMoodleNextAllowedAt(moodleStatusRes.data.next_allowed_at)
-        }
       }
     }
 
@@ -116,9 +111,6 @@ const MoodleIntegrationCard = ({
       if (result.status === 'success') {
         const newStatus = result.data?.moodle_sync_status
         setMoodleSyncStatus(newStatus)
-        if (result.data?.next_allowed_at) {
-          setMoodleNextAllowedAt(result.data.next_allowed_at)
-        }
         if (newStatus !== 'pending') {
           clearInterval(interval)
           setMoodleSyncPolling(false)
@@ -138,34 +130,6 @@ const MoodleIntegrationCard = ({
       setMoodleSyncPolling(false)
     }
   }, [moodleSyncStatus, refreshUser, effectiveUser, onUserUpdate, queryClient])
-
-  // Handle countdown timer based on moodleNextAllowedAt
-  useEffect(() => {
-    if (!moodleNextAllowedAt) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setMoodleCooldownSecs(0)
-      return
-    }
-
-    const calculateCooldown = () => {
-      const diffMs = new Date(moodleNextAllowedAt).getTime() - Date.now()
-      const diffSecs = Math.max(0, Math.ceil(diffMs / 1000))
-      setMoodleCooldownSecs(diffSecs)
-      return diffSecs
-    }
-
-    const initialDiff = calculateCooldown()
-    if (initialDiff <= 0) return
-
-    const interval = setInterval(() => {
-      const remaining = calculateCooldown()
-      if (remaining <= 0) {
-        clearInterval(interval)
-      }
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [moodleNextAllowedAt])
 
   const syncUser = async () => {
     const refreshedUser = await refreshUser()
@@ -268,7 +232,6 @@ const MoodleIntegrationCard = ({
       setManualToken('')
       setManualError('')
       setMoodleSyncStatus(null)
-      setMoodleNextAllowedAt(null)
       toast.success(t('toast.moodleDisconnectSuccess'))
     } catch {
       toast.error(t('toast.moodleDisconnectFailed'))
@@ -285,22 +248,15 @@ const MoodleIntegrationCard = ({
 
       if (response?.status === 'error') {
         if (response.error === 'rate_limited') {
-          const nextAllowed = response.data?.next_allowed_at
-          const retryAfter = response.data?.retry_after_seconds
-          const retryMin = retryAfter ? Math.ceil(retryAfter / 60) : 30
-          if (nextAllowed) {
-            setMoodleNextAllowedAt(nextAllowed)
-          }
-          toast.error(t('moodle.syncing.recentlyTriggered', { minutes: retryMin }))
+          // 429 only means a sync is already running
+          toast.error(t('moodle.syncing.alreadyRunning'))
+          setMoodleSyncStatus('pending')
         } else {
           toast.error(response.error || t('moodle.syncing.failed'))
         }
         return
       }
 
-      if (response?.data?.next_allowed_at) {
-        setMoodleNextAllowedAt(response.data.next_allowed_at)
-      }
       toast.success(t('moodle.syncing.started'))
       setMoodleSyncStatus('pending')
     } catch {
@@ -350,154 +306,150 @@ const MoodleIntegrationCard = ({
   )
 
   return (
-    <div className="space-y-4">
+    <div className="flex h-full flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5">
+      <div className="flex md:items-center md:flex-row justify-between gap-3 flex-col items-start">
+        <div>
+          <h3 className="text-lg font-bold text-on-surface">{t('moodle.card.title')}</h3>
+          <p className="text-sm text-on-surface-variant">{t('moodle.card.subtitle')}</p>
+        </div>
+        {isMoodleConnected ? (
+          <span className="inline-flex items-center rounded-full bg-success-container text-on-success-container px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
+            {t('moodle.connected.connected')}
+          </span>
+        ) : (
+          <span className="inline-flex items-center rounded-full bg-error-container text-on-error-container px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
+            {t('moodle.connected.notConnected')}
+          </span>
+        )}
+      </div>
+
       {isMoodleConnected && moodleSyncStatus === 'pending' && (
-        <div className="flex items-start gap-2.5 px-4 py-3 bg-primary-container border border-primary/30 rounded-lg">
-          <Loader2 className="w-4 h-4 text-primary shrink-0 mt-0.5 animate-spin" />
+        <div className="flex min-h-13 items-center gap-2.5 px-4 py-3 bg-primary-container border border-primary/30 rounded-lg">
+          <Loader2 className="w-4 h-4 text-primary shrink-0 animate-spin" />
           <p className="text-label-sm text-on-primary-container">{t('moodle.status.syncing')}</p>
         </div>
       )}
 
       {isMoodleConnected && moodleSyncStatus === 'success' && (
-        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-success-container border border-success/30 rounded-lg">
-          <div className="flex items-start gap-2.5">
-            <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
+        <div className="flex min-h-13 items-center justify-between gap-3 px-4 py-3 bg-success-container border border-success/30 rounded-lg">
+          <div className="flex items-center gap-2.5">
+            <ShieldCheck className="w-4 h-4 text-success shrink-0" />
             <p className="text-label-sm text-on-success-container">{t('moodle.status.success')}</p>
           </div>
         </div>
       )}
 
       {isMoodleConnected && moodleSyncStatus === 'failed' && (
-        <div className="flex items-start gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
-          <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
+        <div className="flex min-h-13 items-center gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
+          <AlertCircle className="w-4 h-4 text-error shrink-0" />
           <p className="text-label-sm text-error">{t('moodle.status.failed')}</p>
         </div>
       )}
 
-      <div className="rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5 space-y-4">
-        <div className="flex md:items-center md:flex-row justify-between gap-3 flex-col items-start">
-          <div>
-            <h3 className="text-lg font-bold text-on-surface">{t('moodle.card.title')}</h3>
-            <p className="text-sm text-on-surface-variant">{t('moodle.card.subtitle')}</p>
-          </div>
-          {isMoodleConnected ? (
-            <span className="inline-flex items-center rounded-full bg-success-container text-on-success-container px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
-              {t('moodle.connected.connected')}
-            </span>
-          ) : (
-            <span className="inline-flex items-center rounded-full bg-error-container text-on-error-container px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
-              {t('moodle.connected.notConnected')}
-            </span>
+      {!isMoodleConnected ? (
+        <div className="flex flex-1 flex-col gap-4">
+          {launchReturnFailed && (
+            <div role="status" className="flex items-start gap-2.5 px-4 py-3 bg-warning-container border border-warning/30 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-on-warning-container shrink-0 mt-0.5" />
+              <p className="text-label-sm text-on-warning-container">{t('moodle.card.returnFailed')}</p>
+            </div>
           )}
-        </div>
 
-        {!isMoodleConnected ? (
-          <div className="space-y-4">
-            {launchReturnFailed && (
-              <div role="status" className="flex items-start gap-2.5 px-4 py-3 bg-warning-container border border-warning/30 rounded-lg">
-                <AlertCircle className="w-4 h-4 text-on-warning-container shrink-0 mt-0.5" />
-                <p className="text-label-sm text-on-warning-container">{t('moodle.card.returnFailed')}</p>
+          {supportsMoodleHandler ? (
+            <div className="space-y-4">
+              <p className="text-sm text-on-surface-variant">
+                {t('moodle.card.helper')}
+              </p>
+
+              <button
+                type="button"
+                onClick={handleConnectMoodle}
+                disabled={launchStarting}
+                aria-busy={launchStarting}
+                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+                {t('moodle.actions.connect')}
+              </button>
+
+              {/* Fallback when the return from Moodle does not reach the app */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setManualOpen((open) => !open)}
+                  aria-expanded={manualOpen}
+                  aria-controls="profile-moodle-manual"
+                  className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                >
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${manualOpen ? 'rotate-180' : ''}`} />
+                  {t('moodle.card.manualToggle')}
+                </button>
+                {manualOpen && <div id="profile-moodle-manual" className="mt-3">{manualForm}</div>}
               </div>
-            )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-on-surface-variant">
+                {t('moodle.card.unsupportedBrowser')}
+              </p>
 
-            {supportsMoodleHandler ? (
-              <div className="space-y-4">
-                <p className="text-sm text-on-surface-variant">
-                  {t('moodle.card.helper')}
-                </p>
-
+              <div className="flex">
                 <button
                   type="button"
                   onClick={handleConnectMoodle}
                   disabled={launchStarting}
                   aria-busy={launchStarting}
-                  className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-3.5 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
-                  {t('moodle.actions.connect')}
+                  {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+                  {t('moodle.actions.openMoodleLogin')}
                 </button>
+              </div>
 
-                {/* Fallback when the return from Moodle does not reach the app */}
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => setManualOpen((open) => !open)}
-                    aria-expanded={manualOpen}
-                    aria-controls="profile-moodle-manual"
-                    className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-                  >
-                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${manualOpen ? 'rotate-180' : ''}`} />
-                    {t('moodle.card.manualToggle')}
-                  </button>
-                  {manualOpen && <div id="profile-moodle-manual" className="mt-3">{manualForm}</div>}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-on-surface-variant">
-                  {t('moodle.card.unsupportedBrowser')}
-                </p>
-
-                <div className="flex">
-                  <button
-                    type="button"
-                    onClick={handleConnectMoodle}
-                    disabled={launchStarting}
-                    aria-busy={launchStarting}
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-3.5 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
-                    {t('moodle.actions.openMoodleLogin')}
-                  </button>
-                </div>
-
-                {manualForm}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="grid gap-3 rounded-xl border border-success/30 bg-success-container/10 p-4 sm:grid-cols-2">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('moodle.labels.username')}</p>
-                <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.moodle_display_name || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('moodle.labels.password')}</p>
-                <p className="mt-1 text-sm font-semibold tracking-[0.25em] text-on-surface">••••••••</p>
-              </div>
+              {manualForm}
             </div>
-
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={handleResyncMoodle}
-                disabled={moodleResyncLoading || moodleSyncStatus === 'pending' || moodleCooldownSecs > 0}
-                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {moodleResyncLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                {moodleCooldownSecs > 0
-                  ? t('moodle.actions.syncNowCountdown', { time: `${Math.floor(moodleCooldownSecs / 60)}:${(moodleCooldownSecs % 60).toString().padStart(2, '0')}` })
-                  : t('moodle.actions.syncNow')}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDisconnectMoodle}
-                disabled={moodleDisconnecting}
-                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-error-container bg-surface px-4 py-2.5 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {moodleDisconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Unlink2 className="h-4 w-4" />}
-                {t('moodle.actions.disconnect')}
-              </button>
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col gap-4">
+          <div className="grid gap-3 rounded-xl border border-success/30 bg-success-container/10 p-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('moodle.labels.username')}</p>
+              <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.moodle_display_name || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('moodle.labels.password')}</p>
+              <p className="mt-1 text-sm font-semibold tracking-[0.25em] text-on-surface">••••••••</p>
             </div>
           </div>
-        )}
-      </div>
+
+          <div className="mt-auto flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleResyncMoodle}
+              disabled={moodleResyncLoading || moodleSyncStatus === 'pending'}
+              className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {moodleResyncLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              {t('moodle.actions.syncNow')}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDisconnectMoodle}
+              disabled={moodleDisconnecting}
+              className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-error-container bg-surface px-4 py-2.5 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {moodleDisconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Unlink2 className="h-4 w-4" />}
+              {t('moodle.actions.disconnect')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

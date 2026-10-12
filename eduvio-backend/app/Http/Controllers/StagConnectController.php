@@ -24,6 +24,20 @@ class StagConnectController extends Controller
             'stag_sync_error'           => null,
             'stag_synced_at'            => null,
             'stag_last_sync_attempt_at' => null,
+            // Údaje o studentovi z POST /stag/sync-student; předměty, rozvrh a výsledky zůstávají
+            'stag_display_name'         => null,
+            'study_program'             => null,
+            'study_program_code'        => null,
+            'faculty'                   => null,
+            'study_form'                => null,
+            'study_type'                => null,
+            'study_type_key'            => null,
+            'study_year'                => null,
+            'study_status'              => null,
+            'study_officer_name'        => null,
+            'study_officer_email'       => null,
+            'study_officer_phone'       => null,
+            'study_info_synced_at'      => null,
         ]);
 
         return response()->json([
@@ -45,7 +59,6 @@ class StagConnectController extends Controller
             'stag_synced_at'   => $user->stag_synced_at,
             // Hidden from the user model; exposed here so the owner can see why a sync failed
             'stag_sync_error'  => $user->stag_sync_error,
-            'next_allowed_at'  => $this->nextAllowedAt($user),
             // Metadata only — the plain token is returned solely when it is created
             'agent_token'      => $agentToken ? [
                 'created_at'   => $agentToken->created_at?->toIso8601String(),
@@ -77,24 +90,8 @@ class StagConnectController extends Controller
         // 429 — sync already running
         if ($user->stag_sync_status === 'pending') {
             return response()->json([
-                'message'             => 'A sync is already in progress.',
-                'retry_after_seconds' => null,
-                'next_allowed_at'     => $this->nextAllowedAt($user),
+                'message' => 'A sync is already in progress.',
             ], 429);
-        }
-
-        // 429 — cooldown not elapsed
-        $cooldown = (int) config('stag.resync_cooldown_minutes', 30);
-        if ($user->stag_last_sync_attempt_at !== null) {
-            $elapsedSeconds   = now()->timestamp - $user->stag_last_sync_attempt_at->timestamp;
-            $secondsRemaining = $cooldown * 60 - $elapsedSeconds;
-            if ($secondsRemaining > 0) {
-                return response()->json([
-                    'message'             => "Please wait {$cooldown} minutes between syncs.",
-                    'retry_after_seconds' => (int) ceil($secondsRemaining),
-                    'next_allowed_at'     => $this->nextAllowedAt($user),
-                ], 429);
-            }
         }
 
         // All checks passed — dispatch job
@@ -108,26 +105,6 @@ class StagConnectController extends Controller
         return response()->json([
             'user'            => $user->fresh(),
             'message'         => 'Resync started in background.',
-            'next_allowed_at' => $this->nextAllowedAt($user->fresh()),
         ]);
-    }
-
-    // ── Helpers ──────────────────────────────────────────────────────
-
-    /**
-     * Compute the ISO timestamp when the next resync is allowed.
-     * Returns null if the user has never attempted a sync.
-     */
-    private function nextAllowedAt($user): ?string
-    {
-        if (! $user->stag_last_sync_attempt_at) {
-            return null;
-        }
-
-        $cooldown = (int) config('stag.resync_cooldown_minutes', 30);
-
-        return $user->stag_last_sync_attempt_at
-            ->addMinutes($cooldown)
-            ->toIso8601String();
     }
 }

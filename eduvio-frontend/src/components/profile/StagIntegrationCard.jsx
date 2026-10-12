@@ -62,30 +62,9 @@ const StagServerCard = ({
   const [disconnecting, setDisconnecting] = useState(false)
   const [resyncLoading, setResyncLoading] = useState(false)
   const [syncStatus, setSyncStatus] = useState(effectiveUser?.stag_sync_status ?? null)
-  const [nextAllowedAt, setNextAllowedAt] = useState(null)
-  const [cooldownSecs, setCooldownSecs] = useState(0)
 
   // eslint-disable-next-line no-unused-vars
   const [syncPolling, setSyncPolling] = useState(false)
-
-  // Fetch STAG status on mount to retrieve next_allowed_at
-  useEffect(() => {
-    let active = true
-
-    const loadStagStatus = async () => {
-      const statusRes = await api.getStagSyncStatus()
-      if (!active) return
-      if (statusRes.status === 'success' && statusRes.data?.next_allowed_at) {
-        setNextAllowedAt(statusRes.data.next_allowed_at)
-      }
-    }
-
-    loadStagStatus()
-
-    return () => {
-      active = false
-    }
-  }, [])
 
   // Polling effect for STAG sync status
   useEffect(() => {
@@ -107,9 +86,6 @@ const StagServerCard = ({
       if (result.status === 'success') {
         const newStatus = result.data?.stag_sync_status
         setSyncStatus(newStatus)
-        if (result.data?.next_allowed_at) {
-          setNextAllowedAt(result.data.next_allowed_at)
-        }
         if (newStatus !== 'pending') {
           clearInterval(interval)
           setSyncPolling(false)
@@ -129,34 +105,6 @@ const StagServerCard = ({
       setSyncPolling(false)
     }
   }, [syncStatus, refreshUser, effectiveUser, navigate, onUserUpdate])
-
-  // Handle countdown timer based on nextAllowedAt
-  useEffect(() => {
-    if (!nextAllowedAt) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCooldownSecs(0)
-      return
-    }
-
-    const calculateCooldown = () => {
-      const diffMs = new Date(nextAllowedAt).getTime() - Date.now()
-      const diffSecs = Math.max(0, Math.ceil(diffMs / 1000))
-      setCooldownSecs(diffSecs)
-      return diffSecs
-    }
-
-    const initialDiff = calculateCooldown()
-    if (initialDiff <= 0) return
-
-    const interval = setInterval(() => {
-      const remaining = calculateCooldown()
-      if (remaining <= 0) {
-        clearInterval(interval)
-      }
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [nextAllowedAt])
 
   const syncUser = async () => {
     const refreshedUser = await refreshUser()
@@ -198,7 +146,6 @@ const StagServerCard = ({
         onUserUpdate(updatedUser)
       }
       setSyncStatus(null)
-      setNextAllowedAt(null)
       toast.success(t('toast.disconnectSuccess'))
     } catch {
       toast.error(t('toast.disconnectFailed'))
@@ -215,13 +162,9 @@ const StagServerCard = ({
 
       if (response.status === 'error') {
         if (response.error === 'rate_limited') {
-          const nextAllowed = response.data?.next_allowed_at
-          const retryAfter = response.data?.retry_after_seconds
-          const retryMin = retryAfter ? Math.ceil(retryAfter / 60) : 30
-          if (nextAllowed) {
-            setNextAllowedAt(nextAllowed)
-          }
-          toast.error(t('stag.syncing.recentlyTriggered', { minutes: retryMin }))
+          // 429 only means a sync is already running
+          toast.error(t('stag.syncing.alreadyRunning'))
+          setSyncStatus('pending')
         } else if (response.error === 'agent_mode') {
           toast.error(t('stag.errors.agentMode'))
         } else {
@@ -230,9 +173,6 @@ const StagServerCard = ({
         return
       }
 
-      if (response.data?.next_allowed_at) {
-        setNextAllowedAt(response.data.next_allowed_at)
-      }
       toast.success(t('stag.syncing.started'))
       setSyncStatus('pending')
     } catch {
@@ -243,18 +183,34 @@ const StagServerCard = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex h-full flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5">
+      <div className="flex md:items-center md:flex-row justify-between gap-3 flex-col items-start">
+        <div>
+          <h3 className="text-lg font-bold text-on-surface">{t('stag.card.title')}</h3>
+          <p className="text-sm text-on-surface-variant">{t('stag.card.subtitle')}</p>
+        </div>
+        {isStagConnected ? (
+          <span className="inline-flex items-center rounded-full bg-success-container text-on-success-container px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
+            {t('stag.connected.connected')}
+          </span>
+        ) : (
+          <span className="inline-flex items-center rounded-full bg-error-container text-on-error-container px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
+            {t('stag.connected.notConnected')}
+          </span>
+        )}
+      </div>
+
       {isStagConnected && syncStatus === 'pending' && (
-        <div className="flex items-start gap-2.5 px-4 py-3 bg-primary-container border border-primary/30 rounded-lg">
-          <Loader2 className="w-4 h-4 text-primary shrink-0 mt-0.5 animate-spin" />
+        <div className="flex min-h-13 items-center gap-2.5 px-4 py-3 bg-primary-container border border-primary/30 rounded-lg">
+          <Loader2 className="w-4 h-4 text-primary shrink-0 animate-spin" />
           <p className="text-label-sm text-on-primary-container">{t('stag.status.syncing')}</p>
         </div>
       )}
 
       {isStagConnected && syncStatus === 'success' && (
-        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-success-container border border-success/30 rounded-lg">
-          <div className="flex items-start gap-2.5">
-            <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
+        <div className="flex min-h-13 items-center justify-between gap-3 px-4 py-3 bg-success-container border border-success/30 rounded-lg">
+          <div className="flex items-center gap-2.5">
+            <ShieldCheck className="w-4 h-4 text-success shrink-0" />
             <p className="text-label-sm text-on-success-container">{t('stag.status.success')}</p>
           </div>
           {navigate && (
@@ -271,88 +227,76 @@ const StagServerCard = ({
       )}
 
       {isStagConnected && syncStatus === 'failed' && (
-        <div className="flex items-start gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
-          <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
+        <div className="flex min-h-13 items-center gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
+          <AlertCircle className="w-4 h-4 text-error shrink-0" />
           <p className="text-label-sm text-error">{t('stag.status.failed')}</p>
         </div>
       )}
 
-      <div className="rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5 space-y-4">
-        <div className="flex md:items-center md:flex-row justify-between gap-3 flex-col items-start">
-          <div>
-            <h3 className="text-lg font-bold text-on-surface">{t('stag.card.title')}</h3>
-            <p className="text-sm text-on-surface-variant">{t('stag.card.subtitle')}</p>
-          </div>
-          {isStagConnected ? (
-            <span className="inline-flex items-center rounded-full bg-success-container text-on-success-container px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
-              {t('stag.connected.connected')}
-            </span>
-          ) : (
-            <span className="inline-flex items-center rounded-full bg-error-container text-on-error-container px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
-              {t('stag.connected.notConnected')}
-            </span>
-          )}
+      {!isStagConnected ? (
+        <div className="flex flex-1 flex-col gap-4">
+          <p className="text-sm text-on-surface-variant">
+            {t('stag.card.helper')}
+          </p>
+
+          <button
+            type="button"
+            onClick={handleStagConnect}
+            disabled={stagRedirecting}
+            className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {stagRedirecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+            {t('stag.actions.connect')}
+          </button>
         </div>
-
-        {!isStagConnected ? (
-          <div className="space-y-4">
-            <p className="text-sm text-on-surface-variant">
-              {t('stag.card.helper')}
-            </p>
-
-            <button
-              type="button"
-              onClick={handleStagConnect}
-              disabled={stagRedirecting}
-              className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {stagRedirecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
-              {t('stag.actions.connect')}
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="grid gap-3 rounded-xl border border-success/30 bg-success-container/10 p-4 sm:grid-cols-2">
+      ) : (
+        <div className="flex flex-1 flex-col gap-4">
+          <div className="grid gap-3 rounded-xl border border-success/30 bg-success-container/10 p-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('stag.labels.studentId')}</p>
+              <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_student_id || 'N/A'}</p>
+            </div>
+            {/* Name from getStudentInfo; before the first sync the STAG user name, unless it is just the student ID */}
+            {effectiveUser.stag_display_name ? (
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('stag.labels.studentId')}</p>
-                <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_student_id || 'N/A'}</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('stag.labels.name')}</p>
+                <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_display_name}</p>
               </div>
+            ) : effectiveUser.stag_user_name !== effectiveUser.stag_student_id && (
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('stag.labels.username')}</p>
                 <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_user_name || 'N/A'}</p>
               </div>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={handleResync}
-                disabled={resyncLoading || syncStatus === 'pending' || cooldownSecs > 0}
-                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {resyncLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                {cooldownSecs > 0
-                  ? t('stag.actions.syncNowCountdown', { time: `${Math.floor(cooldownSecs / 60)}:${(cooldownSecs % 60).toString().padStart(2, '0')}` })
-                  : t('stag.actions.syncNow')}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDisconnectStag}
-                disabled={disconnecting}
-                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-error-container bg-surface px-4 py-2.5 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {disconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Unlink2 className="h-4 w-4" />}
-                {t('stag.actions.disconnect')}
-              </button>
-            </div>
+            )}
           </div>
-        )}
-      </div>
+
+          <div className="mt-auto flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleResync}
+              disabled={resyncLoading || syncStatus === 'pending'}
+              className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {resyncLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              {t('stag.actions.syncNow')}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDisconnectStag}
+              disabled={disconnecting}
+              className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-error-container bg-surface px-4 py-2.5 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {disconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Unlink2 className="h-4 w-4" />}
+              {t('stag.actions.disconnect')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

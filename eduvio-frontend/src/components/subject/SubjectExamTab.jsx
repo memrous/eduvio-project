@@ -16,9 +16,11 @@ const SubjectExamTab = ({
   materials,
   webTopics,
   syllabus,
+  hiddenSyllabus,
   syllabusLoading,
   sourceUrl,
   onHideSyllabusItem,
+  onUnhideSyllabusItem,
   onSetForExam,
   onShowMaterials,
 }) => {
@@ -28,9 +30,11 @@ const SubjectExamTab = ({
     <div className="flex flex-col gap-6">
       <ContinuousAssessmentCard
         items={syllabus}
+        hiddenItems={hiddenSyllabus}
         isLoading={syllabusLoading}
         sourceUrl={sourceUrl}
         onHide={onHideSyllabusItem}
+        onUnhide={onUnhideSyllabusItem}
       />
 
       <ExamTermsCard subject={subject} />

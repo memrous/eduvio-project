@@ -86,6 +86,7 @@
     },
     "labels": {
       "studentId": "Studentské ID",
+      "name": "Jméno",
       "username": "Uživatelské jméno",
       "password": "Heslo"
     },
@@ -97,14 +98,13 @@
       "connect": "Připojit IS/STAG",
       "disconnect": "Odpojit IS/STAG",
       "syncNow": "Synchronizovat teď",
-      "syncNowCountdown": "Synchronizovat teď ({{time}})",
       "goToDashboard": "Přejít na nástěnku",
       "cancel": "Zrušit"
     },
     "syncing": {
       "background": "IS/STAG je připojen. Rozvrh se synchronizuje na pozadí...",
       "started": "Synchronizace byla spuštěna a rozvrh se na pozadí obnovuje.",
-      "recentlyTriggered": "Synchronizace už byla nedávno spuštěna. Zkuste to znovu za {{minutes}} minut.",
+      "alreadyRunning": "Synchronizace už probíhá.",
       "failed": "Synchronizaci se nepodařilo spustit."
     },
     "errors": {
@@ -208,13 +208,12 @@
       "connectManual": "Připojit Moodle",
       "disconnect": "Odpojit Moodle",
       "syncNow": "Synchronizovat teď",
-      "syncNowCountdown": "Synchronizovat teď ({{time}})",
       "cancel": "Zrušit"
     },
     "syncing": {
       "background": "Moodle je připojen. Úkoly se synchronizují na pozadí...",
       "started": "Synchronizace byla spuštěna a úkoly se na pozadí obnovují.",
-      "recentlyTriggered": "Synchronizace už byla nedávno spuštěna. Zkuste to znovu za {{minutes}} minut.",
+      "alreadyRunning": "Synchronizace už probíhá.",
       "failed": "Synchronizaci se nepodařilo spustit."
     },
     "errors": {

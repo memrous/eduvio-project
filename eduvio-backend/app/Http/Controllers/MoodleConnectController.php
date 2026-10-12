@@ -122,7 +122,6 @@ class MoodleConnectController extends Controller
         return response()->json([
             'user'            => $user->fresh(),
             'message'         => 'Moodle credentials saved. Sync started in background.',
-            'next_allowed_at' => $this->nextAllowedAt($user->fresh()),
         ]);
     }
 
@@ -154,7 +153,6 @@ class MoodleConnectController extends Controller
             'moodle_connected'   => $user->moodle_connected,
             'moodle_sync_status' => $user->moodle_sync_status,
             'moodle_synced_at'   => $user->moodle_synced_at,
-            'next_allowed_at'  => $this->nextAllowedAt($user),
         ]);
     }
 
@@ -172,24 +170,8 @@ class MoodleConnectController extends Controller
         // 429 — sync already running
         if ($user->moodle_sync_status === 'pending') {
             return response()->json([
-                'message'             => 'A sync is already in progress.',
-                'retry_after_seconds' => null,
-                'next_allowed_at'     => $this->nextAllowedAt($user),
+                'message' => 'A sync is already in progress.',
             ], 429);
-        }
-
-        // 429 — cooldown not elapsed
-        $cooldown = (int) config('moodle.resync_cooldown_minutes', 30);
-        if ($user->moodle_last_sync_attempt_at !== null) {
-            $elapsedSeconds   = now()->timestamp - $user->moodle_last_sync_attempt_at->timestamp;
-            $secondsRemaining = $cooldown * 60 - $elapsedSeconds;
-            if ($secondsRemaining > 0) {
-                return response()->json([
-                    'message'             => "Please wait {$cooldown} minutes between syncs.",
-                    'retry_after_seconds' => (int) ceil($secondsRemaining),
-                    'next_allowed_at'     => $this->nextAllowedAt($user),
-                ], 429);
-            }
         }
 
         // All checks passed — dispatch job
@@ -201,28 +183,8 @@ class MoodleConnectController extends Controller
         MoodleSyncJob::dispatch($user);
 
         return response()->json([
-            'user'            => $user->fresh(),
-            'message'         => 'Resync started in background.',
-            'next_allowed_at' => $this->nextAllowedAt($user->fresh()),
+            'user'    => $user->fresh(),
+            'message' => 'Resync started in background.',
         ]);
-    }
-
-    // ── Helpers ──────────────────────────────────────────────────────
-
-    /**
-     * Compute the ISO timestamp when the next resync is allowed.
-     * Returns null if the user has never attempted a sync.
-     */
-    private function nextAllowedAt($user): ?string
-    {
-        if (! $user->moodle_last_sync_attempt_at) {
-            return null;
-        }
-
-        $cooldown = (int) config('moodle.resync_cooldown_minutes', 30);
-
-        return $user->moodle_last_sync_attempt_at
-            ->addMinutes($cooldown)
-            ->toIso8601String();
     }
 }

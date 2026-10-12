@@ -8,6 +8,7 @@ const MonthView = ({
   selectedDate,
   setSelectedDate,
   handleEventSelect,
+  handleDeadlineSelect,
   subjects = [],
   onOpenMobileDetail,
   t,
@@ -40,6 +41,7 @@ const MonthView = ({
               isToday={isToday}
               setSelectedDate={setSelectedDate}
               handleEventSelect={handleEventSelect}
+              handleDeadlineSelect={handleDeadlineSelect}
               onOpenMobileDetail={onOpenMobileDetail}
               subjects={subjects}
             />

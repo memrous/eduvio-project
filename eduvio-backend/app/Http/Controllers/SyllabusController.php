@@ -13,14 +13,15 @@ use Illuminate\Support\Collection;
 class SyllabusController extends Controller
 {
     /**
-     * GET /api/subjects/{subjectId}/syllabus — rows of the subject, without hidden ones.
+     * GET /api/subjects/{subjectId}/syllabus — rows of the subject, without hidden
+     * ones unless ?with_hidden=1 (those carry hidden: true).
      */
     public function index(Request $request, $subjectId): JsonResponse
     {
         $subject = Subject::where('user_id', $request->user()->id)->findOrFail($subjectId);
 
         $items = $subject->syllabusItems()
-            ->whereNull('hidden_at')
+            ->when(! $request->boolean('with_hidden'), fn ($q) => $q->whereNull('hidden_at'))
             ->with('resource:id,url')
             ->orderBy('date')
             ->orderBy('id')

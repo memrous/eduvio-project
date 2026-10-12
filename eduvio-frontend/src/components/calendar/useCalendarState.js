@@ -79,6 +79,15 @@ export const useCalendarState = ({
     setSelectedDetailEvent(event)
   }
 
+  // Deadlines and written tests open in the same panel; "date" is a local YYYY-MM-DD
+  const handleDeadlineSelect = (deadline) => {
+    const [y, m, d] = String(deadline.date).slice(0, 10).split('-').map(Number)
+    const dateObj = new Date(y, m - 1, d)
+    grid.setSelectedDate(dateObj)
+    grid.setCurrentMonth(new Date(y, m - 1, 1))
+    setSelectedDetailEvent({ ...deadline, _kind: 'deadline' })
+  }
+
   const openCreateModal = () => {
     form.openCreateModal(formatDateKey(grid.selectedDate))
   }
@@ -115,6 +124,7 @@ export const useCalendarState = ({
     selectedDetailEvent,
     setSelectedDetailEvent,
     handleEventSelect,
+    handleDeadlineSelect,
     openCreateModal,
     selectedDayEvents,
     upcomingEventsList,

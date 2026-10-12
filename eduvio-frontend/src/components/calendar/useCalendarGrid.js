@@ -13,7 +13,7 @@ export const useCalendarGrid = () => {
   const { i18n } = useTranslation()
   const [selectedDate, setSelectedDate] = useState(new Date()) 
   const [currentMonth, setCurrentMonth] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
-  const [activeView, setActiveView] = useState('month')
+  const [activeView, setActiveView] = useState('week')
 
   const handlePrev = () => {
     if (activeView === 'month') {

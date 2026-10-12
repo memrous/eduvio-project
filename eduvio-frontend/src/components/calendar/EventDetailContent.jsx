@@ -4,6 +4,7 @@ import { getEventStyle } from './useCalendarState'
 import { getLocaleFromLanguage } from '../../utils/locale'
 import { formatRoom } from '../../utils/room'
 import Icon from '../common/Icon'
+import DeadlineDetailContent from './DeadlineDetailContent'
 
 const EventDetailContent = ({
   selectedDetailEvent,
@@ -17,6 +18,16 @@ const EventDetailContent = ({
 }) => {
   const { t, i18n } = useTranslation(['academic', 'dashboard'])
   if (!selectedDetailEvent) return null
+  if (selectedDetailEvent._kind === 'deadline') {
+    return (
+      <DeadlineDetailContent
+        deadline={selectedDetailEvent}
+        currentSubjects={currentSubjects}
+        onClose={onClose}
+        onOpenSubject={onOpenSubject}
+      />
+    )
+  }
 
   const targetSubject = currentSubjects.find(s => s.id === selectedDetailEvent.subjectId)
   const styleObj = getEventStyle(selectedDetailEvent.type)

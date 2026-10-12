@@ -18,6 +18,7 @@ const DayCell = ({
   isToday,
   setSelectedDate,
   handleEventSelect,
+  handleDeadlineSelect,
   onOpenMobileDetail,
   subjects = [],
 }) => {
@@ -80,9 +81,9 @@ const DayCell = ({
             return (
               <div
                 key={`d-${item.id ?? idx}`}
-                onClick={(e) => { e.stopPropagation() }}
+                onClick={(e) => { e.stopPropagation(); handleDeadlineSelect?.(item) }}
                 title={deadlineTitle(item, t)}
-                className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded truncate border border-error/30 cursor-default ${style.bg} ${style.text}`}
+                className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded truncate border border-error/30 hover:brightness-95 cursor-pointer ${style.bg} ${style.text}`}
               >
                 <Icon className="w-2.5 h-2.5 shrink-0 text-error" />
                 <span className="truncate">{item.title}</span>

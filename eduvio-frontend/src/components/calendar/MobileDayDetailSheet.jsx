@@ -1,7 +1,7 @@
 import { useState, forwardRef, useImperativeHandle } from 'react'
 import { deadlineTimeLabel, getAssessmentLabel, isWebAssessment } from '../../utils/assessments'
 
-const MobileDayDetailSheet = forwardRef(({ subjects, handleEventSelect, t, getSubjectStyle, getDeadlineIcon }, ref) => {
+const MobileDayDetailSheet = forwardRef(({ subjects, handleEventSelect, handleDeadlineSelect, t, getSubjectStyle, getDeadlineIcon }, ref) => {
   const [mobileDetail, setMobileDetail] = useState(null)
   const [sheetVisible, setSheetVisible] = useState(false)
 
@@ -53,9 +53,10 @@ const MobileDayDetailSheet = forwardRef(({ subjects, handleEventSelect, t, getSu
               const style = getSubjectStyle(subject)
               const Icon = getDeadlineIcon(item.type)
               return (
-                <div
+                <button
                   key={`d-${item.id ?? idx}`}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 border border-error/30 ${style.bg} ${style.text}`}
+                  onClick={() => { handleDeadlineSelect?.(item); closeMobileDetail() }}
+                  className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 border border-error/30 text-left ${style.bg} ${style.text}`}
                 >
                   <Icon className="size-4 shrink-0 text-error" />
                   <div className="min-w-0 flex-1">
@@ -64,7 +65,7 @@ const MobileDayDetailSheet = forwardRef(({ subjects, handleEventSelect, t, getSu
                       {isWebAssessment(item) ? getAssessmentLabel(item.type, t) : deadlineTimeLabel(item)}
                     </p>
                   </div>
-                </div>
+                </button>
               )
             }
             const subject = subjects.find(s => s.id === item.subjectId || s.name === item.subject)

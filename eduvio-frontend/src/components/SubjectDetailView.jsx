@@ -296,6 +296,8 @@ const SubjectDetailView = ({
   const syllabus = useSyllabus(subject?.id)
   const hideSyllabusItem = (item) =>
     syllabus.hideItem(item.id).catch(() => toast.error(t('academic:subjectDetail.exam.assessments.hideFailed')))
+  const unhideSyllabusItem = (item) =>
+    syllabus.unhideItem(item.id).catch(() => toast.error(t('academic:subjectDetail.exam.assessments.unhideFailed')))
 
   // Same material actions as on the Materials page (edit, move, delete, hide, for the exam)
   const semesterStarts = useMemo(() => buildSemesterStarts(events, subjects), [events, subjects])
@@ -426,9 +428,11 @@ const SubjectDetailView = ({
                 materials={examMaterials}
                 webTopics={webTopics}
                 syllabus={syllabus.data}
+                hiddenSyllabus={syllabus.hidden}
                 syllabusLoading={syllabus.isLoading}
                 sourceUrl={semesterLinks[0]?.url ?? null}
                 onHideSyllabusItem={hideSyllabusItem}
+                onUnhideSyllabusItem={unhideSyllabusItem}
                 onSetForExam={setForExam}
                 onShowMaterials={() => setActiveTab('materials')}
               />

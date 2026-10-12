@@ -309,7 +309,7 @@
         "pasteHint": "Tip: paste a list (one topic per line) to add several topics at once.",
         "edit": "Edit topic “{{title}}”",
         "delete": "Delete topic “{{title}}”",
-        "deleteConfirm": "Delete topic “{{title}}”?",
+        "deleteArmed": "Click again to delete topic “{{title}}”",
         "save": "Save",
         "cancel": "Cancel",
         "markDone": "Learned: {{title}}",
@@ -332,6 +332,10 @@
         "hidePast": "Hide past",
         "hide": "Hide “{{title}}”",
         "hideFailed": "Could not hide the item.",
+        "hidden": "Hidden ({{count}})",
+        "hideHidden": "Collapse hidden",
+        "unhide": "Show “{{title}}” again",
+        "unhideFailed": "Could not show the item again.",
         "empty": "There are no written tests on the teacher’s website yet.",
         "noSource": "We do not have the teacher’s page for this subject yet."
       }
@@ -463,6 +467,7 @@
   },
   "eventDetail": {
     "title": "Event Details",
+    "deadlineTitle": "Deadline details",
     "unknownSubject": "Unknown Subject",
     "lecturer": "Lecturer:",
     "notSpecified": "Not specified",

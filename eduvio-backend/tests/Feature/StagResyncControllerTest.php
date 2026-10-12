@@ -30,11 +30,10 @@ class StagResyncControllerTest extends TestCase
 
     // ── Success path ──────────────────────────────────────────────────
 
-    public function test_resync_succeeds_when_cooldown_has_passed(): void
+    public function test_resync_succeeds_after_previous_attempt(): void
     {
         Queue::fake();
 
-        // Last attempt was 31 minutes ago — cooldown (30 min) has elapsed
         $user = $this->stagUser([
             'stag_last_sync_attempt_at' => now()->subMinutes(31),
         ]);
@@ -43,7 +42,7 @@ class StagResyncControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJsonPath('message', 'Resync started in background.');
-        $response->assertJsonStructure(['user', 'message', 'next_allowed_at']);
+        $response->assertJsonStructure(['user', 'message']);
 
         $user->refresh();
         $this->assertEquals('pending', $user->stag_sync_status);
@@ -68,28 +67,19 @@ class StagResyncControllerTest extends TestCase
         Queue::assertPushed(StagSyncJob::class);
     }
 
-    // ── Rate-limit (cooldown) ─────────────────────────────────────────
+    // ── No cooldown ───────────────────────────────────────────────────
 
-    public function test_resync_returns_429_while_cooldown_is_active(): void
+    public function test_recent_attempt_does_not_block_resync(): void
     {
         Queue::fake();
 
-        // Last attempt was only 5 minutes ago — still within 30-minute cooldown
         $user = $this->stagUser([
-            'stag_last_sync_attempt_at' => now()->subMinutes(5),
+            'stag_last_sync_attempt_at' => now()->subMinute(),
         ]);
 
-        $response = $this->actingAs($user, 'sanctum')->postJson('/api/user/stag/resync');
+        $this->actingAs($user, 'sanctum')->postJson('/api/user/stag/resync')->assertStatus(200);
 
-        $response->assertStatus(429);
-        $response->assertJsonStructure(['message', 'retry_after_seconds', 'next_allowed_at']);
-
-        // 5 min elapsed → ~25 min remaining (±10 s tolerance for test execution time)
-        $retryAfter = $response->json('retry_after_seconds');
-        $this->assertGreaterThan(0, $retryAfter);
-        $this->assertLessThanOrEqual(25 * 60 + 10, $retryAfter);
-
-        Queue::assertNothingPushed();
+        Queue::assertPushed(StagSyncJob::class);
     }
 
     // ── Already pending ───────────────────────────────────────────────
@@ -100,7 +90,7 @@ class StagResyncControllerTest extends TestCase
 
         $user = $this->stagUser([
             'stag_sync_status'          => 'pending',
-            'stag_last_sync_attempt_at' => now()->subMinutes(31), // cooldown elapsed, but still pending
+            'stag_last_sync_attempt_at' => now()->subMinutes(31),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')->postJson('/api/user/stag/resync');

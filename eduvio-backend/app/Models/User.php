@@ -27,6 +27,7 @@ class User extends Authenticatable
         'stag_ticket',
         'stag_ticket_expires_at',
         'stag_user_name',
+        'stag_display_name',
         'stag_sync_status',
         'stag_sync_error',
         'stag_synced_at',

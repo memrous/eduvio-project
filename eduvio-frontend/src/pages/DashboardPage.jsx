@@ -9,6 +9,7 @@ import { useStagStatus } from '../hooks/useStagStatus'
 import { useResources } from '../hooks/useResources'
 import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
+import { daysFromToday } from '../utils/assessments'
 import PageState from '../components/PageState'
 import { DashboardSkeleton } from '../components/common/Skeleton'
 
@@ -148,9 +149,12 @@ const DashboardPage = () => {
   // Recent materials box; the query is invalidated after upload, delete, hide and sync
   const { data: resources, isLoading: resourcesLoading, markResourceSeen } = useResources()
 
+  // Requirements and written tests due today (not the classes of today's schedule)
   const todayDeadlinesCount = useMemo(() => {
-    return (summary?.todaySchedule || []).length
-  }, [summary?.todaySchedule])
+    return (summary?.needsAttention || []).filter(
+      (alert) => (alert.type === 'deadline' || alert.type === 'assessment') && alert.dueDate && daysFromToday(alert.dueDate) === 0
+    ).length
+  }, [summary?.needsAttention])
 
   if (isLoading) {
     return <DashboardSkeleton />

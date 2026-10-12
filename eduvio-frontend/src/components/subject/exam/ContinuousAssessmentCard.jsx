@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ClipboardCheck, ExternalLink, EyeOff, Globe, Paperclip } from 'lucide-react'
+import { ClipboardCheck, ExternalLink, Eye, EyeOff, Globe, Paperclip } from 'lucide-react'
 import Icon from '../../common/Icon'
 import { getLocaleFromLanguage } from '../../../utils/locale'
 import { daysFromToday, getAssessmentIcon, getAssessmentLabel, toLocalDate } from '../../../utils/assessments'
@@ -41,7 +41,7 @@ export const ItemLinks = ({ links }) => {
   )
 }
 
-const AssessmentRow = ({ item, onHide }) => {
+const AssessmentRow = ({ item, onHide, onUnhide }) => {
   const { t, i18n } = useTranslation(['academic', 'common'])
   const locale = getLocaleFromLanguage(i18n.language)
   const date = toLocalDate(item.date)
@@ -76,7 +76,17 @@ const AssessmentRow = ({ item, onHide }) => {
         )}
         <ItemLinks links={item.links} />
       </div>
-      {onHide && (
+      {onUnhide ? (
+        <button
+          type="button"
+          onClick={() => onUnhide(item)}
+          aria-label={t('academic:subjectDetail.exam.assessments.unhide', { title: item.title })}
+          title={t('academic:subjectDetail.exam.assessments.unhide', { title: item.title })}
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg border-0 bg-transparent text-on-surface-variant transition-colors hover:bg-surface-container hover:text-foreground cursor-pointer"
+        >
+          <Icon icon={Eye} />
+        </button>
+      ) : onHide && (
         <button
           type="button"
           onClick={() => onHide(item)}
@@ -93,13 +103,16 @@ const AssessmentRow = ({ item, onHide }) => {
 
 /**
  * Written tests, credit tests and retakes from the teacher's course page:
- * upcoming ones first, past ones folded and muted.
+ * upcoming ones first, past ones folded and muted, hidden ones folded at the
+ * end so they can be shown again.
  */
-const ContinuousAssessmentCard = ({ items, isLoading, sourceUrl, onHide }) => {
+const ContinuousAssessmentCard = ({ items, hiddenItems = [], isLoading, sourceUrl, onHide, onUnhide }) => {
   const { t } = useTranslation('academic')
   const [showPast, setShowPast] = useState(false)
+  const [showHidden, setShowHidden] = useState(false)
 
   const assessments = items.filter((item) => item.kind === 'assessment')
+  const hiddenAssessments = hiddenItems.filter((item) => item.kind === 'assessment')
   const upcoming = assessments.filter((item) => daysFromToday(item.date) >= 0)
   const past = assessments.filter((item) => daysFromToday(item.date) < 0)
   const pageUrl = sourceUrl ?? assessments[0]?.source_url ?? null
@@ -151,6 +164,26 @@ const ContinuousAssessmentCard = ({ items, isLoading, sourceUrl, onHide }) => {
                 </ul>
               )}
             </div>
+          )}
+        </div>
+      )}
+
+      {!isLoading && hiddenAssessments.length > 0 && (
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={() => setShowHidden((v) => !v)}
+            aria-expanded={showHidden}
+            className="text-label-md font-semibold text-on-surface-variant hover:text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer"
+          >
+            {showHidden
+              ? t('academic:subjectDetail.exam.assessments.hideHidden')
+              : t('academic:subjectDetail.exam.assessments.hidden', { count: hiddenAssessments.length })}
+          </button>
+          {showHidden && (
+            <ul className="mt-2 flex flex-col gap-2 opacity-60">
+              {hiddenAssessments.map((item) => <AssessmentRow key={item.id} item={item} onUnhide={onUnhide} />)}
+            </ul>
           )}
         </div>
       )}

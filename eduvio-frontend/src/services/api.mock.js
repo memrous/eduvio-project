@@ -1017,10 +1017,11 @@ const mockSyllabusFor = (subjectId) => {
   }))
 }
 
-export const getSyllabus = async (subjectId) => {
+export const getSyllabus = async (subjectId, { withHidden = false } = {}) => {
   await delay(MOCK_DELAY)
   const hidden = readHiddenSyllabus()
-  return success(mockSyllabusFor(subjectId).filter((item) => !hidden.includes(item.id)))
+  const items = mockSyllabusFor(subjectId).map((item) => ({ ...item, hidden: hidden.includes(item.id) }))
+  return success(withHidden ? items : items.filter((item) => !item.hidden))
 }
 
 export const getWebAssessments = async () => {

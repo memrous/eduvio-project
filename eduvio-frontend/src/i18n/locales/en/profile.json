@@ -86,6 +86,7 @@
     },
     "labels": {
       "studentId": "Student ID",
+      "name": "Name",
       "username": "Username",
       "password": "Password"
     },
@@ -97,14 +98,13 @@
       "connect": "Connect IS/STAG",
       "disconnect": "Disconnect IS/STAG",
       "syncNow": "Sync now",
-      "syncNowCountdown": "Sync now ({{time}})",
       "goToDashboard": "Go to Dashboard",
       "cancel": "Cancel"
     },
     "syncing": {
       "background": "IS/STAG connected. Syncing your schedule in the background...",
       "started": "Sync started — refreshing your schedule in the background.",
-      "recentlyTriggered": "Sync was already triggered recently — try again in {{minutes}} minutes.",
+      "alreadyRunning": "A sync is already running.",
       "failed": "Failed to trigger sync."
     },
     "errors": {
@@ -208,13 +208,12 @@
       "connectManual": "Connect Moodle",
       "disconnect": "Disconnect Moodle",
       "syncNow": "Sync now",
-      "syncNowCountdown": "Sync now ({{time}})",
       "cancel": "Cancel"
     },
     "syncing": {
       "background": "Moodle connected. Syncing tasks in the background...",
       "started": "Sync started — refreshing tasks in the background.",
-      "recentlyTriggered": "Sync was already triggered recently — try again in {{minutes}} minutes.",
+      "alreadyRunning": "A sync is already running.",
       "failed": "Failed to trigger sync."
     },
     "errors": {

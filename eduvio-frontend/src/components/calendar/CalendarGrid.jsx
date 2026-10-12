@@ -28,6 +28,7 @@ const CalendarGrid = ({
   selectedDate,
   setSelectedDate,
   handleEventSelect,
+  handleDeadlineSelect,
   currentWeekDays,
   hourlySlots,
   requirements = [],
@@ -47,6 +48,7 @@ const CalendarGrid = ({
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
           handleEventSelect={handleEventSelect}
+          handleDeadlineSelect={handleDeadlineSelect}
           subjects={subjects}
           onOpenMobileDetail={(d, items) => sheetRef.current?.open(d, items)}
           t={t}
@@ -60,6 +62,7 @@ const CalendarGrid = ({
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
           handleEventSelect={handleEventSelect}
+          handleDeadlineSelect={handleDeadlineSelect}
           currentWeekDays={currentWeekDays}
           hourlySlots={hourlySlots}
           subjects={subjects}
@@ -76,6 +79,7 @@ const CalendarGrid = ({
           filteredEvents={filteredEvents}
           requirements={requirements}
           handleEventSelect={handleEventSelect}
+          handleDeadlineSelect={handleDeadlineSelect}
           subjects={subjects}
           locale={locale}
           t={t}
@@ -88,6 +92,7 @@ const CalendarGrid = ({
         ref={sheetRef}
         subjects={subjects}
         handleEventSelect={handleEventSelect}
+        handleDeadlineSelect={handleDeadlineSelect}
         t={t}
         getSubjectStyle={getSubjectStyle}
         getDeadlineIcon={getDeadlineIcon}

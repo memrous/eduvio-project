@@ -24,6 +24,9 @@ class StagStudentController extends Controller
         'studReferentkaTelefon'       => 'study_officer_phone',
     ];
 
+    /** Části jména studenta; ukládají se jen složené do users.stag_display_name. */
+    private const NAME_FIELDS = ['titulPred', 'jmeno', 'prijmeni', 'titulZa'];
+
     /**
      * POST /api/stag/sync-student
      * Uloží studijní údaje studenta; ukládá jen pole, která přišla.
@@ -37,7 +40,7 @@ class StagStudentController extends Controller
         }
 
         // Neznámá pole odmítneme celá, aby se citlivé údaje omylem nikdy neuložily
-        $unknown = array_diff(array_keys($payload), array_keys(self::FIELDS));
+        $unknown = array_diff(array_keys($payload), [...array_keys(self::FIELDS), ...self::NAME_FIELDS]);
         if ($unknown !== []) {
             return response()->json([
                 'message' => 'Unknown fields are not accepted.',
@@ -57,6 +60,10 @@ class StagStudentController extends Controller
             'studReferentkaPrijmeniJmeno' => 'nullable|string|max:255',
             'studReferentkaEmail'         => 'nullable|string|max:255',
             'studReferentkaTelefon'       => 'nullable|string|max:255',
+            'titulPred'                   => 'nullable|string|max:100',
+            'jmeno'                       => 'nullable|string|max:100',
+            'prijmeni'                    => 'nullable|string|max:100',
+            'titulZa'                     => 'nullable|string|max:100',
         ]);
 
         $user = $request->user();
@@ -76,6 +83,11 @@ class StagStudentController extends Controller
             $updated[] = $column;
         }
 
+        if (array_intersect(self::NAME_FIELDS, array_keys($payload)) !== []) {
+            $user->stag_display_name = self::displayName($payload);
+            $updated[] = 'stag_display_name';
+        }
+
         $user->study_info_synced_at = now();
         $user->save();
 
@@ -83,5 +95,22 @@ class StagStudentController extends Controller
             'success' => true,
             'updated' => $updated,
         ]);
+    }
+
+    /**
+     * "titulPred Jméno Příjmení, titulZa" bez prázdných částí; null bez jména.
+     */
+    private static function displayName(array $payload): ?string
+    {
+        $part = fn (string $key) => is_string($payload[$key] ?? null) ? trim($payload[$key]) : '';
+
+        $name = implode(' ', array_filter([$part('titulPred'), $part('jmeno'), $part('prijmeni')], fn ($p) => $p !== ''));
+        if ($part('jmeno') === '' && $part('prijmeni') === '') {
+            return null;
+        }
+
+        $after = $part('titulZa');
+
+        return $after !== '' ? "{$name}, {$after}" : $name;
     }
 }

@@ -314,8 +314,9 @@ export const deleteExamTopic = async (topicId) => {
 }
 
 // Semester schedule from teachers' course pages
-export const getSyllabus = async (subjectId) => {
-  return request(() => httpClient.get(`/subjects/${subjectId}/syllabus`).then((res) => res.data))
+export const getSyllabus = async (subjectId, { withHidden = false } = {}) => {
+  const params = withHidden ? { with_hidden: 1 } : undefined
+  return request(() => httpClient.get(`/subjects/${subjectId}/syllabus`, { params }).then((res) => res.data))
 }
 export const getWebAssessments = async () => {
   return request(() => httpClient.get('/syllabus/assessments').then((res) => res.data))

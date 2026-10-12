@@ -72,6 +72,38 @@ class StagSyncStudentTest extends TestCase
         $this->assertNotNull($this->user->study_info_synced_at);
     }
 
+    public function test_name_is_stored_as_display_name_only(): void
+    {
+        $response = $this->postAs($this->agentToken(), $this->payload() + [
+            'titulPred' => 'Bc.', 'jmeno' => 'Jan', 'prijmeni' => 'Novák', 'titulZa' => 'DiS.',
+        ])->assertStatus(200);
+        $this->assertContains('stag_display_name', $response->json('updated'));
+
+        $user = $this->user->fresh();
+        $this->assertEquals('Bc. Jan Novák, DiS.', $user->stag_display_name);
+        $this->assertEquals('Aplikovaná informatika', $user->study_program);
+    }
+
+    public function test_display_name_skips_empty_parts(): void
+    {
+        $token = $this->agentToken();
+
+        $this->postAs($token, ['titulPred' => '  ', 'jmeno' => 'Jan', 'prijmeni' => 'Novák', 'titulZa' => null])->assertStatus(200);
+        $this->assertEquals('Jan Novák', $this->user->fresh()->stag_display_name);
+
+        $this->postAs($token, ['titulPred' => 'Ing.', 'jmeno' => '', 'prijmeni' => null])->assertStatus(200);
+        $this->assertNull($this->user->fresh()->stag_display_name);
+    }
+
+    public function test_display_name_is_kept_when_name_is_not_sent(): void
+    {
+        $token = $this->agentToken();
+        $this->postAs($token, ['jmeno' => 'Jan', 'prijmeni' => 'Novák'])->assertStatus(200);
+
+        $this->postAs($token, ['rocnik' => 3])->assertStatus(200);
+        $this->assertEquals('Jan Novák', $this->user->fresh()->stag_display_name);
+    }
+
     public function test_full_token_is_accepted_too(): void
     {
         $fullToken = $this->user->createToken('auth_token')->plainTextToken;

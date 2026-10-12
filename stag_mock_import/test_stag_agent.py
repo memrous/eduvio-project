@@ -24,18 +24,18 @@ TOKEN = "12|AbCdEfGhIjKlMnOpQrStUvWxYz0123456789abcd"
 TICKET = "ticket-secret-0123456789"
 
 
-# getStudentInfo: whitelisted study fields ...
+# getStudentInfo: whitelisted study fields and the name with titles ...
 STUDENT_INFO = {
     "nazevSp": "Aplikovaná informatika", "kodSp": "B0613A140005", "fakultaSp": "PRF", "formaSp": "P",
     "typSp": "B", "typSpKey": 7, "rocnik": "2", "stav": "S",
     "studReferentkaPrijmeniJmeno": "Nováková Jana", "studReferentkaEmail": "jana.novakova@upol.cz",
     "studReferentkaTelefon": "585 634 000",
+    "jmeno": "Jan", "prijmeni": "Novák", "titulPred": "Bc.", "titulZa": "",
 }
 # ... and fields that must never leave the agent (distinctive values to search for)
 SENSITIVE_STUDENT_INFO = {
     "cisloKarty": "CARD-9876543210", "evidovanBankovniUcet": "BANK-123456789/0100",
     "financovani": "FIN-SECRET-7", "pohlavi": "SEX-SECRET-Z", "email": "student-private@example.com",
-    "jmeno": "JMENO-SECRET", "prijmeni": "PRIJMENI-SECRET",
 }
 
 
@@ -597,6 +597,7 @@ class StudentInfoWhitelistTest(unittest.TestCase):
         info = test_import.vyber_info_studenta(raw)
 
         self.assertEqual(set(info), set(test_import.INFO_STUDENTA_POLE))
+        self.assertEqual((info["titulPred"], info["jmeno"], info["prijmeni"], info["titulZa"]), ("Bc.", "Jan", "Novák", None))
         for key in SENSITIVE_STUDENT_INFO:
             self.assertNotIn(key, info)
         self.assertNotIn("osCislo", info)

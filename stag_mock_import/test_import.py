@@ -165,9 +165,11 @@ def nacti_doplnky(ticket: str, base_url: str, student_id: str, surova_predmety: 
 
 # ── Studijní údaje studenta ─────────────────────────────────────────
 
-# Jediná pole z getStudentInfo, která se smí dál posílat. Odpověď obsahuje i citlivé
-# údaje (číslo karty, bankovní účet, financování, pohlaví...), ty se nikdy nepoužijí.
+# Jediná pole z getStudentInfo, která se smí dál posílat (studijní údaje a jméno s tituly
+# pro profil). Odpověď obsahuje i citlivé údaje (číslo karty, bankovní účet, financování,
+# pohlaví...), ty se nikdy nepoužijí.
 INFO_STUDENTA_POLE = (
+    "jmeno", "prijmeni", "titulPred", "titulZa",
     "nazevSp", "kodSp", "fakultaSp", "formaSp", "typSp", "typSpKey", "rocnik", "stav",
     "studReferentkaPrijmeniJmeno", "studReferentkaEmail", "studReferentkaTelefon",
 )

@@ -324,7 +324,7 @@
         "pasteHint": "Tip: vložením seznamu (každý okruh na řádku) přidáš víc okruhů najednou.",
         "edit": "Upravit okruh „{{title}}“",
         "delete": "Smazat okruh „{{title}}“",
-        "deleteConfirm": "Smazat okruh „{{title}}“?",
+        "deleteArmed": "Klikněte znovu pro smazání okruhu „{{title}}“",
         "save": "Uložit",
         "cancel": "Zrušit",
         "markDone": "Umím: {{title}}",
@@ -347,6 +347,10 @@
         "hidePast": "Skrýt proběhlé",
         "hide": "Skrýt „{{title}}“",
         "hideFailed": "Položku se nepodařilo skrýt.",
+        "hidden": "Skryté ({{count}})",
+        "hideHidden": "Sbalit skryté",
+        "unhide": "Zobrazit znovu „{{title}}“",
+        "unhideFailed": "Položku se nepodařilo znovu zobrazit.",
         "empty": "Na webu vyučujícího zatím nejsou žádné písemky ani testy.",
         "noSource": "K předmětu zatím nemáme stránku vyučujícího."
       }
@@ -478,6 +482,7 @@
   },
   "eventDetail": {
     "title": "Detail události",
+    "deadlineTitle": "Detail termínu",
     "unknownSubject": "Neznámý předmět",
     "lecturer": "Vyučující:",
     "notSpecified": "Neuvedeno",

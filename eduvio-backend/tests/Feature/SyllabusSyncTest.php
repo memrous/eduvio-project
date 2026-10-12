@@ -320,6 +320,8 @@ class SyllabusSyncTest extends TestCase
         $id = collect($rows)->firstWhere('assessment_type', 'credit_test')['id'];
         $this->postJson("/api/syllabus-items/{$id}/hide")->assertOk()->assertJsonPath('hidden', true);
         $this->getJson("/api/subjects/{$subject->id}/syllabus")->assertJsonCount(6);
+        $withHidden = $this->getJson("/api/subjects/{$subject->id}/syllabus?with_hidden=1")->assertJsonCount(7)->json();
+        $this->assertTrue(collect($withHidden)->firstWhere('id', $id)['hidden']);
         $this->postJson("/api/syllabus-items/{$id}/unhide")->assertOk()->assertJsonPath('hidden', false);
 
         Sanctum::actingAs(User::factory()->create(), ['*']);
