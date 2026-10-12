@@ -74,7 +74,9 @@ class MoodleConnectTokenTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')->postJson('/api/user/moodle/launch');
 
-        $response->assertOk()->assertJsonStructure(['launch_url']);
+        $response->assertOk()
+            ->assertJsonStructure(['launch_url', 'urlscheme'])
+            ->assertJsonPath('urlscheme', 'web+eduvio');
 
         $user->refresh();
         $passport = $user->moodle_launch_passport;
@@ -94,6 +96,48 @@ class MoodleConnectTokenTest extends TestCase
         $this->assertStringContainsString('urlscheme=web%2Beduvio', $url);
 
         $this->assertArrayNotHasKey('moodle_launch_passport', $user->toArray());
+    }
+
+    public function test_launch_uses_configured_urlscheme_for_url_and_response(): void
+    {
+        config(['moodle.launch_urlscheme' => 'web+eduviodev']);
+        $user = $this->createUser();
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/user/moodle/launch');
+
+        $response->assertOk()->assertJsonPath('urlscheme', 'web+eduviodev');
+        parse_str(parse_url($response->json('launch_url'), PHP_URL_QUERY), $query);
+        $this->assertSame('web+eduviodev', $query['urlscheme']);
+    }
+
+    public function test_launch_urlscheme_config_accepts_only_web_plus_lowercase_letters(): void
+    {
+        $cases = [
+            'web+eduviodev' => 'web+eduviodev',
+            'web+eduvio'    => 'web+eduvio',
+            ''              => 'web+eduvio',
+            'eduvio'        => 'web+eduvio',
+            'web+'          => 'web+eduvio',
+            'web+Eduvio'    => 'web+eduvio',
+            'web+eduvio2'   => 'web+eduvio',
+            'web+edu-vio'   => 'web+eduvio',
+            "web+eduvio\n"  => 'web+eduvio',
+            'https'         => 'web+eduvio',
+        ];
+
+        $original = getenv('MOODLE_LAUNCH_URLSCHEME');
+        try {
+            foreach ($cases as $value => $expected) {
+                putenv("MOODLE_LAUNCH_URLSCHEME={$value}");
+                $_ENV['MOODLE_LAUNCH_URLSCHEME'] = $_SERVER['MOODLE_LAUNCH_URLSCHEME'] = $value;
+
+                $config = require config_path('moodle.php');
+                $this->assertSame($expected, $config['launch_urlscheme'], 'value: ' . json_encode($value));
+            }
+        } finally {
+            unset($_ENV['MOODLE_LAUNCH_URLSCHEME'], $_SERVER['MOODLE_LAUNCH_URLSCHEME']);
+            putenv($original === false ? 'MOODLE_LAUNCH_URLSCHEME' : "MOODLE_LAUNCH_URLSCHEME={$original}");
+        }
     }
 
     public function test_new_launch_replaces_previous_passport(): void

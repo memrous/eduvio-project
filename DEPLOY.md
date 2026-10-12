@@ -152,6 +152,10 @@ Když se návrat nepovede (jiný prohlížeč, zablokovaný handler), použij v 
 **ruční vložení** adresy podle návodu v aplikaci. `FRONTEND_URL` na Renderu musí být
 přesně adresa z Vercelu, jinak návrat skončí na špatné adrese.
 
+Lokální vývoj používá vlastní schéma `web+eduviodev` (`.env.local.example`), aby si
+lokální a produkční handler v prohlížeči nepřepisovaly. Schéma musí začínat `web+`
+a obsahovat jen malá písmena a–z, jinak backend použije `web+eduvio`.
+
 ## h) STAG agent proti produkci
 
 STAG je dostupný jen ze sítě UPOL, proto data stahuje agent na notebooku (VPN / eduroam).
@@ -187,6 +191,7 @@ STAG je dostupný jen ze sítě UPOL, proto data stahuje agent na notebooku (VPN
 | **Mixed content** / v konzoli `[Eduvio] VITE_API_BASE_URL must use https://` | `VITE_API_BASE_URL` ve Vercelu musí začínat `https://`. Oprav a dej **Redeploy**. |
 | **Odkazy na soubory začínají `http://`** | Nastav `APP_URL=https://<tvoje-sluzba>.onrender.com` (nebo ho nech prázdné, doplní se samo). |
 | **První načtení trvá dlouho**, aplikace „spí“ | Služba usnula – zkontroluj cron-job.org (**e)**), že pinguje `/up` každých 10 minut a dostává `200`. |
+| **Návrat z Moodlu vede na `localhost`** místo na web z Vercelu | V prohlížeči zůstal starý handler `web+eduvio` z lokálního vývoje (dřív používal stejné schéma). Otevři `chrome://settings/handlers` (Edge: `edge://settings/content/handlers`), smaž u `web+eduvio` položku s `localhost` a znovu klikni na **Moodle → Připojit** – prohlížeč nabídne handler pro produkci. |
 | **„Příliš mnoho pokusů“ při přihlášení** | Limit 5 pokusů za minutu – počkej minutu. |
 | **Supabase projekt je „Paused“** | Free projekty Supabase se po delší nečinnosti pozastaví. Fronta úloh se databáze ptá každých 10 s, takže by k tomu nemělo dojít; kdyby ano, obnov projekt v dashboardu Supabase (**Restore**). |
 

@@ -23,6 +23,11 @@ const MOODLE_CONNECT_ERROR_KEYS = {
   invalid_signature: 'moodle.errors.invalidSignature',
 }
 
+// Same rule as the backend config (moodle.launch_urlscheme)
+const DEFAULT_MOODLE_URLSCHEME = 'web+eduvio'
+const resolveMoodleUrlScheme = (scheme) =>
+  typeof scheme === 'string' && /^web\+[a-z]+$/.test(scheme) ? scheme : DEFAULT_MOODLE_URLSCHEME
+
 const MoodleIntegrationCard = ({
   effectiveUser,
   isMoodleConnected,
@@ -141,15 +146,6 @@ const MoodleIntegrationCard = ({
   }
 
   const handleConnectMoodle = async () => {
-    if (supportsMoodleHandler) {
-      const callbackUrl = `${window.location.origin}/moodle/callback?token=%s`
-      try {
-        navigator.registerProtocolHandler('web+eduvio', callbackUrl)
-      } catch {
-        // Silently ignore errors (e.g. user already registered or denied)
-      }
-    }
-
     setLaunchStarting(true)
     try {
       const response = await api.startMoodleLaunch()
@@ -158,6 +154,17 @@ const MoodleIntegrationCard = ({
         toast.error(t('toast.moodleConnectFailed'))
         setLaunchStarting(false)
         return
+      }
+
+      // Register for the scheme the backend put into launch_url, so dev and production
+      // (web+eduviodev / web+eduvio) keep separate handlers in the browser
+      if (supportsMoodleHandler) {
+        const callbackUrl = `${window.location.origin}/moodle/callback?token=%s`
+        try {
+          navigator.registerProtocolHandler(resolveMoodleUrlScheme(response.data.urlscheme), callbackUrl)
+        } catch {
+          // Silently ignore errors (e.g. user already registered or denied)
+        }
       }
 
       // Whole flow in this tab: profile → Moodle → /moodle/callback → profile.

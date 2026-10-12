@@ -443,6 +443,7 @@ export const startMoodleLaunch = async () => {
   const passport = Math.random().toString(36).slice(2)
   return success({
     launch_url: `https://moodle.example.test/admin/tool/mobile/launch.php?service=moodle_mobile_app&passport=${passport}&urlscheme=web%2Beduvio`,
+    urlscheme: 'web+eduvio',
   })
 }
 

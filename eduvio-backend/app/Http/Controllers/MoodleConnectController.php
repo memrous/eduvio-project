@@ -11,8 +11,9 @@ use Illuminate\Support\Str;
 class MoodleConnectController extends Controller
 {
     /**
-     * Issue a server-side passport and return the Moodle mobile launch URL.
-     * Starting a new launch replaces any previous one.
+     * Issue a server-side passport and return the Moodle mobile launch URL
+     * together with its URL scheme (the frontend registers its protocol
+     * handler for it). Starting a new launch replaces any previous one.
      */
     public function startLaunch(Request $request): JsonResponse
     {
@@ -25,14 +26,16 @@ class MoodleConnectController extends Controller
         ]);
 
         $baseUrl = rtrim(config('moodle.base_url'), '/');
+        $urlScheme = config('moodle.launch_urlscheme', 'web+eduvio');
         $query = http_build_query([
             'service'   => 'moodle_mobile_app',
             'passport'  => $passport,
-            'urlscheme' => config('moodle.launch_urlscheme', 'web+eduvio'),
+            'urlscheme' => $urlScheme,
         ], '', '&', PHP_QUERY_RFC3986);
 
         return response()->json([
             'launch_url' => "{$baseUrl}/admin/tool/mobile/launch.php?{$query}",
+            'urlscheme'  => $urlScheme,
         ]);
     }
 
