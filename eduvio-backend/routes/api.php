@@ -17,6 +17,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentLinksController;
 use App\Http\Controllers\ExamTermController;
 use App\Http\Controllers\ExamTopicController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\SyllabusController;
 use App\Http\Controllers\MoodleConnectController;
 use Illuminate\Http\Request;
@@ -24,6 +25,8 @@ use Illuminate\Support\Facades\Route;
 
 // Veřejné endpointy
 Route::get('/config', [AppConfigController::class, 'show']);
+// Ruční kontrola po nasazení (DB, disk materiálů, fronta); bez detailů chyb
+Route::get('/health', [HealthController::class, 'show'])->middleware('throttle:6,1');
 // 5 pokusů za minutu na IP + e-mail (limiter "auth" v AppServiceProvider)
 Route::middleware('throttle:auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);

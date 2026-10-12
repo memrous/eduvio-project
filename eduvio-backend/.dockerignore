@@ -1,0 +1,39 @@
+# Not part of the production image (see Dockerfile)
+.git
+.github
+.idea
+.vscode
+
+# Installed inside the image / generated at start
+vendor
+node_modules
+public/build
+public/hot
+public/storage
+bootstrap/cache/*.php
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+auth.json
+
+# Runtime data (the container disk is ephemeral anyway)
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/testing/*
+storage/app/private/*
+storage/app/public/*
+storage/*.key
+
+# Development only
+tests
+phpunit.xml
+.phpunit.cache
+.phpunit.result.cache
+compose.yaml
+compose.*.yaml
+README.md
+*.log

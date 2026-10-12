@@ -10,6 +10,9 @@ import ErrorBoundary from './components/ErrorBoundary'
 import queryClient from './lib/queryClient'
 import { ThemeProvider } from './context/ThemeContext'
 import { ICON_STROKE_WIDTH } from './components/common/iconScale'
+import { checkProductionConfig } from './config'
+
+checkProductionConfig()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

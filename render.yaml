@@ -1,0 +1,137 @@
+# Render Blueprint – Eduvio API (see DEPLOY.md)
+# One free web service from eduvio-backend/Dockerfile: web, queue worker and
+# scheduler run in the same container. Values marked `sync: false` are secrets
+# or deployment specific: Render asks for them when the Blueprint is created
+# (later: service → Environment).
+services:
+  - type: web
+    name: eduvio-api
+    runtime: docker
+    rootDir: eduvio-backend
+    plan: free
+    region: frankfurt
+    branch: main
+    autoDeployTrigger: commit
+    # Answers without the database, also used by the keep-alive ping
+    healthCheckPath: /up
+    envVars:
+      # ── Application ──
+      - key: APP_KEY
+        sync: false
+      # Optional: defaults to the Render URL of the service (RENDER_EXTERNAL_URL)
+      - key: APP_URL
+        sync: false
+      - key: APP_NAME
+        value: Eduvio
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_LOCALE
+        value: cs
+      - key: APP_FALLBACK_LOCALE
+        value: en
+      - key: APP_FAKER_LOCALE
+        value: cs_CZ
+      - key: APP_MAINTENANCE_DRIVER
+        value: file
+      - key: BCRYPT_ROUNDS
+        value: "12"
+
+      # ── Frontend / CORS (the Vercel URL, https://….vercel.app) ──
+      - key: FRONTEND_URL
+        sync: false
+
+      # ── Registration (on only to create the first account) ──
+      - key: REGISTRATION_ENABLED
+        value: "false"
+      - key: REGISTRATION_ALLOWED_DOMAINS
+        sync: false
+
+      # ── Database: Supabase session pooler ──
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        value: postgres
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSLMODE
+        value: require
+
+      # ── Uploaded materials: Supabase Storage over S3 ──
+      - key: MATERIALS_DISK
+        value: s3
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: eu-central-1
+      - key: AWS_BUCKET
+        value: materials
+      - key: AWS_ENDPOINT
+        sync: false
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        value: "true"
+
+      # ── STAG (the notebook agent syncs) and Moodle ──
+      - key: STAG_MODE
+        value: agent
+      - key: STAG_WS_BASE_URL
+        value: https://stag-ws.upol.cz/ws
+      - key: STAG_AGENT_TOKEN_TTL_DAYS
+        value: "180"
+      - key: MOODLE_BASE_URL
+        value: https://moodle.upol.cz
+      - key: MOODLE_LAUNCH_URLSCHEME
+        value: web+eduvio
+      - key: MOODLE_LAUNCH_TTL_MINUTES
+        value: "15"
+
+      # ── Teachers' course pages ──
+      - key: DEPARTMENT_KMI_BASE_URL
+        value: https://www.inf.upol.cz
+      - key: DEPARTMENT_BOT_CONTACT
+        sync: false
+      - key: DEPARTMENT_HTTP_TIMEOUT
+        value: "10"
+      - key: DEPARTMENT_MIN_REQUEST_INTERVAL_MS
+        value: "1000"
+      - key: DEPARTMENT_CACHE_TTL_HOURS
+        value: "24"
+      - key: DEPARTMENT_REFRESH_COOLDOWN_MINUTES
+        value: "30"
+
+      # ── Logging, sessions, cache, queue ──
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+      - key: LOG_DEPRECATIONS_CHANNEL
+        value: "null"
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_LIFETIME
+        value: "120"
+      - key: SESSION_ENCRYPT
+        value: "false"
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: BROADCAST_CONNECTION
+        value: log
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: CACHE_PREFIX
+        value: eduvio_
+      - key: MAIL_MAILER
+        value: log

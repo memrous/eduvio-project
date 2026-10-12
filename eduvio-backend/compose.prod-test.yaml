@@ -1,0 +1,111 @@
+# Local test of the PRODUCTION image (not for development – use compose.yaml / Sail).
+# Runs the image like Render does (one container, 512 MB, $PORT) against a local
+# Postgres and RustFS as an S3 stand-in for Supabase Storage. (MinIO no longer
+# publishes public Docker images; RustFS speaks the same S3 API.)
+#
+#   docker compose -f compose.prod-test.yaml up --build -d
+#   curl http://localhost:10000/up
+#   curl http://localhost:10000/api/health
+#   docker stats eduvio-prodtest-app
+#   docker compose -f compose.prod-test.yaml down -v
+#
+# All keys and passwords below are throwaway test values.
+name: eduvio-prodtest
+
+x-s3: &s3
+  AWS_ACCESS_KEY_ID: rustfsadmin
+  AWS_SECRET_ACCESS_KEY: rustfsadmin
+  AWS_DEFAULT_REGION: eu-central-1
+  AWS_BUCKET: materials
+  AWS_ENDPOINT: 'http://s3:9000'
+  AWS_USE_PATH_STYLE_ENDPOINT: 'true'
+
+services:
+  app:
+    build: .
+    image: eduvio-api:test
+    container_name: eduvio-prodtest-app
+    ports:
+      - '10000:10000'
+    mem_limit: 512m
+    environment:
+      <<: *s3
+      APP_NAME: Eduvio
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      APP_KEY: 'base64:H+0FijYEAtwVRyTbNk2NkaXAjjcAN+83WoR5aKaaNgM='
+      APP_URL: 'http://localhost:10000'
+      APP_LOCALE: cs
+      PORT: '10000'
+      FRONTEND_URL: 'https://eduvio.example.com'
+      REGISTRATION_ENABLED: 'false'
+      STAG_MODE: agent
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: warning
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: '5432'
+      DB_DATABASE: eduvio
+      DB_USERNAME: eduvio
+      DB_PASSWORD: prodtest
+      # The local Postgres has no TLS (Supabase: require)
+      DB_SSLMODE: prefer
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      MATERIALS_DISK: s3
+    depends_on:
+      postgres:
+        condition: service_healthy
+      bucket-init:
+        condition: service_completed_successfully
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: eduvio
+      POSTGRES_USER: eduvio
+      POSTGRES_PASSWORD: prodtest
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U eduvio -d eduvio']
+      interval: 2s
+      retries: 30
+
+  s3:
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin
+      RUSTFS_VOLUMES: /data
+
+  # Creates the private bucket "materials" (like the Supabase bucket), using the
+  # AWS SDK that the app image already contains
+  bucket-init:
+    image: eduvio-api:test
+    depends_on:
+      - s3
+    environment:
+      <<: *s3
+    entrypoint:
+      - php
+      - -r
+      - |
+        require '/var/www/html/vendor/autoload.php';
+        $$s3 = new Aws\S3\S3Client([
+            'version' => 'latest', 'region' => getenv('AWS_DEFAULT_REGION'),
+            'endpoint' => getenv('AWS_ENDPOINT'), 'use_path_style_endpoint' => true,
+            'credentials' => ['key' => getenv('AWS_ACCESS_KEY_ID'), 'secret' => getenv('AWS_SECRET_ACCESS_KEY')],
+        ]);
+        for ($$i = 1; $$i <= 30; $$i++) {
+            try {
+                if (! $$s3->doesBucketExistV2(getenv('AWS_BUCKET'))) {
+                    $$s3->createBucket(['Bucket' => getenv('AWS_BUCKET')]);
+                }
+                echo "bucket ready\n";
+                exit(0);
+            } catch (Throwable $$e) {
+                fwrite(STDERR, "waiting for S3 ($$i): ".strtok($$e->getMessage(), "\n")."\n");
+                sleep(2);
+            }
+        }
+        exit(1);
