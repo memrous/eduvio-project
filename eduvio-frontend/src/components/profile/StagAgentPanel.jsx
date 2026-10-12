@@ -152,8 +152,8 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
   })()
 
   return (
-    <div className="flex h-full min-w-0 flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5">
-      <div className="flex md:items-center md:flex-row justify-between gap-3 flex-col items-start">
+    <div className="@container flex h-full min-w-0 flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5">
+      <div className="flex @md:items-center @md:flex-row justify-between gap-3 flex-col items-start">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             <h3 className="text-lg font-bold text-on-surface">{t('stag.card.title')}</h3>
@@ -202,7 +202,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
               <p className="text-xs text-on-surface-variant">{t('stag.agent.reveal.warning')}</p>
             </div>
           </div>
-          <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
+          <div className="flex min-w-0 flex-col gap-2 @md:flex-row">
             <input
               type="text"
               readOnly

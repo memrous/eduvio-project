@@ -78,10 +78,10 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
       </div>
 
       {/* ACTIVITIES LIST */}
-      <div className="relative flex flex-col gap-3 pl-6 sm:pl-8">
+      <div className="relative flex flex-col gap-3 pl-6 @xl:pl-8">
         {/* Timeline vertical line */}
         <div
-          className="absolute left-[11px] sm:left-[15px] top-5 bottom-5 w-px bg-outline-variant"
+          className="absolute left-[11px] @xl:left-[15px] top-5 bottom-5 w-px bg-outline-variant"
           aria-hidden="true"
         />
         {requirements.map((req) => {
@@ -139,7 +139,7 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
             return (
               <div key={req.id} className="relative">
                 <div
-                  className={`absolute -left-6 sm:-left-8 top-4 size-2.5 rounded-full ring-2 ring-surface ${dotColor}`}
+                  className={`absolute -left-6 @xl:-left-8 top-4 size-2.5 rounded-full ring-2 ring-surface ${dotColor}`}
                   aria-hidden="true"
                 />
                 <div
@@ -180,7 +180,7 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
           return (
             <div key={req.id} className="relative">
               <div
-                className={`absolute -left-6 sm:-left-8 top-5 size-2.5 rounded-full ring-2 ring-surface ${dotColor}`}
+                className={`absolute -left-6 @xl:-left-8 top-5 size-2.5 rounded-full ring-2 ring-surface ${dotColor}`}
                 aria-hidden="true"
               />
               <div

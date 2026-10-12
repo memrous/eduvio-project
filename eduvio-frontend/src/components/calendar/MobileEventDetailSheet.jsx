@@ -32,7 +32,7 @@ const MobileEventDetailSheet = ({
   if (!closingEvent) return null
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
+    <div className="fixed inset-0 z-50 @5xl:hidden">
       {/* Backdrop overlay */}
       <div 
         onClick={onClose}

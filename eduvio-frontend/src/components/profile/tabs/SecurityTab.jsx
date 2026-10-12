@@ -28,7 +28,7 @@ const SecurityTab = () => {
 
       <div className="divide-y divide-outline-variant/60">
         {/* Password */}
-        <div className="pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="pb-4 flex flex-col @xl:flex-row @xl:items-center justify-between gap-3">
           <div>
             <strong className="block text-sm font-semibold text-on-surface">{t('security.password.title')}</strong>
             <p className="text-xs text-on-surface-variant mt-0.5">{t('security.password.subtitle')}</p>
@@ -47,7 +47,7 @@ const SecurityTab = () => {
         </div>
 
         {/* Sessions */}
-        <div className="pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="pt-4 flex flex-col @xl:flex-row @xl:items-center justify-between gap-3">
           <div>
             <strong className="block text-sm font-semibold text-on-surface">{t('security.sessions.title')}</strong>
             <p className="text-xs text-on-surface-variant mt-0.5">{t('security.sessions.subtitle')}</p>

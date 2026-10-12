@@ -17,7 +17,7 @@ const AccountTab = ({ effectiveUser }) => {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 @xl:grid-cols-2">
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-on-surface-variant" htmlFor="account-name">
             {t('stag.labels.username', 'Jméno a příjmení')}

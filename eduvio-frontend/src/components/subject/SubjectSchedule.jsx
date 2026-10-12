@@ -160,7 +160,7 @@ const SubjectSchedule = ({ subject }) => {
             <span className="text-on-surface-variant">{typeLabel(nextEvent.type)}</span>
           </span>
           {(nextEvent.room || nextEvent.teacherName) && (
-            <span className="flex flex-col gap-1 text-xs text-on-surface-variant sm:flex-row sm:flex-wrap sm:gap-x-4">
+            <span className="flex flex-col gap-1 text-xs text-on-surface-variant @xl:flex-row @xl:flex-wrap @xl:gap-x-4">
               {nextEvent.room && (
                 <span className="inline-flex items-center gap-1.5 min-w-0">
                   <MapPin className="size-4 shrink-0" />
@@ -191,7 +191,7 @@ const SubjectSchedule = ({ subject }) => {
           {groups.map((g) => (
             <li
               key={g.key}
-              className="flex flex-col gap-1 py-2.5 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4"
+              className="flex flex-col gap-1 py-2.5 text-sm @xl:flex-row @xl:flex-wrap @xl:items-center @xl:gap-x-4"
             >
               <span className="font-semibold text-foreground">
                 {typeLabel(g.type)}

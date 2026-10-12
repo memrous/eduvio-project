@@ -61,7 +61,7 @@ const WeekView = ({
   return (
     <>
       {/* ── MOBILE: Single-day view ─────────────────────────────────────────────────── */}
-      <div className="block md:hidden w-full border border-outline-variant rounded-xl overflow-hidden bg-surface-container-lowest">
+      <div className="block @2xl:hidden w-full border border-outline-variant rounded-xl overflow-hidden bg-surface-container-lowest">
         {/* Mobile day header with prev/next arrows */}
         {(() => {
           const day = mobileWeekDay
@@ -194,7 +194,7 @@ const WeekView = ({
       </div>
 
       {/* ── DESKTOP: Full 7-column scrollable view ──────────────────────────────────── */}
-      <div className="hidden md:block w-full border border-outline-variant rounded-xl overflow-x-auto bg-surface-container-lowest">
+      <div className="hidden @2xl:block w-full border border-outline-variant rounded-xl overflow-x-auto bg-surface-container-lowest">
       <div className="flex flex-col min-w-[700px]">
 
       {/* Day headers — deadlines and written tests sit right under their day */}
@@ -304,7 +304,7 @@ const WeekView = ({
                         <span className="text-[10px] font-bold uppercase truncate">
                           {event.code}
                         </span>
-                        <span className="hidden truncate text-[9px] opacity-70 sm:inline">
+                        <span className="hidden truncate text-[9px] opacity-70 @xl:inline">
                           · {typeLabel}
                         </span>
                         {event.requirementId && <Paperclip className="ml-auto size-2.5 shrink-0 opacity-80" />}

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LogOut } from 'lucide-react'
+import { LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { useStagStatus } from '../hooks/useStagStatus'
@@ -8,15 +8,113 @@ import Avatar from './common/Avatar'
 import { NAV_ITEMS, PROFILE_NAV_ITEM, getNavLinkClass } from './navigation/navItems'
 import logoImg from '../assets/images/logo.png'
 
-const Sidebar = () => {
+/** Label of an icon-only control, shown to the right on hover and keyboard focus. */
+const RailTooltip = ({ children }) => (
+  <span
+    role="presentation"
+    className="pointer-events-none absolute left-full top-1/2 z-50 ml-3 -translate-y-1/2 whitespace-nowrap rounded-md bg-inverse-surface px-2 py-1 text-label-sm font-medium text-inverse-on-surface opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+  >
+    {children}
+  </span>
+)
+
+const railLinkClass = ({ isActive }) =>
+  `group relative flex size-12 items-center justify-center rounded-md transition-colors cursor-pointer ${
+    isActive ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+  }`
+
+const STATUS_DOT = {
+  connected: 'bg-success-soft',
+  offline: 'bg-outline',
+  disconnected: 'bg-error',
+}
+
+/**
+ * Desktop navigation: the full sidebar (260 px) or the icon rail (72 px).
+ * `collapsed` and `onToggle` come from useSidebarCollapsed in AppLayout.
+ */
+const Sidebar = ({ collapsed = false, onToggle }) => {
   const { t } = useTranslation('common')
   const { user, logout } = useAuth()
   // Same source as the IS/STAG card: stag_connected (ticket in server mode, agent token in agent mode)
   const { status: stagStatus, mode: stagMode } = useStagStatus()
   const stagConnected = Boolean(stagStatus?.stag_connected ?? user?.stag_connected)
   const notebookOffline = stagConnected && stagMode === 'agent' && !stagStatus?.agent_online
+  const moodleConnected = Boolean(user?.moodle_connected)
+
+  const stagState = notebookOffline ? 'offline' : stagConnected ? 'connected' : 'disconnected'
+  const stagLabel = notebookOffline
+    ? t('sidebar.connectedNotebookOffline')
+    : stagConnected ? t('sidebar.connected') : t('sidebar.notConnected')
+  const moodleLabel = moodleConnected ? t('sidebar.connected') : t('sidebar.notConnected')
+
+  const toggleLabel = collapsed ? t('sidebar.expand') : t('sidebar.collapse')
+  const toggleButton = (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={toggleLabel}
+      aria-expanded={!collapsed}
+      className="group relative flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+    >
+      <Icon icon={collapsed ? PanelLeftOpen : PanelLeftClose} size="md" />
+      {collapsed && <RailTooltip>{toggleLabel}</RailTooltip>}
+    </button>
+  )
+
+  if (collapsed) {
+    return (
+      <aside className="relative z-20 w-[72px] bg-surface border-r border-outline-variant flex flex-col items-center justify-between py-6 shrink-0 sticky top-0 h-screen font-inter">
+        <div className="flex flex-col items-center gap-6">
+          <img src={logoImg} alt="Eduvio" className="w-9 h-9 object-contain" />
+          {toggleButton}
+          <nav className="flex flex-col items-center gap-1">
+            {NAV_ITEMS.map(({ to, icon, labelKey }) => (
+              <NavLink key={to} to={to} className={railLinkClass} aria-label={t(labelKey)}>
+                <Icon icon={icon} size="md" />
+                <RailTooltip>{t(labelKey)}</RailTooltip>
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 border-t border-outline-variant" />
+          <NavLink
+            to={PROFILE_NAV_ITEM.to}
+            className={railLinkClass}
+            aria-label={`${t(PROFILE_NAV_ITEM.labelKey)} – ${t('sidebar.stagAccount')}: ${stagLabel}, ${t('sidebar.moodleAccount')}: ${moodleLabel}`}
+          >
+            <span className="relative">
+              <Avatar name={user.name} src={user.avatarUrl} size="sm" />
+              {/* STAG and Moodle status at the avatar */}
+              <span className="absolute -bottom-1 -right-1.5 flex gap-0.5 rounded-full bg-surface p-0.5">
+                <span className={`size-2 rounded-full ${STATUS_DOT[stagState]}`} />
+                <span className={`size-2 rounded-full ${moodleConnected ? STATUS_DOT.connected : STATUS_DOT.disconnected}`} />
+              </span>
+            </span>
+            <RailTooltip>
+              <span className="block font-semibold">{user.name}</span>
+              <span className="block">{t('sidebar.stagAccount')}: {stagLabel}</span>
+              <span className="block">{t('sidebar.moodleAccount')}: {moodleLabel}</span>
+            </RailTooltip>
+          </NavLink>
+          <button
+            type="button"
+            onClick={logout}
+            aria-label={t('sidebar.logout')}
+            className="group relative flex size-12 cursor-pointer items-center justify-center rounded-md border border-error/20 bg-surface-container-low text-error transition-all hover:bg-surface-container"
+          >
+            <Icon icon={LogOut} size="md" />
+            <RailTooltip>{t('sidebar.logout')}</RailTooltip>
+          </button>
+        </div>
+      </aside>
+    )
+  }
+
   return (
-    <aside className="w-[260px] bg-surface border-r border-outline-variant flex flex-col justify-between p-6 shrink-0 sticky top-0 h-screen font-inter">
+    <aside className="relative z-20 w-[260px] bg-surface border-r border-outline-variant flex flex-col justify-between p-6 shrink-0 sticky top-0 h-screen font-inter">
       <div className="flex flex-col gap-8">
         {/* Logo & Brand */}
         <div className="flex items-center gap-3">
@@ -26,6 +124,7 @@ const Sidebar = () => {
             className="w-9 h-9 object-contain"
           />
           <span className="font-geist font-bold text-xl tracking-tight text-on-surface">Eduvio</span>
+          <span className="ml-auto">{toggleButton}</span>
         </div>
 
         {/* Navigation Links */}

@@ -43,6 +43,9 @@
     "connected": "Connected",
     "connectedNotebookOffline": "Connected · notebook offline",
     "notConnected": "Not Connected",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "moodleAccount": "Moodle",
     "logout": "Log Out"
   },
   "notFound": {

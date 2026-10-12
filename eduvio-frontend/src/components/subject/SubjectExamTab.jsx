@@ -39,7 +39,7 @@ const SubjectExamTab = ({
 
       <ExamTermsCard subject={subject} />
 
-      <div className="grid items-start gap-6 xl:grid-cols-2">
+      <div className="grid items-start gap-6 @3xl:grid-cols-2">
         <ExamTopicsCard subjectId={subject.id} webTopics={webTopics} />
         <ExamMaterialsCard
           subject={subject}

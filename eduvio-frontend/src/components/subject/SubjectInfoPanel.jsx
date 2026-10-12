@@ -77,7 +77,7 @@ const SubjectInfoPanel = ({ subject, semesterLinks = [], hasAbout, onShowInfo })
           onClick={() => setIsOpen((open) => !open)}
           aria-expanded={isOpen}
           aria-controls={contentId}
-          className="flex w-full items-center justify-between gap-3 rounded-2xl bg-transparent px-5 py-4 text-left cursor-pointer xl:hidden"
+          className="flex w-full items-center justify-between gap-3 rounded-2xl bg-transparent px-5 py-4 text-left cursor-pointer @5xl/page:hidden"
         >
           <span className="text-sm font-bold text-foreground">{t('academic:subjectDetail.infoPanel.title')}</span>
           <span className="sr-only">
@@ -85,11 +85,11 @@ const SubjectInfoPanel = ({ subject, semesterLinks = [], hasAbout, onShowInfo })
           </span>
           <Icon icon={ChevronDown} className={`text-on-surface-variant transition-transform motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`} />
         </button>
-        <h2 className="hidden px-5 pt-5 text-sm font-bold text-foreground xl:block">
+        <h2 className="hidden px-5 pt-5 text-sm font-bold text-foreground @5xl/page:block">
           {t('academic:subjectDetail.infoPanel.title')}
         </h2>
 
-        <div id={contentId} className={`${isOpen ? 'block' : 'hidden'} px-5 pb-5 xl:block`}>
+        <div id={contentId} className={`${isOpen ? 'block' : 'hidden'} px-5 pb-5 @5xl/page:block`}>
           <dl className="flex flex-col divide-y divide-outline-variant/60">
             <InfoRow icon={GraduationCap} label={t('academic:subjectDetail.creditsLabel')}>
               {t('academic:subjectDetail.creditsEcts', { count: subject.credits })}
@@ -162,7 +162,7 @@ const SubjectInfoPanel = ({ subject, semesterLinks = [], hasAbout, onShowInfo })
       </section>
 
       {/* Collapsed together with the info on small screens */}
-      <div className={`${isOpen ? 'block' : 'hidden'} empty:hidden xl:block`}>
+      <div className={`${isOpen ? 'block' : 'hidden'} empty:hidden @5xl/page:block`}>
         <SubjectSchedule subject={subject} />
       </div>
     </div>

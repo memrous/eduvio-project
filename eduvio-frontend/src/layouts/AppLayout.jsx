@@ -7,6 +7,7 @@ import logoImg from '../assets/images/logo.png'
 
 // Desktop Components
 import Sidebar from '../components/Sidebar'
+import { useSidebarCollapsed } from '../hooks/useSidebarCollapsed'
 import Header from '../components/Header'
 import MobileSearch from '../components/search/MobileSearch'
 
@@ -54,7 +55,13 @@ const MobileDashboardItem = () => {
   )
 }
 
+// Page content: a size container with the padding of its width, at most 1440 px wide.
+// Page layouts use container breakpoints (@xl:, @4xl: …) of this real content width.
+const PAGE_CLASS =
+  '@container/page mx-auto flex w-full max-w-[1440px] flex-col gap-6 p-4 @2xl/main:p-6 @6xl/main:p-8'
+
 const AppLayout = () => {
+  const sidebar = useSidebarCollapsed()
   return (
     <div className="min-h-screen bg-background text-on-background font-inter">
 
@@ -62,13 +69,13 @@ const AppLayout = () => {
       {/* DESKTOP LAYOUT                            */}
       {/* ========================================== */}
       <div className="hidden lg:flex h-screen">
-          <Sidebar />
-          
+          <Sidebar collapsed={sidebar.collapsed} onToggle={sidebar.toggle} />
+
           <div className="flex-1 flex flex-col min-w-0 h-screen">
             <Header />
-          
-            <main className="flex-1 overflow-y-auto bg-surface p-8">
-              <PageTransition className="max-w-[1600px] w-full mx-auto flex flex-col gap-6">
+
+            <main className="@container/main flex-1 overflow-y-auto bg-surface">
+              <PageTransition className={PAGE_CLASS}>
                 <Outlet />
               </PageTransition>
             </main>
@@ -92,8 +99,8 @@ const AppLayout = () => {
           </div>
         </header>
 
-        <main className="p-4">
-          <PageTransition className="flex flex-col gap-6">
+        <main className="@container/main">
+          <PageTransition className={PAGE_CLASS}>
             <Outlet />
           </PageTransition>
         </main>

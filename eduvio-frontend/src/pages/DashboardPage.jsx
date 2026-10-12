@@ -193,7 +193,7 @@ const DashboardPage = () => {
       const syncBanner = (
         <div className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 border border-primary/20 text-on-surface text-body-sm font-medium">
           <div className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
-          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+          <div className="flex flex-col @xl:flex-row @xl:items-center @xl:gap-2">
             <span className="font-semibold text-primary">{t('common:syncingSchedule')}</span>
             <span className="text-on-surface-variant">{t('common:syncingDescription')}</span>
           </div>
@@ -226,11 +226,11 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 font-inter">
+    <div className="flex flex-col gap-6 @4xl:grid @4xl:grid-cols-[minmax(0,1fr)_20rem] @6xl:grid-cols-[minmax(0,1fr)_24rem] font-inter">
       {/* Main feed (2/3) */}
-      <div className="contents lg:flex lg:flex-col lg:gap-6 lg:col-span-2 space-y-6 lg:space-y-0">
+      <div className="contents @4xl:flex @4xl:min-w-0 @4xl:flex-col @4xl:gap-6 space-y-6 @4xl:space-y-0">
         {/* Greeting */}
-        <div className="order-1 lg:order-none page-section">
+        <div className="order-1 @4xl:order-none page-section">
           <div className="flex flex-col gap-2">
             <h1 className="text-display text-on-surface">
               {t(getGreetingKey(), { name: user?.name })}
@@ -252,7 +252,7 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        <div className="order-3 lg:order-none">
+        <div className="order-3 @4xl:order-none">
           <NeedsAttention
             alerts={summary.needsAttention}
             subjects={allSubjects}
@@ -261,7 +261,7 @@ const DashboardPage = () => {
           />
         </div>
 
-        <div className="order-2 lg:order-none">
+        <div className="order-2 @4xl:order-none">
           <NextUp
             nextClass={summary.nextClass}
             onOpenMaterials={handleOpenMaterials}
@@ -270,8 +270,8 @@ const DashboardPage = () => {
           />
         </div>
 
-        <div className="order-5 lg:order-none">
-          <section className="flex flex-col gap-4 lg:gap-4">
+        <div className="order-5 @4xl:order-none">
+          <section className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h2 className="text-headline-md text-on-surface font-semibold">
                 {t('dashboardPage.mySubjects')}
@@ -298,14 +298,14 @@ const DashboardPage = () => {
       </div>
 
       {/* Context & progress sidebar (1/3) */}
-      <div className="contents lg:flex lg:flex-col lg:gap-6 lg:col-span-1 lg:sticky lg:top-6 lg:self-start space-y-6 lg:space-y-0">
-        <div className="order-4 lg:order-none">
+      <div className="contents @4xl:flex @4xl:min-w-0 @4xl:flex-col @4xl:gap-6 @4xl:sticky @4xl:top-6 @4xl:self-start space-y-6 @4xl:space-y-0">
+        <div className="order-4 @4xl:order-none">
           <TodaySchedule schedule={summary.todaySchedule} />
         </div>
-        <div className="order-6 lg:order-none">
+        <div className="order-6 @4xl:order-none">
           <QuickProgress progress={summary.progress} />
         </div>
-        <div className="order-7 lg:order-none">
+        <div className="order-7 @4xl:order-none">
           <RecentMaterials
             resources={resources}
             subjects={allSubjects}

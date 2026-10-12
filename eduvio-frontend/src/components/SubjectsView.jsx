@@ -298,15 +298,15 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
       <div className="w-full flex flex-col gap-8 font-inter pb-16 page-section">
 
         {/* Page Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 @4xl:flex-row @4xl:items-center @4xl:justify-between">
           <div className="flex flex-col gap-1 min-w-0">
             <h1 className="text-display text-on-surface">{t('academic:subjectsView.page.title')}</h1>
             <p className="text-body-md text-on-surface-variant">{t('academic:subjectsView.page.subtitle')}</p>
           </div>
 
           {/* Filter + Sort Controls */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <div className="w-full sm:w-auto">
+          <div className="flex flex-col @xl:flex-row items-stretch @xl:items-center gap-3 w-full @4xl:w-auto">
+            <div className="w-full @xl:w-auto">
               <Dropdown
                 label={filterLabel}
                 icon={SlidersHorizontal}
@@ -315,7 +315,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                 onChange={setFilterType}
               />
             </div>
-            <div className="w-full sm:w-auto">
+            <div className="w-full @xl:w-auto">
               <Dropdown
                 label={sortLabel}
                 icon={ArrowUpDown}
@@ -341,7 +341,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                 {t('academic:subjectsView.emptyState.noDataDescription')}
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))] gap-5">
               <AddManuallyCard onAdd={() => setIsModalOpen(true)} label={t('academic:subjectsView.addManually')} />
             </div>
           </div>
@@ -401,7 +401,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                             ({section.items.length})
                           </span>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))] gap-5">
                           {section.items.map(subject => (
                             <SubjectOverviewCard key={subject.id} subject={subject} onSelect={onSelectSubject} />
                           ))}
@@ -459,7 +459,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                             ({section.items.length})
                           </span>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))] gap-5">
                           {section.items.map(subject => (
                             <SubjectOverviewCard key={subject.id} subject={subject} onSelect={onSelectSubject} />
                           ))}

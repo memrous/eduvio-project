@@ -26,7 +26,7 @@ const ResultRow = ({ label, result, displayResult, date, attempt, examiner, poin
   ].filter(Boolean)
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl bg-surface-container-low p-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex flex-col gap-2 rounded-xl bg-surface-container-low p-4 @xl:flex-row @xl:items-start @xl:justify-between">
       <div className="min-w-0">
         <p className="text-xs font-medium text-on-surface-variant">{label}</p>
         {hasResult && details.length > 0 && (

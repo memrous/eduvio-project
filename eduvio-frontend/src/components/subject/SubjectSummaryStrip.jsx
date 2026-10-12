@@ -43,7 +43,7 @@ const SubjectSummaryStrip = ({ subject, requirements = [], className = '' }) => 
   if (!showPoints && !showRemaining) return null
 
   return (
-    <div className={`grid gap-4 ${showPoints && showRemaining ? 'sm:grid-cols-2' : ''} ${className}`}>
+    <div className={`grid gap-4 ${showPoints && showRemaining ? '@xl:grid-cols-2' : ''} ${className}`}>
       {/* CARD 1: Points from continuous assessment */}
       {showPoints && (
         <div className="flex flex-col justify-between rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">

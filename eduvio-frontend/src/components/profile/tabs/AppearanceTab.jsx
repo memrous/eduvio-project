@@ -27,7 +27,7 @@ const AppearanceTab = () => {
 
       <div className="divide-y divide-outline-variant/60">
         {/* Theme */}
-        <div className="pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="pb-4 flex flex-col @xl:flex-row @xl:items-center justify-between gap-3">
           <div>
             <strong className="block text-sm font-semibold text-on-surface">{t('appearance.theme.title')}</strong>
             <p className="text-xs text-on-surface-variant mt-0.5">{t('appearance.theme.subtitle')}</p>
@@ -57,14 +57,14 @@ const AppearanceTab = () => {
         </div>
 
         {/* Language */}
-        <div className="pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="pt-4 flex flex-col @xl:flex-row @xl:items-center justify-between gap-3">
           <div>
             <label htmlFor="appearance-lang" className="block text-sm font-semibold text-on-surface">
               {t('appearance.language.title')}
             </label>
             <p className="text-xs text-on-surface-variant mt-0.5">{t('appearance.language.subtitle')}</p>
           </div>
-          <div className="w-full sm:w-56 shrink-0">
+          <div className="w-full @xl:w-56 shrink-0">
             <LanguageSelect id="appearance-lang" />
           </div>
         </div>

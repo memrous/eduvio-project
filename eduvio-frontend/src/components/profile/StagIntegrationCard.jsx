@@ -183,8 +183,8 @@ const StagServerCard = ({
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5">
-      <div className="flex md:items-center md:flex-row justify-between gap-3 flex-col items-start">
+    <div className="@container flex h-full min-w-0 flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5">
+      <div className="flex @md:items-center @md:flex-row justify-between gap-3 flex-col items-start">
         <div>
           <h3 className="text-lg font-bold text-on-surface">{t('stag.card.title')}</h3>
           <p className="text-sm text-on-surface-variant">{t('stag.card.subtitle')}</p>
@@ -251,7 +251,7 @@ const StagServerCard = ({
         </div>
       ) : (
         <div className="flex flex-1 flex-col gap-4">
-          <div className="grid gap-3 rounded-xl border border-success/30 bg-success-container/10 p-4 sm:grid-cols-2">
+          <div className="grid gap-3 rounded-xl border border-success/30 bg-success-container/10 p-4 @md:grid-cols-2">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-on-success-container">{t('stag.labels.studentId')}</p>
               <p className="mt-1 text-sm font-semibold text-on-surface">{effectiveUser.stag_student_id || 'N/A'}</p>

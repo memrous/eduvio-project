@@ -175,8 +175,8 @@ const Profile = ({ user: initialUser }) => {
   ]
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 lg:gap-8 items-start">
+    <div className="min-h-screen bg-background text-foreground font-sans @xl:p-2 @4xl:p-4">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 @4xl:grid-cols-[20rem_minmax(0,1fr)] @6xl:grid-cols-[380px_minmax(0,1fr)] gap-6 @4xl:gap-8 items-start">
         {/* ================= LEFT SIDEBAR (Side Cards) ================= */}
         <aside className="flex flex-col gap-5 w-full min-w-0">
           {/* Card 1: Identity Card */}
@@ -204,7 +204,7 @@ const Profile = ({ user: initialUser }) => {
               <h1 className="text-xl font-bold text-on-surface leading-snug break-words">
                 {effectiveUser.name || effectiveUser.username}
               </h1>
-              <p className="text-xs sm:text-sm text-on-surface-variant truncate">
+              <p className="text-xs @xl:text-sm text-on-surface-variant truncate">
                 {effectiveUser.email}
               </p>
             </div>
@@ -258,9 +258,9 @@ const Profile = ({ user: initialUser }) => {
         </aside>
 
         {/* ================= RIGHT CONTENT COLUMN ================= */}
-        <section className="flex flex-col gap-6 w-full min-w-0">
+        <section className="@container flex flex-col gap-6 w-full min-w-0">
           {/* Header Intro */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-outline-variant/60 pb-4 page-section">
+          <div className="flex flex-col @xl:flex-row @xl:items-end justify-between gap-2 border-b border-outline-variant/60 pb-4 page-section">
             <div>
               <span className="block text-xs font-bold tracking-wider text-primary uppercase mb-1">
                 {t('intro.badge', 'NASTAVENÍ ÚČTU')}
@@ -327,7 +327,7 @@ const Profile = ({ user: initialUser }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 @xl:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="block text-xs font-medium text-on-surface-variant" htmlFor="overview-name">
                       {t('stag.labels.username', 'Jméno a příjmení')}
@@ -375,7 +375,7 @@ const Profile = ({ user: initialUser }) => {
 
                 <div className="divide-y divide-outline-variant/60">
                   {integrations.map((item) => (
-                    <div key={item.id} className="py-3 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div key={item.id} className="py-3 last:pb-0 flex flex-col @xl:flex-row @xl:items-center justify-between gap-3">
                       <div className="min-w-0">
                         <strong className="block text-sm font-semibold text-on-surface">{item.name}</strong>
                         <p className="text-xs text-on-surface-variant mt-0.5">{item.description}</p>
@@ -418,7 +418,7 @@ const Profile = ({ user: initialUser }) => {
             <div className="space-y-6 page-section">
               <AccountTab effectiveUser={effectiveUser} />
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 pt-2">
+              <div className="grid grid-cols-1 gap-4 @3xl:grid-cols-2 pt-2">
                 <StagIntegrationCard
                   effectiveUser={effectiveUser}
                   isStagConnected={isStagConnected}

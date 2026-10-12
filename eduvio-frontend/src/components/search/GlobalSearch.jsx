@@ -237,7 +237,7 @@ const GlobalSearch = ({ variant = 'header', autoFocus = false, onDone }) => {
   return (
     <div
       ref={rootRef}
-      className={isMobile ? 'flex w-full min-w-0 flex-col' : 'relative w-80'}
+      className={isMobile ? 'flex w-full min-w-0 flex-col' : 'relative w-full'}
       onBlur={(event) => {
         if (!rootRef.current?.contains(event.relatedTarget)) setIsOpen(false)
       }}

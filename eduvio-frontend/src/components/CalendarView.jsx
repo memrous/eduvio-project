@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { PanelRightOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useCalendarState, getSubjectStyle } from './calendar/useCalendarState'
@@ -13,6 +13,8 @@ import { getLocaleFromLanguage } from '../utils/locale'
 import { formatDateKey } from './calendar/useCalendarGrid'
 
 const VIEWS = ['month', 'week', 'agenda']
+// @2xl container breakpoint (42rem): below it the toolbar is compact and the week shows one day
+const COMPACT_BELOW_PX = 672
 
 const CalendarView = ({ 
   events: propEvents, 
@@ -104,6 +106,16 @@ const CalendarView = ({
       .slice(0, 5)
   }, [currentRequirements, todayKey])
 
+  // Narrow content (the toolbar shows the view dropdown): start in the agenda, like on phones.
+  // Measured once on mount; the hidden copy of the other layout (no boxes) keeps the default.
+  const rootRef = useRef(null)
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (root && root.getClientRects().length > 0 && root.clientWidth < COMPACT_BELOW_PX) {
+      setActiveView((view) => (view === 'week' ? 'agenda' : view))
+    }
+  }, [setActiveView])
+
   const handleGoToToday = () => {
     const now = new Date()
     setSelectedDate(now)
@@ -111,7 +123,7 @@ const CalendarView = ({
   }
 
   return (
-    <div className="relative flex flex-1 overflow-hidden">
+    <div ref={rootRef} className="relative flex flex-1 overflow-hidden">
       {/* MAIN CALENDAR AREA */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <div className="page-section"><CalendarToolbar
@@ -141,7 +153,7 @@ const CalendarView = ({
         /></div>
 
         {/* Calendar grid / views */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 md:px-6 md:pb-6 page-section">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 @2xl:px-6 @2xl:pb-6 page-section">
           <CalendarGrid
             activeView={activeView}
             gridDays={gridDays}
@@ -165,7 +177,7 @@ const CalendarView = ({
         <button
           onClick={() => setPanelOpen(true)}
           aria-label={t('academic:calendarView.showPanel', 'Zobrazit panel')}
-          className="absolute right-0 top-1/2 hidden -translate-y-1/2 items-center rounded-l-lg border border-r-0 border-outline-variant bg-surface-container-lowest px-1.5 py-3 text-on-surface-variant shadow-sm transition-colors hover:bg-surface-container hover:text-foreground md:flex"
+          className="absolute right-0 top-1/2 hidden -translate-y-1/2 items-center rounded-l-lg border border-r-0 border-outline-variant bg-surface-container-lowest px-1.5 py-3 text-on-surface-variant shadow-sm transition-colors hover:bg-surface-container hover:text-foreground @5xl:flex"
         >
           <PanelRightOpen className="size-4" />
         </button>
@@ -173,11 +185,11 @@ const CalendarView = ({
 
       {/* RIGHT PANEL: Quick overview or inline detail — hidden on mobile, collapsible on desktop */}
       <aside
-        className={`hidden md:flex shrink-0 overflow-hidden border-l border-outline-variant bg-surface-container-lowest transition-all duration-300 ease-in-out ${
-          panelOpen ? 'md:w-[22rem] opacity-100' : 'md:w-0 opacity-0 border-l-0'
+        className={`hidden @5xl:flex shrink-0 overflow-hidden border-l border-outline-variant bg-surface-container-lowest transition-all duration-300 ease-in-out ${
+          panelOpen ? '@5xl:w-[22rem] opacity-100' : '@5xl:w-0 opacity-0 border-l-0'
         }`}
       >
-        <div className="flex h-full w-full md:w-[22rem] flex-col gap-6 overflow-y-auto p-5">
+        <div className="flex h-full w-full @5xl:w-[22rem] flex-col gap-6 overflow-y-auto p-5">
           {selectedDetailEvent ? (
             <div>
               <EventDetailContent

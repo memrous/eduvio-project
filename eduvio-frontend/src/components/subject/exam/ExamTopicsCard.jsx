@@ -214,8 +214,8 @@ const ExamTopicsCard = ({ subjectId, webTopics = [] }) => {
           className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
         >
           <Icon icon={Plus} />
-          <span className="hidden sm:inline">{t('academic:subjectDetail.exam.topics.add')}</span>
-          <span className="sr-only sm:hidden">{t('academic:subjectDetail.exam.topics.add')}</span>
+          <span className="hidden @xl:inline">{t('academic:subjectDetail.exam.topics.add')}</span>
+          <span className="sr-only @xl:hidden">{t('academic:subjectDetail.exam.topics.add')}</span>
         </button>
       </form>
       <p className="mt-2 text-xs text-on-surface-variant">{t('academic:subjectDetail.exam.topics.pasteHint')}</p>

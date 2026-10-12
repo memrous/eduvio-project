@@ -23,7 +23,7 @@ export const SubjectsSkeleton = () => {
   return (
     <div className="w-full flex flex-col gap-8 font-inter pb-16">
       {/* Page Header Skeleton */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 @4xl:flex-row @4xl:items-center @4xl:justify-between">
         <div className="space-y-2">
           <Skeleton className="h-8 w-48 rounded-xl" />
           <Skeleton className="h-4 w-72 rounded-md" />
@@ -35,7 +35,7 @@ export const SubjectsSkeleton = () => {
       </div>
 
       {/* Grid of Subject Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))] gap-5">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
@@ -80,7 +80,7 @@ export const SubjectsSkeleton = () => {
  */
 export const DashboardSkeleton = ({ statusBanner = null }) => {
   return (
-    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 font-inter">
+    <div className="flex flex-col gap-6 @4xl:grid @4xl:grid-cols-[minmax(0,1fr)_20rem] @6xl:grid-cols-[minmax(0,1fr)_24rem] font-inter">
       {statusBanner ? (
         <div className="col-span-full">
           {statusBanner}
@@ -88,7 +88,7 @@ export const DashboardSkeleton = ({ statusBanner = null }) => {
       ) : null}
 
       {/* Left 2 Columns (2/3) */}
-      <div className="contents lg:flex lg:flex-col lg:gap-6 lg:col-span-2 space-y-6 lg:space-y-0">
+      <div className="contents @4xl:flex @4xl:min-w-0 @4xl:flex-col @4xl:gap-6 space-y-6 @4xl:space-y-0">
         {/* Greeting Banner */}
         <div className="space-y-2">
           <Skeleton className="h-9 w-72 rounded-xl" />
@@ -140,7 +140,7 @@ export const DashboardSkeleton = ({ statusBanner = null }) => {
       </div>
 
       {/* Right Column (1/3) */}
-      <div className="contents lg:flex lg:flex-col lg:gap-6 lg:col-span-1 space-y-6 lg:space-y-0">
+      <div className="contents @4xl:flex @4xl:min-w-0 @4xl:flex-col @4xl:gap-6 space-y-6 @4xl:space-y-0">
         {/* Today Schedule Skeleton */}
         <div className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
@@ -227,15 +227,15 @@ export const MaterialsSkeleton = () => {
       </div>
 
       {/* Search & Filters */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/60 bg-surface p-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/60 bg-surface p-3 @xl:flex-row @xl:items-center">
         <Skeleton className="h-10 flex-1 rounded-xl" />
         <Skeleton className="h-10 w-44 rounded-xl" />
         <Skeleton className="h-10 w-36 rounded-xl" />
       </div>
 
       {/* Two columns layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 gap-6 items-start @4xl:grid-cols-[minmax(0,1fr)_18rem] @6xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="min-w-0 space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
@@ -268,15 +268,15 @@ export const SubjectDetailSkeleton = () => {
       <Skeleton className="mb-4 h-5 w-36 rounded" />
 
       {/* Same grid as SubjectDetailView: info column on the left, title and content on the right */}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] xl:gap-8 xl:grid-rows-[auto_1fr] xl:items-start">
+      <div className="grid gap-6 @5xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] @7xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] @5xl:gap-8 @5xl:grid-rows-[auto_1fr] @5xl:items-start">
         {/* Title */}
-        <div className="space-y-3 xl:col-start-2 xl:row-start-1">
+        <div className="space-y-3 @5xl:col-start-2 @5xl:row-start-1">
           <Skeleton className="h-6 w-40 rounded-lg" />
           <Skeleton className="h-8 w-72 max-w-full rounded-xl" />
         </div>
 
         {/* Info panel */}
-        <div className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-5 space-y-4 shadow-sm xl:col-start-1 xl:row-span-2 xl:row-start-1">
+        <div className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-5 space-y-4 shadow-sm @5xl:col-start-1 @5xl:row-span-2 @5xl:row-start-1">
           <Skeleton className="h-5 w-40 rounded" />
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="space-y-1.5">
@@ -287,8 +287,8 @@ export const SubjectDetailSkeleton = () => {
         </div>
 
         {/* Summary, tabs and content */}
-        <div className="flex flex-col gap-6 xl:col-start-2 xl:row-start-2">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex min-w-0 flex-col gap-6 @5xl:col-start-2 @5xl:row-start-2">
+          <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2">
             {Array.from({ length: 2 }).map((_, i) => (
               <div
                 key={i}
@@ -331,9 +331,9 @@ export const ProfileSkeleton = () => {
       </div>
 
       {/* 2-Column Grid */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
+      <div className="grid grid-cols-1 gap-8 items-start @4xl:grid-cols-[20rem_minmax(0,1fr)] @6xl:grid-cols-[380px_minmax(0,1fr)]">
         {/* Left Column (5/12) */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="min-w-0 space-y-6">
           {/* Identity Card Skeleton */}
           <div className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-6 space-y-6 shadow-sm">
             <div className="flex items-start gap-4">
@@ -368,7 +368,7 @@ export const ProfileSkeleton = () => {
         </div>
 
         {/* Right Column (7/12) */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="min-w-0 space-y-6">
           {/* Tabs bar */}
           <div className="flex items-center gap-3 border-b border-outline-variant/60 pb-3">
             <Skeleton className="h-9 w-24 rounded-xl" />

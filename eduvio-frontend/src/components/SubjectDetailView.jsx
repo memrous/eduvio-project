@@ -92,7 +92,7 @@ const StagRemovedNotice = ({ subject, onDelete }) => {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface-container-low/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface-container-low/60 p-4 @xl:flex-row @xl:items-center @xl:justify-between">
       <div className="flex items-start gap-3">
         <Info className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
         <p className="text-sm text-on-surface-variant">{t('academic:stagRemoved.description')}</p>
@@ -153,7 +153,7 @@ const MaterialsTab = ({ subject, materials, menuFor, onSetForExam }) => {
             return (
               <div
                 key={res.id ?? res.url}
-                className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 transition-shadow hover:shadow-md @xl:flex-row @xl:items-center @xl:justify-between"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <MaterialTypeIcon resource={res} tile="lg" />
@@ -389,12 +389,12 @@ const SubjectDetailView = ({
         Small screens: title, (collapsed) info, then the main content.
         Wide screens (xl): info and schedule in a sticky left column, title and content on the right.
       */}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] xl:gap-8 xl:grid-rows-[auto_1fr] xl:items-start">
-        <div className="page-section xl:col-start-2 xl:row-start-1">
+      <div className="grid gap-6 @5xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] @7xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] @5xl:gap-8 @5xl:grid-rows-[auto_1fr] @5xl:items-start">
+        <div className="page-section min-w-0 @5xl:col-start-2 @5xl:row-start-1">
           <SubjectTitle subject={subject} requirements={requirements} />
         </div>
 
-        <aside className="page-section xl:sticky xl:top-0 xl:col-start-1 xl:row-span-2 xl:row-start-1 xl:max-h-[calc(180vh-9rem)] xl:overflow-y-auto">
+        <aside className="@container page-section min-w-0 @5xl/page:sticky @5xl/page:top-0 @5xl/page:col-start-1 @5xl/page:row-span-2 @5xl/page:row-start-1 @5xl/page:max-h-[calc(180vh-9rem)] @5xl/page:overflow-y-auto">
           <SubjectInfoPanel
             subject={subject}
             semesterLinks={semesterLinks}
@@ -403,7 +403,7 @@ const SubjectDetailView = ({
           />
         </aside>
 
-        <div className="flex min-w-0 flex-col gap-6 xl:col-start-2 xl:row-start-2">
+        <div className="@container flex min-w-0 flex-col gap-6 @5xl/page:col-start-2 @5xl/page:row-start-2">
           {subject.stag_removed_at && (
             <div className="page-section"><StagRemovedNotice subject={subject} onDelete={onDeleteSubject} /></div>
           )}

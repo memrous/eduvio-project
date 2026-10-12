@@ -23,7 +23,7 @@ const MobileDayDetailSheet = forwardRef(({ subjects, handleEventSelect, handleDe
 
   return (
     <div
-      className="sm:hidden fixed inset-0 z-50 flex items-end"
+      className="@xl:hidden fixed inset-0 z-50 flex items-end"
       onClick={closeMobileDetail}
     >
       <div

@@ -37,7 +37,7 @@ const DayCell = ({
   return (
     <div
       onClick={() => setSelectedDate(day.date)}
-      className={`cursor-pointer flex flex-col transition-all group relative min-h-[56px] sm:min-h-[112px] p-1.5 border-b border-r border-outline-variant [&:nth-child(7n)]:border-r-0 ${
+      className={`cursor-pointer flex flex-col transition-all group relative min-h-[56px] @xl:min-h-[112px] p-1.5 border-b border-r border-outline-variant [&:nth-child(7n)]:border-r-0 ${
         !day.isCurrentMonth
           ? 'bg-surface-container-low/40 text-on-surface-variant/70'
           : isToday
@@ -69,7 +69,7 @@ const DayCell = ({
       </div>
 
       {/* Desktop: items list — show up to 3 */}
-      <div className="hidden sm:flex flex-col gap-1 flex-grow overflow-hidden">
+      <div className="hidden @xl:flex flex-col gap-1 flex-grow overflow-hidden">
         {visibleDesktop.map((item, idx) => {
           if (item._kind === 'deadline') {
             const subject = subjects.find(s => s.id === item.subjectId || s.id === item.subject_id)
@@ -121,7 +121,7 @@ const DayCell = ({
             e.stopPropagation()
             onOpenMobileDetail?.(day, allItems)
           }}
-          className={`sm:hidden mt-1 flex items-center justify-center gap-1 min-w-[22px] h-[22px] px-1.5 rounded-full text-[10px] font-bold border transition-colors ${
+          className={`@xl:hidden mt-1 flex items-center justify-center gap-1 min-w-[22px] h-[22px] px-1.5 rounded-full text-[10px] font-bold border transition-colors ${
             hasDeadline
               ? 'bg-error-container border-error/30 text-on-error-container'
               : 'bg-primary/10 border-primary/20 text-primary'

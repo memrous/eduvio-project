@@ -11,13 +11,13 @@ const CalendarFilterChips = ({
   if (!SUBJECTS || SUBJECTS.length === 0) return null
 
   return (
-    <div className="flex flex-col gap-2 px-4 pb-3 md:px-6">
+    <div className="flex flex-col gap-2 px-4 pb-3 @2xl:px-6">
       <span className="flex items-center gap-1.5 text-xs font-medium text-on-surface-variant">
         <Filter className="size-4" />
         {t('academic:calendarView.filterLabel', 'Filtr:')}
       </span>
       {/* Chips of the same width; long names end with "…" (full name on hover) */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))]">
+      <div className="grid grid-cols-2 gap-2 @xl:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))]">
         {SUBJECTS.map((subj) => {
           const subject = currentSubjects.find(s => s.name === subj.name || s.code === subj.name)
           const style = getSubjectStyle(subject)

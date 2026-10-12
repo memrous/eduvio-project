@@ -160,7 +160,7 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar, onOpenSubject }) 
           {t('nextUp.noUpcoming')}
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-2xl bg-midnight p-5 text-midnight-foreground shadow-lg sm:p-8">
+        <div className="relative overflow-hidden rounded-2xl bg-midnight p-5 text-midnight-foreground shadow-lg @xl:p-8">
           {/* Mobile: the whole card opens the subject */}
           {subjectId && onOpenSubject && (
             <button
@@ -191,7 +191,7 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar, onOpenSubject }) 
           </div>
 
           {/* Title */}
-          <h3 className="mt-3 flex items-center gap-2 text-xl font-bold leading-tight text-balance sm:mt-4 sm:text-3xl">
+          <h3 className="mt-3 flex items-center gap-2 text-xl font-bold leading-tight text-balance @xl:mt-4 @xl:text-3xl">
             <span className="min-w-0 lg:hidden">{titleWithoutType(nextClass.title, nextClass.type)}</span>
             <span className="hidden lg:inline">{nextClass.title}</span>
             {subjectId && onOpenSubject && <ChevronRight className="ml-auto size-5 shrink-0 opacity-70 lg:hidden" aria-hidden="true" />}

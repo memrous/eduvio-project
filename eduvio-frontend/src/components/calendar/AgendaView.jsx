@@ -95,14 +95,14 @@ const AgendaView = ({
                         {/* Right: room + time range — desktop only */}
                         {(item.room || item.location) ? (
                           <span
-                            className="hidden sm:flex shrink-0 items-center gap-1 text-xs text-on-surface-variant"
+                            className="hidden @xl:flex shrink-0 items-center gap-1 text-xs text-on-surface-variant"
                             title={formatRoom(item.room || item.location, { language: i18n.language })}
                           >
                             <MapPin className="size-3 shrink-0" />
                             <span className="truncate max-w-[180px]">{formatRoom(item.room || item.location, { language: i18n.language })}</span>
                           </span>
                         ) : null}
-                        <span className="hidden sm:flex shrink-0 items-center gap-1 text-xs text-on-surface-variant">
+                        <span className="hidden @xl:flex shrink-0 items-center gap-1 text-xs text-on-surface-variant">
                           <Clock className="size-3" />
                           {timeRange}
                         </span>
@@ -145,7 +145,7 @@ const AgendaView = ({
                         </div>
 
                         {/* Right time — hidden on very narrow screens to prevent overlap */}
-                        <span className="hidden sm:inline shrink-0 text-xs font-semibold tabular-nums text-on-surface-variant">
+                        <span className="hidden @xl:inline shrink-0 text-xs font-semibold tabular-nums text-on-surface-variant">
                           {dueTime}
                         </span>
                       </div>

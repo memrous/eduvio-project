@@ -44,6 +44,9 @@
     "connected": "Připojeno",
     "connectedNotebookOffline": "Připojeno · notebook offline",
     "notConnected": "Nepřipojeno",
+    "collapse": "Sbalit postranní panel",
+    "expand": "Rozbalit postranní panel",
+    "moodleAccount": "Moodle",
     "logout": "Odhlásit se"
   },
   "notFound": {

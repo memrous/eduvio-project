@@ -142,7 +142,7 @@ const StagAgentSyncControl = ({ compact = false }) => {
 
   return (
     <section className="space-y-3 rounded-xl border border-outline-variant bg-surface p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 @md:flex-row @md:items-center @md:justify-between">
         <div className="space-y-1">
           <h4 className="text-sm font-bold text-on-surface">{t('stag.agent.sync.title')}</h4>
           <AgentPresence status={status} />

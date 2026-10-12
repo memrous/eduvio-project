@@ -857,8 +857,8 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
         </div>
 
         {/* Filters Row */}
-        <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface p-3 sm:flex-row sm:items-center page-section">
-          <div className="relative flex-1">
+        <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface p-3 @xl:flex-row @xl:flex-wrap @xl:items-center page-section">
+          <div className="relative flex-1 @xl:min-w-56">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant" />
             <input
               type="text"
@@ -886,9 +886,9 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
         </div>
 
         {/* Two Columns Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 gap-6 items-start @4xl:grid-cols-[minmax(0,1fr)_18rem] @6xl:grid-cols-[minmax(0,1fr)_20rem]">
           {/* LEFT COLUMN: Timeline & Other Materials */}
-          <div className="lg:col-span-2 flex flex-col gap-10">
+          <div className="flex min-w-0 flex-col gap-10">
             {weeklyGroups.length === 0 && generalGrouped.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-outline-variant bg-surface/50 p-16 text-center flex flex-col items-center gap-3">
                 <div className="w-12 h-12 bg-surface-container-low text-primary rounded-full flex items-center justify-center">
@@ -974,7 +974,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
                                   <div className="flex flex-wrap items-center gap-2">
                                     <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${color.bg} ${color.text}`}>
                                       <span className="font-mono">{session.subject?.code}</span>
-                                      <span className="hidden font-normal opacity-80 sm:inline">{session.subject?.name}</span>
+                                      <span className="hidden font-normal opacity-80 @xl:inline">{session.subject?.name}</span>
                                     </span>
                                     <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-container-low px-2.5 py-1 text-xs font-medium text-on-surface-variant">
                                       <TypeIcon className="size-4" />
@@ -1052,7 +1052,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
                             <>{subject.name} <span className="text-xs text-on-surface-variant font-medium">({subject.code})</span></>
                           ) : t('resources:otherSubject')}
                         </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] gap-4">
                           {items.map(r => (
                             <ResourceCard
                               key={r.id}
@@ -1075,7 +1075,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
           {/* RIGHT COLUMN: Pinned Semestrální materiály */}
           <aside
             aria-label={t('resources:library.semesterMaterials')}
-            className="rounded-2xl border border-primary/25 bg-primary/[0.06] p-5 lg:sticky lg:top-8 page-section"
+            className="rounded-2xl border border-primary/25 bg-primary/[0.06] min-w-0 p-5 @4xl:sticky @4xl:top-8 page-section"
           >
             <div className="mb-3 flex items-center gap-2">
               <Pin className="size-4 text-primary" />

@@ -50,7 +50,7 @@ const ProfileStudyCard = ({ user }) => {
           )}
 
           {rows.length > 0 && (
-            <dl className="space-y-2.5 text-xs sm:text-sm border-t border-outline-variant/60 pt-3">
+            <dl className="space-y-2.5 text-xs @xl:text-sm border-t border-outline-variant/60 pt-3">
               {rows.map((row) => (
                 <div key={row.key} className="flex justify-between gap-3">
                   <dt className="text-on-surface-variant shrink-0">{t(`study.fields.${row.key}`)}</dt>
