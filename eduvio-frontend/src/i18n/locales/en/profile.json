@@ -3,7 +3,21 @@
     "overview": "Overview",
     "account": "Personal Details",
     "integrations": "Integrations",
+    "appearance": "Appearance",
     "security": "Security"
+  },
+  "appearance": {
+    "subtitle": "Look and language of the app on this device.",
+    "theme": {
+      "title": "Background",
+      "subtitle": "Light or dark appearance.",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "language": {
+      "title": "App language",
+      "subtitle": "Language of menus, texts and notifications."
+    }
   },
   "sidebar": {
     "badge": "INSTITUTIONAL ACCOUNT",

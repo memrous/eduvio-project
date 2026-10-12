@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MapPin, Clock, FileText, CalendarPlus } from 'lucide-react'
+import { MapPin, Clock, FileText, CalendarPlus, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { formatRoom } from '../../utils/room'
 import { getLocaleFromLanguage } from '../../utils/locale'
@@ -23,7 +23,16 @@ const getCalendarDayDiff = (from, to) => {
   return Math.round((toDay - fromDay) / (24 * 60 * 60 * 1000))
 }
 
-const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
+// "Přednáška" → "Př.", "Cvičení" → "Cv." for the compact mobile badge
+const shortType = (label) => (label.length > 4 ? `${label.slice(0, 2)}.` : label)
+
+// STAG titles look like "Subject name (Přednáška)"; the type is already in the badge
+const titleWithoutType = (title, type) => {
+  const suffix = type ? ` (${type})` : ''
+  return suffix && title?.endsWith(suffix) ? title.slice(0, -suffix.length) : title
+}
+
+const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar, onOpenSubject }) => {
   const { t, i18n } = useTranslation('dashboard')
   const [minutesLeft, setMinutesLeft] = useState(null)
   const [isOngoing, setIsOngoing] = useState(false)
@@ -120,17 +129,25 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
       })
     }
 
-    if (minutesLeft <= 100) {
+    // < 1 h: minutes; 1–2 h: "an hour 30 min"; ≥ 2 h: whole hours
+    if (minutesLeft < 60) {
       return t('nextUp.startsIn', { count: minutesLeft, minutes: minutesLeft })
+    }
+
+    if (minutesLeft < 120) {
+      const rest = minutesLeft - 60
+      return rest === 0
+        ? t('nextUp.startsInHours', { count: 1, hours: 1 })
+        : t('nextUp.startsInHourMinutes', { minutes: rest })
     }
 
     const hours = Math.round(minutesLeft / 60)
     return t('nextUp.startsInHours', { count: hours, hours })
   }
 
-  const typeBadge = nextClass?.type
-    ? t(`timetable.eventTypes.${nextClass.type}`, nextClass.type).toUpperCase()
-    : ''
+  const typeLabel = nextClass?.type ? t(`timetable.eventTypes.${nextClass.type}`, nextClass.type) : ''
+  const typeBadge = typeLabel.toUpperCase()
+  const subjectId = nextClass?.subject_id ?? nextClass?.subjectId
 
   return (
     <section aria-labelledby="nextup-heading" className="w-full">
@@ -143,11 +160,25 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
           {t('nextUp.noUpcoming')}
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-2xl bg-midnight p-6 text-midnight-foreground shadow-lg sm:p-8">
+        <div className="relative overflow-hidden rounded-2xl bg-midnight p-5 text-midnight-foreground shadow-lg sm:p-8">
+          {/* Mobile: the whole card opens the subject */}
+          {subjectId && onOpenSubject && (
+            <button
+              type="button"
+              onClick={() => onOpenSubject(subjectId)}
+              aria-label={t('nextUp.openSubject', { title: titleWithoutType(nextClass.title, nextClass.type) })}
+              className="absolute inset-0 z-10 cursor-pointer lg:hidden"
+            />
+          )}
+
           {/* Header Row: Badges */}
           <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-midnight-foreground/8 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-balance ring-1 ring-inset ring-midnight-foreground/15">
-              {typeBadge}
+            <span
+              title={typeLabel}
+              className="rounded-full bg-midnight-foreground/8 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-balance ring-1 ring-inset ring-midnight-foreground/15"
+            >
+              <span className="lg:hidden">{shortType(typeLabel)}</span>
+              <span className="hidden lg:inline">{typeBadge}</span>
             </span>
             {(minutesLeft !== null || isOngoing) && (
               <span
@@ -160,8 +191,10 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
           </div>
 
           {/* Title */}
-          <h3 className="mt-4 text-2xl font-bold leading-tight text-balance sm:text-3xl">
-            {nextClass.title}
+          <h3 className="mt-3 flex items-center gap-2 text-xl font-bold leading-tight text-balance sm:mt-4 sm:text-3xl">
+            <span className="min-w-0 lg:hidden">{titleWithoutType(nextClass.title, nextClass.type)}</span>
+            <span className="hidden lg:inline">{nextClass.title}</span>
+            {subjectId && onOpenSubject && <ChevronRight className="ml-auto size-5 shrink-0 opacity-70 lg:hidden" aria-hidden="true" />}
           </h3>
 
           {/* Details Row: Room, Time, Teacher */}
@@ -182,7 +215,7 @@ const NextUp = ({ nextClass, onOpenMaterials, onAddToCalendar }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6 hidden flex-wrap gap-3 lg:flex">
             <button
               type="button"
               onClick={() => onOpenMaterials?.(nextClass)}

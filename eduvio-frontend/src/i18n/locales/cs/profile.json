@@ -3,7 +3,21 @@
     "overview": "Přehled",
     "account": "Osobní údaje",
     "integrations": "Integrace",
+    "appearance": "Přizpůsobení",
     "security": "Zabezpečení"
+  },
+  "appearance": {
+    "subtitle": "Vzhled a jazyk aplikace na tomto zařízení.",
+    "theme": {
+      "title": "Barva pozadí",
+      "subtitle": "Světlý nebo tmavý vzhled.",
+      "light": "Světlý",
+      "dark": "Tmavý"
+    },
+    "language": {
+      "title": "Jazyk aplikace",
+      "subtitle": "Jazyk menu, textů a oznámení."
+    }
   },
   "sidebar": {
     "badge": "INSTITUCIONÁLNÍ ÚČET",

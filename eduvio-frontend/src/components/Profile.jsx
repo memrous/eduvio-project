@@ -8,6 +8,8 @@ import {
   Copy,
   GraduationCap,
   LockKeyhole,
+  LogOut,
+  Palette,
   RefreshCw,
   SlidersHorizontal,
   UserRound,
@@ -16,6 +18,7 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import AccountTab from './profile/tabs/AccountTab'
 import SecurityTab from './profile/tabs/SecurityTab'
+import AppearanceTab from './profile/tabs/AppearanceTab'
 import StagIntegrationCard from './profile/StagIntegrationCard'
 import MoodleIntegrationCard from './profile/MoodleIntegrationCard'
 import LanguageSelect from './profile/LanguageSelect'
@@ -33,7 +36,7 @@ const Profile = ({ user: initialUser }) => {
   const { t, i18n } = useTranslation('profile')
   const navigate = useNavigate()
   const location = useLocation()
-  const { refreshUser } = useAuth()
+  const { refreshUser, logout } = useAuth()
   const toast = useToast()
   const [user, setUser] = useState(initialUser ?? null)
   const [isFetching] = useState(!initialUser)
@@ -143,6 +146,7 @@ const Profile = ({ user: initialUser }) => {
   const tabs = [
     { id: 'overview', label: t('tabs.overview', 'Přehled'), icon: UserRound },
     { id: 'account', label: t('tabs.account', 'Osobní údaje'), icon: SlidersHorizontal },
+    { id: 'appearance', label: t('tabs.appearance'), icon: Palette },
     { id: 'security', label: t('tabs.security', 'Zabezpečení'), icon: LockKeyhole },
   ]
 
@@ -228,6 +232,16 @@ const Profile = ({ user: initialUser }) => {
                 </button>
               </div>
             )}
+
+            {/* Mobile has no sidebar, so logging out lives here */}
+            <button
+              type="button"
+              onClick={logout}
+              className="lg:hidden mt-4 w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-surface-container-low hover:bg-surface-container text-error rounded-lg text-label-md font-semibold transition-colors cursor-pointer border border-error/20"
+            >
+              <LogOut className="size-4" />
+              {t('common:sidebar.logout')}
+            </button>
           </section>
 
           {/* Card 2: Study details from STAG */}
@@ -416,7 +430,12 @@ const Profile = ({ user: initialUser }) => {
             </div>
           )}
 
-          {/* TAB 3: SECURITY */}
+          {/* TAB 3: APPEARANCE (theme + language) */}
+          {activeTab === 'appearance' && (
+            <div className="page-section"><AppearanceTab /></div>
+          )}
+
+          {/* TAB 4: SECURITY */}
           {activeTab === 'security' && (
             <div className="page-section"><SecurityTab /></div>
           )}

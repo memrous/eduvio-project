@@ -21,15 +21,9 @@ export const getEventStyle = (type) => {
   return TYPE_COLOR_MAP[type] || TYPE_COLOR_MAP['default']
 }
 
+// Same color for a subject everywhere: event blocks (bg/text) and filter dots (dot)
 export const getSubjectStyle = (subject) => {
-  const { bg, text } = getSubjectColor(subject)
-  let dot = 'var(--color-outline-variant)'
-  if (bg === 'bg-primary-container') dot = 'var(--color-primary)'
-  else if (bg === 'bg-secondary-container') dot = 'var(--color-secondary)'
-  else if (bg === 'bg-tertiary-container') dot = 'var(--color-tertiary)'
-  else if (bg === 'bg-success-container') dot = 'var(--color-success)'
-  else if (bg === 'bg-warning-container') dot = 'var(--color-warning)'
-  else if (bg === 'bg-error-container') dot = 'var(--color-error)'
+  const { bg, text, dot } = getSubjectColor(subject)
   return { bg, text, dot }
 }
 

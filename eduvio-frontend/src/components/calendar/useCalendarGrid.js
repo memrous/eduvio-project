@@ -9,11 +9,15 @@ export const formatDateKey = (date) => {
   return `${yyyy}-${mm}-${dd}`
 }
 
+// Phones (below md, where the toolbar shows a dropdown) start in the agenda, wider screens in the week
+const getDefaultView = () =>
+  typeof window !== 'undefined' && window.matchMedia?.('(max-width: 767px)').matches ? 'agenda' : 'week'
+
 export const useCalendarGrid = () => {
   const { i18n } = useTranslation()
   const [selectedDate, setSelectedDate] = useState(new Date()) 
   const [currentMonth, setCurrentMonth] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
-  const [activeView, setActiveView] = useState('week')
+  const [activeView, setActiveView] = useState(getDefaultView)
 
   const handlePrev = () => {
     if (activeView === 'month') {

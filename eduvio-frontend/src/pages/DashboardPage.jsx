@@ -266,6 +266,7 @@ const DashboardPage = () => {
             nextClass={summary.nextClass}
             onOpenMaterials={handleOpenMaterials}
             onAddToCalendar={handleAddToCalendar}
+            onOpenSubject={handleViewSubject}
           />
         </div>
 

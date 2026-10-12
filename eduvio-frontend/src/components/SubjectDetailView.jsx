@@ -396,7 +396,7 @@ const SubjectDetailView = ({
           )}
 
           {/* PROGRESS SUMMARY */}
-          <div className="page-section"><SubjectSummaryStrip subject={subject} requirements={requirements} /></div>
+          <SubjectSummaryStrip subject={subject} requirements={requirements} className="page-section" />
 
           {/* TABS NAVIGATION */}
           <div role="tablist" className="flex items-center gap-1 overflow-x-auto border-b border-outline-variant no-scrollbar page-section">

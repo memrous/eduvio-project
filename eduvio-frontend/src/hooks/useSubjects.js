@@ -17,6 +17,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
+import { registerSubjectColors } from '../utils/subjectColors'
 
 export const SUBJECTS_KEY = 'subjects'
 
@@ -47,7 +48,10 @@ export const useSubjects = ({ enabled = true } = {}) => {
   // ── Query ──────────────────────────────────────────────────────
   const query = useQuery({
     queryKey,
-    queryFn: () => api.getSubjects(user.id).then(extractSubjects),
+    queryFn: () => api.getSubjects(user.id).then(extractSubjects).then((subjects) => {
+      registerSubjectColors(subjects)
+      return subjects
+    }),
     enabled: !!user && enabled,
   })
 

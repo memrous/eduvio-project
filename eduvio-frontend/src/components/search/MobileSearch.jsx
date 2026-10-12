@@ -30,9 +30,10 @@ const MobileSearch = () => {
         aria-label={t('search.open')}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className="flex size-9 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+        className="flex h-9 w-full min-w-0 cursor-pointer items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-3.5 text-left text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
       >
-        <Icon icon={Search} size="md" />
+        <Icon icon={Search} size="sm" />
+        <span className="truncate text-sm">{t('search.placeholder')}</span>
       </button>
 
       {isOpen && (

@@ -108,6 +108,8 @@
     "startsInHours_one": "Začíná za {{hours}} hodinu",
     "startsInHours_few": "Začíná za {{hours}} hodiny",
     "startsInHours_other": "Začíná za {{hours}} hodin",
+    "openSubject": "Otevřít předmět {{title}}",
+    "startsInHourMinutes":"Začíná za 1 hodinu a {{minutes}} min",
     "tomorrowAt": "Zítra v {{time}}",
     "onDateAt": "{{date}} v {{time}}",
     "openMaterials": "Otevřít materiály k přednášce",

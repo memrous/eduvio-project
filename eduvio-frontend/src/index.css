@@ -97,6 +97,32 @@
   --shadow-ambient: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
   /* Mobile bottom navigation */
   --shadow-nav: 0 -2px 10px 0 rgba(0, 0, 0, 0.04);
+
+  /* ── Subjects (calendar, filters, chips): 8 distinct hues ─────────────────────────────── */
+  --color-subject-1: #dbe7fd;
+  --color-on-subject-1: #1e3f8f;
+  --color-subject-dot-1: #2f5fd0;
+  --color-subject-2: #d7f2e1;
+  --color-on-subject-2: #1f5b3a;
+  --color-subject-dot-2: #2f9a5c;
+  --color-subject-3: #fde2cc;
+  --color-on-subject-3: #8a3a12;
+  --color-subject-dot-3: #e2711d;
+  --color-subject-4: #ece0fb;
+  --color-on-subject-4: #5b2a91;
+  --color-subject-dot-4: #8b4fd6;
+  --color-subject-5: #d2f1ef;
+  --color-on-subject-5: #165e5a;
+  --color-subject-dot-5: #1f9e96;
+  --color-subject-6: #fbdcea;
+  --color-on-subject-6: #8f1f55;
+  --color-subject-dot-6: #d6458a;
+  --color-subject-7: #fbefc0;
+  --color-on-subject-7: #6e5208;
+  --color-subject-dot-7: #c99a06;
+  --color-subject-8: #fbdcda;
+  --color-on-subject-8: #8b1e1e;
+  --color-subject-dot-8: #d64545;
 }
 
 .dark {
@@ -178,6 +204,32 @@
   --color-midnight-muted: #9aa6b4;
 
   --shadow-nav: 0 -2px 10px 0 rgba(0, 0, 0, 0.3);
+
+  /* ── Subjects ─────────────────────────────── */
+  --color-subject-1: #1f3358;
+  --color-on-subject-1: #c9dafc;
+  --color-subject-dot-1: #7fa2f0;
+  --color-subject-2: #1d3d2b;
+  --color-on-subject-2: #c3ebd2;
+  --color-subject-dot-2: #5cc28a;
+  --color-subject-3: #4a2a14;
+  --color-on-subject-3: #fcd5b5;
+  --color-subject-dot-3: #f0995a;
+  --color-subject-4: #36255a;
+  --color-on-subject-4: #e2d2fa;
+  --color-subject-dot-4: #b48ced;
+  --color-subject-5: #173f3d;
+  --color-on-subject-5: #bdeae6;
+  --color-subject-dot-5: #4fc4bb;
+  --color-subject-6: #4a1f34;
+  --color-on-subject-6: #f9cde2;
+  --color-subject-dot-6: #ec82b3;
+  --color-subject-7: #403411;
+  --color-on-subject-7: #f5e3a1;
+  --color-subject-dot-7: #e0bf4a;
+  --color-subject-8: #4a1d1d;
+  --color-on-subject-8: #fcd6d3;
+  --color-subject-dot-8: #f08c86;
 }
 
 /* Custom design system typography classes */

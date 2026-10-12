@@ -102,6 +102,8 @@
     "ongoing": "Ongoing",
     "startsInHours_one": "Starts in {{hours}} hour",
     "startsInHours_other": "Starts in {{hours}} hours",
+    "openSubject": "Open subject {{title}}",
+    "startsInHourMinutes":"Starts in 1 hour and {{minutes}} min",
     "tomorrowAt": "Tomorrow at {{time}}",
     "onDateAt": "{{date}} at {{time}}",
     "openMaterials": "Open materials",

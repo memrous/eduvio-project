@@ -53,7 +53,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
             return (
               <div
                 key={`${alert.type}-${alert.requirementId ?? alert.subjectId}-${index}`}
-                className={`flex items-start gap-4 rounded-xl border border-outline-variant border-l-4 bg-surface-container-lowest p-4 shadow-sm ${
+                className={`flex items-start gap-3 rounded-xl border border-outline-variant border-l-4 bg-surface-container-lowest p-3 shadow-sm sm:gap-4 sm:p-4 ${
                   isAssessment ? 'border-l-primary' : 'border-l-error'
                 }`}
               >
@@ -65,7 +65,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-foreground">{alert.title}</h3>
+                    <h3 className="text-sm font-semibold leading-snug text-foreground break-words">{alert.title}</h3>
                     {isAssessment && (
                       <span className="rounded-md bg-primary-container px-1.5 py-0.5 text-[11px] font-semibold text-on-primary-container">
                         {getAssessmentLabel(alert.assessmentType, t)}
@@ -77,7 +77,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-sm text-on-surface-variant">
+                  <p className="mt-0.5 text-xs text-on-surface-variant sm:text-sm">
                     {isAssessment
                       ? t('needsAttention.assessmentMessage', { count: alert.days })
                       : isDeadline
