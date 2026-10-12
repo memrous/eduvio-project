@@ -72,6 +72,41 @@ class StagSyncStudentTest extends TestCase
         $this->assertNotNull($this->user->study_info_synced_at);
     }
 
+    public function test_student_number_is_stored_as_stag_student_id(): void
+    {
+        $this->postAs($this->agentToken(), [...$this->payload(), 'osCislo' => 'R26691'])
+            ->assertStatus(200)
+            ->assertJsonFragment(['updated' => [
+                'study_program', 'study_program_code', 'faculty', 'study_form', 'study_type', 'study_type_key',
+                'study_year', 'study_status', 'study_officer_name', 'study_officer_email', 'study_officer_phone',
+                'stag_student_id',
+            ]]);
+
+        $this->assertSame('R26691', $this->user->refresh()->stag_student_id);
+        $this->assertSame('R26691', $this->user->toArray()['stag_student_id']);
+    }
+
+    public function test_empty_student_number_keeps_stored_id(): void
+    {
+        $this->user->forceFill(['stag_student_id' => 'R26691'])->save();
+
+        $this->postAs($this->agentToken(), ['osCislo' => null])->assertStatus(200);
+        $this->postAs($this->agentToken(), ['osCislo' => '  '])->assertStatus(200);
+
+        $this->assertSame('R26691', $this->user->refresh()->stag_student_id);
+    }
+
+    public function test_invalid_student_number_is_rejected(): void
+    {
+        foreach (['R 26691', 'R26691;', 'R-26691', str_repeat('R', 21)] as $value) {
+            $this->postAs($this->agentToken(), ['osCislo' => $value])
+                ->assertStatus(422)
+                ->assertJsonValidationErrors(['osCislo']);
+        }
+
+        $this->assertNull($this->user->refresh()->stag_student_id);
+    }
+
     public function test_name_is_stored_as_display_name_only(): void
     {
         $response = $this->postAs($this->agentToken(), $this->payload() + [

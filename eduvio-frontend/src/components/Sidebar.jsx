@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import { useStagStatus } from '../hooks/useStagStatus'
 import Icon from './common/Icon'
 import Avatar from './common/Avatar'
 import { NAV_ITEMS, PROFILE_NAV_ITEM, getNavLinkClass } from './navigation/navItems'
@@ -10,6 +11,10 @@ import logoImg from '../assets/images/logo.png'
 const Sidebar = () => {
   const { t } = useTranslation('common')
   const { user, logout } = useAuth()
+  // Same source as the IS/STAG card: stag_connected (ticket in server mode, agent token in agent mode)
+  const { status: stagStatus, mode: stagMode } = useStagStatus()
+  const stagConnected = Boolean(stagStatus?.stag_connected ?? user?.stag_connected)
+  const notebookOffline = stagConnected && stagMode === 'agent' && !stagStatus?.agent_online
   return (
     <aside className="w-[260px] bg-surface border-r border-outline-variant flex flex-col justify-between p-6 shrink-0 sticky top-0 h-screen font-inter">
       <div className="flex flex-col gap-8">
@@ -50,9 +55,14 @@ const Sidebar = () => {
               <span className="text-label-sm text-on-surface-variant truncate leading-none mt-0.5">{user.program}</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-label-sm font-semibold pt-1 border-t border-outline-variant">
-            <span className="text-on-surface-variant">{t('sidebar.stagAccount')}</span>
-            {user?.stag_student_id ? (
+          <div className="flex items-center justify-between gap-2 text-label-sm font-semibold pt-1 border-t border-outline-variant">
+            <span className="shrink-0 text-on-surface-variant">{t('sidebar.stagAccount')}</span>
+            {notebookOffline ? (
+              <span className="flex min-w-0 items-center gap-1.5 text-right text-on-surface-variant">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-outline"></span>
+                {t('sidebar.connectedNotebookOffline')}
+              </span>
+            ) : stagConnected ? (
               <span className="flex items-center gap-1.5 text-on-success-container">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-soft opacity-75"></span>

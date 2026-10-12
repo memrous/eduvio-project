@@ -42,6 +42,7 @@
     "profile": "Profil",
     "stagAccount": "Účet STAG",
     "connected": "Připojeno",
+    "connectedNotebookOffline": "Připojeno · notebook offline",
     "notConnected": "Nepřipojeno",
     "logout": "Odhlásit se"
   },

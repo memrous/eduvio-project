@@ -4,29 +4,24 @@ import { useQueryClient } from '@tanstack/react-query'
 import {
   AlertCircle,
   Check,
-  Copy,
+  Info,
   KeyRound,
   Loader2,
   RefreshCw,
   ShieldCheck,
-  Terminal,
   Trash2,
 } from 'lucide-react'
+import Icon from '../common/Icon'
 import * as api from '../../services/api'
 import { STAG_STATUS_KEY } from '../../hooks/useStagStatus'
 import { getLocaleFromLanguage } from '../../utils/locale'
 import { formatDate, formatDateTime, formatRelativeTime } from '../../utils/relativeTime'
 import StagAgentSyncControl from './StagAgentSyncControl'
+import StagAgentSetupDialog from './StagAgentSetupDialog'
+import CopyButton from './CopyButton'
 import { isStagLoginNeeded } from '../../utils/stagAgent'
 
 const STALE_AFTER_MS = 14 * 24 * 60 * 60 * 1000
-
-const AGENT_COMMANDS = [
-  { key: 'setup', command: 'python3 stag_agent.py setup' },
-  { key: 'login', command: 'python3 stag_agent.py login' },
-  { key: 'sync', command: 'python3 stag_agent.py' },
-  { key: 'watch', command: 'python3 stag_agent.py watch' },
-]
 
 const primaryButton =
   'cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60'
@@ -35,49 +30,10 @@ const secondaryButton =
 const dangerButton =
   'cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-error-container bg-surface px-3.5 py-2 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 disabled:cursor-not-allowed disabled:opacity-60'
 
-const copyToClipboard = async (text) => {
-  if (navigator.clipboard?.writeText && window.isSecureContext) {
-    await navigator.clipboard.writeText(text)
-    return
-  }
-  // Fallback for non-secure contexts (e.g. LAN dev server over http)
-  const textarea = document.createElement('textarea')
-  textarea.value = text
-  textarea.setAttribute('readonly', '')
-  textarea.style.position = 'fixed'
-  textarea.style.opacity = '0'
-  document.body.appendChild(textarea)
-  textarea.select()
-  try {
-    if (!document.execCommand('copy')) throw new Error('copy failed')
-  } finally {
-    document.body.removeChild(textarea)
-  }
-}
-
-const CopyButton = ({ text, label, toast }) => {
-  const { t } = useTranslation('profile')
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    try {
-      await copyToClipboard(text)
-      setCopied(true)
-      toast.success(t('stag.agent.copied'))
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      toast.error(t('stag.agent.copyFailed'))
-    }
-  }
-
-  return (
-    <button type="button" onClick={handleCopy} className={secondaryButton} aria-label={label}>
-      {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
-      {t('stag.agent.copy')}
-    </button>
-  )
-}
-
+/**
+ * IS/STAG card in agent mode: sync status, notebook presence with "Sync now"
+ * and the agent token. The setup guide is in a dialog behind the (i) button.
+ */
 const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
   const { t, i18n } = useTranslation('profile')
   const queryClient = useQueryClient()
@@ -89,6 +45,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
   const [pendingConfirm, setPendingConfirm] = useState(null) // 'regenerate' | 'revoke' | null
   const [creating, setCreating] = useState(false)
   const [revoking, setRevoking] = useState(false)
+  const [setupOpen, setSetupOpen] = useState(false)
 
   const agentToken = status?.agent_token ?? null
   const syncedAt = status?.stag_synced_at ?? null
@@ -155,8 +112,8 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
     if (syncStatus === 'failed') {
       return (
         <div className="flex items-start gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
-          <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
-          <div className="text-label-sm text-error space-y-0.5">
+          <Icon icon={AlertCircle} className="text-error mt-0.5" />
+          <div className="min-w-0 text-label-sm text-error space-y-0.5">
             <p className="font-semibold">{t('stag.agent.status.title')} · {t('stag.agent.status.failed')}</p>
             <p>{t('stag.agent.status.lastSync')} {lastSync}</p>
             {syncError && (
@@ -174,8 +131,8 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
     if (syncStatus === 'success' && syncedAt) {
       return (
         <div className="flex items-start gap-2.5 px-4 py-3 bg-success-container border border-success/30 rounded-lg">
-          <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
-          <div className="text-label-sm text-on-success-container space-y-0.5">
+          <Icon icon={ShieldCheck} className="text-success mt-0.5" />
+          <div className="min-w-0 text-label-sm text-on-success-container space-y-0.5">
             <p className="font-semibold">{t('stag.agent.status.title')} · {t('stag.agent.status.success')}</p>
             <p>{t('stag.agent.status.lastSync')} {lastSync}</p>
           </div>
@@ -185,8 +142,8 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
 
     return (
       <div className="flex items-start gap-2.5 px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg">
-        <RefreshCw className="w-4 h-4 text-on-surface-variant shrink-0 mt-0.5" />
-        <div className="text-label-sm text-on-surface-variant space-y-0.5">
+        <Icon icon={RefreshCw} className="text-on-surface-variant mt-0.5" />
+        <div className="min-w-0 text-label-sm text-on-surface-variant space-y-0.5">
           <p className="font-semibold text-on-surface">{t('stag.agent.status.title')}</p>
           <p>{t('stag.agent.status.lastSync')} {lastSync}</p>
         </div>
@@ -195,7 +152,34 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
   })()
 
   return (
-    <div className="space-y-4">
+    <div className="flex h-full min-w-0 flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5">
+      <div className="flex md:items-center md:flex-row justify-between gap-3 flex-col items-start">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-lg font-bold text-on-surface">{t('stag.card.title')}</h3>
+            <button
+              type="button"
+              onClick={() => setSetupOpen(true)}
+              aria-label={t('stag.agent.setupDialog.open')}
+              title={t('stag.agent.setupDialog.open')}
+              className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container hover:text-foreground"
+            >
+              <Icon icon={Info} />
+            </button>
+          </div>
+          <p className="text-sm text-on-surface-variant">{t('stag.agent.card.subtitle')}</p>
+        </div>
+        {isConnected ? (
+          <span className="inline-flex shrink-0 items-center rounded-full bg-success-container text-on-success-container px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
+            {t('stag.connected.connected')}
+          </span>
+        ) : (
+          <span className="inline-flex shrink-0 items-center rounded-full bg-error-container text-on-error-container px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
+            {t('stag.connected.notConnected')}
+          </span>
+        )}
+      </div>
+
       {statusBanner}
 
       {/* Notebook agent: online state and "Sync now" */}
@@ -203,165 +187,123 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
 
       {agentToken && isStale && (
         <p className="flex items-start gap-2 text-xs text-on-surface-variant">
-          <AlertCircle className="size-4 shrink-0 mt-0.5" />
+          <Icon icon={AlertCircle} className="mt-0.5" />
           {syncedAt ? t('stag.agent.stale.old') : t('stag.agent.stale.never')}
         </p>
       )}
 
-      <div className="rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5 space-y-5">
-        <div className="flex md:items-center md:flex-row justify-between gap-3 flex-col items-start">
-          <div>
-            <h3 className="text-lg font-bold text-on-surface">{t('stag.card.title')}</h3>
-            <p className="text-sm text-on-surface-variant">{t('stag.agent.card.subtitle')}</p>
+      {/* ── One-time token reveal ── */}
+      {revealedToken && (
+        <div className="space-y-3 rounded-xl border border-primary/30 bg-surface p-4 shadow-sm">
+          <div className="flex items-start gap-2.5">
+            <Icon icon={KeyRound} className="text-primary mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-on-surface">{t('stag.agent.reveal.title')}</p>
+              <p className="text-xs text-on-surface-variant">{t('stag.agent.reveal.warning')}</p>
+            </div>
           </div>
-          {isConnected ? (
-            <span className="inline-flex items-center rounded-full bg-success-container text-on-success-container px-3 py-1 text-xs font-bold tracking-wide border border-success/30">
-              {t('stag.connected.connected')}
-            </span>
-          ) : (
-            <span className="inline-flex items-center rounded-full bg-error-container text-on-error-container px-3 py-1 text-xs font-bold tracking-wide border border-error/30">
-              {t('stag.connected.notConnected')}
-            </span>
-          )}
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
+            <input
+              type="text"
+              readOnly
+              value={revealedToken}
+              onFocus={(e) => e.target.select()}
+              aria-label={t('stag.agent.reveal.label')}
+              autoComplete="off"
+              spellCheck={false}
+              data-1p-ignore
+              className="w-full min-w-0 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            <CopyButton text={revealedToken} label={t('stag.agent.reveal.copyLabel')} toast={toast} />
+          </div>
+          <button type="button" onClick={() => setRevealedToken(null)} className={secondaryButton}>
+            <Icon icon={Check} />
+            {t('stag.agent.reveal.done')}
+          </button>
         </div>
+      )}
 
-        <p className="text-sm text-on-surface-variant">{t('stag.agent.card.helper')}</p>
+      {/* ── Token management ── */}
+      <div className="mt-auto space-y-3">
+        <h4 className="text-sm font-bold text-on-surface">{t('stag.agent.token.title')}</h4>
 
-        {/* ── One-time token reveal ── */}
-        {revealedToken && (
-          <div className="space-y-3 rounded-xl border border-primary/30 bg-surface p-4 shadow-sm">
-            <div className="flex items-start gap-2.5">
-              <KeyRound className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-on-surface">{t('stag.agent.reveal.title')}</p>
-                <p className="text-xs text-on-surface-variant">{t('stag.agent.reveal.warning')}</p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <input
-                type="text"
-                readOnly
-                value={revealedToken}
-                onFocus={(e) => e.target.select()}
-                aria-label={t('stag.agent.reveal.label')}
-                autoComplete="off"
-                spellCheck={false}
-                data-1p-ignore
-                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              <CopyButton text={revealedToken} label={t('stag.agent.reveal.copyLabel')} toast={toast} />
-            </div>
-            <button type="button" onClick={() => setRevealedToken(null)} className={secondaryButton}>
-              <Check className="h-4 w-4" />
-              {t('stag.agent.reveal.done')}
+        {!agentToken ? (
+          <div className="space-y-3">
+            <p className="text-sm text-on-surface-variant">{t('stag.agent.token.none')}</p>
+            <button type="button" onClick={handleCreateToken} disabled={creating} className={primaryButton}>
+              <Icon icon={creating ? Loader2 : KeyRound} className={creating ? 'animate-spin' : ''} />
+              {t('stag.agent.token.create')}
             </button>
           </div>
-        )}
-
-        {/* ── Token management ── */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-bold text-on-surface">{t('stag.agent.token.title')}</h4>
-
-          {!agentToken ? (
-            <div className="space-y-3">
-              <p className="text-sm text-on-surface-variant">{t('stag.agent.token.none')}</p>
-              <button type="button" onClick={handleCreateToken} disabled={creating} className={primaryButton}>
-                {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
-                {t('stag.agent.token.create')}
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="grid gap-3 rounded-xl border border-outline-variant bg-surface p-4 sm:grid-cols-3">
-                {[
-                  ['created', agentToken.created_at],
-                  ['expires', agentToken.expires_at],
-                  ['lastUsed', agentToken.last_used_at],
-                ].map(([key, value]) => (
-                  <div key={key}>
-                    <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                      {t(`stag.agent.token.${key}`)}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-on-surface" title={value ? formatDateTime(value, locale) : undefined}>
-                      {value ? formatDate(value, locale) : t('stag.agent.token.neverUsed')}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {pendingConfirm ? (
-                <div className="space-y-3 rounded-xl border border-error/30 bg-error-container/10 p-4">
-                  <p className="text-sm text-on-surface">
-                    {pendingConfirm === 'regenerate'
-                      ? t('stag.agent.confirm.regenerate')
-                      : t('stag.agent.confirm.revoke')}
+        ) : (
+          <div className="space-y-3">
+            <div className="grid gap-3 rounded-xl border border-outline-variant bg-surface p-4 grid-cols-[repeat(auto-fit,minmax(7rem,1fr))]">
+              {[
+                ['created', agentToken.created_at],
+                ['expires', agentToken.expires_at],
+                ['lastUsed', agentToken.last_used_at],
+              ].map(([key, value]) => (
+                <div key={key} className="min-w-0">
+                  <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                    {t(`stag.agent.token.${key}`)}
                   </p>
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={pendingConfirm === 'regenerate' ? handleCreateToken : handleRevokeToken}
-                      className={pendingConfirm === 'regenerate' ? primaryButton : dangerButton}
-                    >
-                      {pendingConfirm === 'regenerate' ? <RefreshCw className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
-                      {pendingConfirm === 'regenerate'
-                        ? t('stag.agent.confirm.regenerateConfirm')
-                        : t('stag.agent.confirm.revokeConfirm')}
-                    </button>
-                    <button type="button" onClick={() => setPendingConfirm(null)} className={secondaryButton}>
-                      {t('stag.actions.cancel')}
-                    </button>
-                  </div>
+                  <p className="mt-1 text-sm font-semibold text-on-surface" title={value ? formatDateTime(value, locale) : undefined}>
+                    {value ? formatDate(value, locale) : t('stag.agent.token.neverUsed')}
+                  </p>
                 </div>
-              ) : (
+              ))}
+            </div>
+
+            {pendingConfirm ? (
+              <div className="space-y-3 rounded-xl border border-error/30 bg-error-container/10 p-4">
+                <p className="text-sm text-on-surface">
+                  {pendingConfirm === 'regenerate'
+                    ? t('stag.agent.confirm.regenerate')
+                    : t('stag.agent.confirm.revoke')}
+                </p>
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
-                    onClick={() => setPendingConfirm('regenerate')}
-                    disabled={creating || revoking}
-                    className={secondaryButton}
+                    onClick={pendingConfirm === 'regenerate' ? handleCreateToken : handleRevokeToken}
+                    className={pendingConfirm === 'regenerate' ? primaryButton : dangerButton}
                   >
-                    {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                    {t('stag.agent.token.regenerate')}
+                    <Icon icon={pendingConfirm === 'regenerate' ? RefreshCw : Trash2} />
+                    {pendingConfirm === 'regenerate'
+                      ? t('stag.agent.confirm.regenerateConfirm')
+                      : t('stag.agent.confirm.revokeConfirm')}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setPendingConfirm('revoke')}
-                    disabled={creating || revoking}
-                    className={dangerButton}
-                  >
-                    {revoking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                    {t('stag.agent.token.revoke')}
+                  <button type="button" onClick={() => setPendingConfirm(null)} className={secondaryButton}>
+                    {t('stag.actions.cancel')}
                   </button>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ── How to run the agent ── */}
-        <div className="space-y-3">
-          <h4 className="flex items-center gap-2 text-sm font-bold text-on-surface">
-            <Terminal className="h-4 w-4" />
-            {t('stag.agent.guide.title')}
-          </h4>
-          <ol className="space-y-3">
-            {AGENT_COMMANDS.map(({ key, command }, index) => (
-              <li key={key} className="space-y-1.5">
-                <p className="text-sm text-on-surface-variant">
-                  {index + 1}. {t(`stag.agent.guide.${key}`)}
-                </p>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <code className="block w-full overflow-x-auto whitespace-nowrap rounded-lg border border-outline-variant bg-surface px-3 py-2 font-mono text-sm text-on-surface">
-                    {command}
-                  </code>
-                  <CopyButton text={command} label={t('stag.agent.guide.copyLabel', { command })} toast={toast} />
-                </div>
-              </li>
-            ))}
-          </ol>
-          <p className="text-xs text-on-surface-variant">{t('stag.agent.guide.footer')}</p>
-        </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPendingConfirm('regenerate')}
+                  disabled={creating || revoking}
+                  className={secondaryButton}
+                >
+                  <Icon icon={creating ? Loader2 : RefreshCw} className={creating ? 'animate-spin' : ''} />
+                  {t('stag.agent.token.regenerate')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPendingConfirm('revoke')}
+                  disabled={creating || revoking}
+                  className={dangerButton}
+                >
+                  <Icon icon={revoking ? Loader2 : Trash2} className={revoking ? 'animate-spin' : ''} />
+                  {t('stag.agent.token.revoke')}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      <StagAgentSetupDialog open={setupOpen} onClose={() => setSetupOpen(false)} toast={toast} />
     </div>
   )
 }

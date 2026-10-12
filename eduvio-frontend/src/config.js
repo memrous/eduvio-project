@@ -6,6 +6,11 @@
 /** Base URL of the Laravel API, e.g. https://api.example.com/api */
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:80/api'
 
+/** STAG agent guide (AGENT.md in the repository), linked from the agent setup dialog */
+export const AGENT_GUIDE_URL =
+  import.meta.env.VITE_AGENT_GUIDE_URL ||
+  'https://github.com/memrous/eduvio-project/blob/main/stag_mock_import/AGENT.md'
+
 /**
  * Called once at startup. A production build must talk to the API over https:
  * the page itself is served over https (Vercel), so an http API would be blocked

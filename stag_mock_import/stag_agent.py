@@ -452,6 +452,9 @@ def run_sync(args, config: dict, home: Path) -> int:
             stag.odesli_rozvrh_do_laravelu(api_url, token, schedule)
         else:
             print("📭 Žádné rozvrhové události k odeslání.")
+        if student_info:
+            # Osobní číslo z ticketu: v režimu agent jinak backend studentské ID nezná
+            student_info = {**student_info, "osCislo": ticket["student_id"]}
         stag.odesli_info_studenta_bezpecne(api_url, token, student_info)
         stag.odesli_terminy_bezpecne(api_url, token, exam_terms)
     except LoginRequired:

@@ -9,7 +9,6 @@ import {
   Download,
   ExternalLink,
   Info,
-  X,
   ListChecks,
   Trash2,
 } from 'lucide-react'
@@ -20,6 +19,7 @@ import SubjectInfoPanel from './subject/SubjectInfoPanel'
 import SubjectExamTab from './subject/SubjectExamTab'
 import SubjectSyllabusTab from './subject/SubjectSyllabusTab'
 import ExpandableText from './common/ExpandableText'
+import InfoDialog from './common/InfoDialog'
 import Icon from './common/Icon'
 import { formatSemesterLabel } from '../utils/semester'
 import { getOwnDescription, getSafeHttpUrl, normalizeText } from '../utils/subjectDetails'
@@ -471,47 +471,24 @@ const SubjectDetailView = ({
       {actions.modals}
 
       {/* ABOUT DIALOG */}
-      {showInfo && aboutSections.length > 0 && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-scrim/60 p-4 backdrop-blur-sm"
-          onClick={() => setShowInfo(false)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-mono text-xs font-bold text-primary">{subject.code}</p>
-                <h2 className="text-lg font-semibold text-foreground">
-                  {t('academic:subjectDetail.infoDialog.title')}
-                </h2>
-              </div>
-              <button
-                onClick={() => setShowInfo(false)}
-                aria-label={t('academic:subjectDetail.infoDialog.close')}
-                className="flex size-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container hover:text-foreground"
-              >
-                <X className="size-4" />
-              </button>
+      <InfoDialog
+        open={showInfo && aboutSections.length > 0}
+        onClose={() => setShowInfo(false)}
+        eyebrow={subject.code}
+        title={t('academic:subjectDetail.infoDialog.title')}
+        closeLabel={t('academic:subjectDetail.infoDialog.close')}
+      >
+        {aboutSections.map(({ key, text }) => (
+          <section key={key}>
+            <h3 className="text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">
+              {t(`academic:subjectDetail.infoDialog.${key}`)}
+            </h3>
+            <div className="mt-1">
+              <ExpandableText text={text} />
             </div>
-            <div className="mt-4 flex flex-col gap-5 overflow-y-auto pr-1">
-              {aboutSections.map(({ key, text }) => (
-                <section key={key}>
-                  <h3 className="text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">
-                    {t(`academic:subjectDetail.infoDialog.${key}`)}
-                  </h3>
-                  <div className="mt-1">
-                    <ExpandableText text={text} />
-                  </div>
-                </section>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+          </section>
+        ))}
+      </InfoDialog>
     </div>
   )
 }

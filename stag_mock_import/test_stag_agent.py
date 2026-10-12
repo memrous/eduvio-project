@@ -406,7 +406,8 @@ class RunSyncTest(unittest.TestCase):
         self.assertEqual(code, stag_agent.EXIT_OK)
         sent = [c.kwargs["json"] for c in post.call_args_list if c.args[0].endswith("/stag/sync-student")]
         self.assertEqual(len(sent), 1)
-        self.assertEqual(set(sent[0]), set(test_import.INFO_STUDENTA_POLE))
+        self.assertEqual(set(sent[0]), set(test_import.INFO_STUDENTA_POLE) | {"osCislo"})
+        self.assertEqual(sent[0]["osCislo"], "R12345")
         self.assertEqual(sent[0]["typSpKey"], "7")
         self.assertEqual(sent[0]["studReferentkaEmail"], "jana.novakova@upol.cz")
         everything_posted = json.dumps([c.kwargs.get("json") for c in post.call_args_list], ensure_ascii=False)

@@ -27,6 +27,9 @@ class StagStudentController extends Controller
     /** Části jména studenta; ukládají se jen složené do users.stag_display_name. */
     private const NAME_FIELDS = ['titulPred', 'jmeno', 'prijmeni', 'titulZa'];
 
+    /** Osobní číslo (R26691) => users.stag_student_id; v režimu agent ho jinak nic nevyplní. */
+    private const STUDENT_ID_FIELD = 'osCislo';
+
     /**
      * POST /api/stag/sync-student
      * Uloží studijní údaje studenta; ukládá jen pole, která přišla.
@@ -40,7 +43,7 @@ class StagStudentController extends Controller
         }
 
         // Neznámá pole odmítneme celá, aby se citlivé údaje omylem nikdy neuložily
-        $unknown = array_diff(array_keys($payload), [...array_keys(self::FIELDS), ...self::NAME_FIELDS]);
+        $unknown = array_diff(array_keys($payload), [...array_keys(self::FIELDS), ...self::NAME_FIELDS, self::STUDENT_ID_FIELD]);
         if ($unknown !== []) {
             return response()->json([
                 'message' => 'Unknown fields are not accepted.',
@@ -64,6 +67,7 @@ class StagStudentController extends Controller
             'jmeno'                       => 'nullable|string|max:100',
             'prijmeni'                    => 'nullable|string|max:100',
             'titulZa'                     => 'nullable|string|max:100',
+            'osCislo'                     => ['nullable', 'string', 'max:20', 'regex:/^[A-Za-z0-9]+$/D'],
         ]);
 
         $user = $request->user();
@@ -86,6 +90,13 @@ class StagStudentController extends Controller
         if (array_intersect(self::NAME_FIELDS, array_keys($payload)) !== []) {
             $user->stag_display_name = self::displayName($payload);
             $updated[] = 'stag_display_name';
+        }
+
+        // Prázdné osobní číslo uložené ID nemaže
+        $studentId = is_string($payload[self::STUDENT_ID_FIELD] ?? null) ? trim($payload[self::STUDENT_ID_FIELD]) : '';
+        if ($studentId !== '') {
+            $user->stag_student_id = $studentId;
+            $updated[] = 'stag_student_id';
         }
 
         $user->study_info_synced_at = now();

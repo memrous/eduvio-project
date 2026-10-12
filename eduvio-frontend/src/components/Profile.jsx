@@ -418,7 +418,7 @@ const Profile = ({ user: initialUser }) => {
             <div className="space-y-6 page-section">
               <AccountTab effectiveUser={effectiveUser} />
 
-              <div className="grid gap-4 lg:grid-cols-2 pt-2">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 pt-2">
                 <StagIntegrationCard
                   effectiveUser={effectiveUser}
                   isStagConnected={isStagConnected}
