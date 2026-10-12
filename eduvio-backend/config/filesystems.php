@@ -17,6 +17,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Disk for uploaded materials
+    |--------------------------------------------------------------------------
+    |
+    | Private disk with the files users upload to their materials; they are
+    | streamed only through GET /api/materials/{id}/file. "local" (storage/
+    | app/private) for development, "s3" in production (e.g. Supabase Storage
+    | over its S3 API, see the AWS_* variables).
+    |
+    */
+
+    'materials_disk' => env('MATERIALS_DISK', 'local'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |

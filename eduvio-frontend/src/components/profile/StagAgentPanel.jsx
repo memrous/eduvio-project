@@ -16,6 +16,8 @@ import * as api from '../../services/api'
 import { STAG_STATUS_KEY } from '../../hooks/useStagStatus'
 import { getLocaleFromLanguage } from '../../utils/locale'
 import { formatDate, formatDateTime, formatRelativeTime } from '../../utils/relativeTime'
+import StagAgentSyncControl from './StagAgentSyncControl'
+import { isStagLoginNeeded } from '../../utils/stagAgent'
 
 const STALE_AFTER_MS = 14 * 24 * 60 * 60 * 1000
 
@@ -23,6 +25,7 @@ const AGENT_COMMANDS = [
   { key: 'setup', command: 'python3 stag_agent.py setup' },
   { key: 'login', command: 'python3 stag_agent.py login' },
   { key: 'sync', command: 'python3 stag_agent.py' },
+  { key: 'watch', command: 'python3 stag_agent.py watch' },
 ]
 
 const primaryButton =
@@ -156,7 +159,13 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
           <div className="text-label-sm text-error space-y-0.5">
             <p className="font-semibold">{t('stag.agent.status.title')} · {t('stag.agent.status.failed')}</p>
             <p>{t('stag.agent.status.lastSync')} {lastSync}</p>
-            {syncError && <p className="break-words">{t('stag.agent.status.error', { error: syncError })}</p>}
+            {syncError && (
+              <p className="break-words">
+                {isStagLoginNeeded(syncError)
+                  ? t('stag.agent.sync.loginNeeded')
+                  : t('stag.agent.status.error', { error: syncError })}
+              </p>
+            )}
           </div>
         </div>
       )
@@ -188,6 +197,9 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
   return (
     <div className="space-y-4">
       {statusBanner}
+
+      {/* Notebook agent: online state and "Sync now" */}
+      <StagAgentSyncControl />
 
       {agentToken && isStale && (
         <p className="flex items-start gap-2 text-xs text-on-surface-variant">

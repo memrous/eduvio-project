@@ -84,27 +84,69 @@ načíst, sync pokračuje a předmět se pošle bez těchto údajů (Eduvio nech
 dříve uložené hodnoty). `--dry-run` vypíše, u kolika předmětů se info
 a výsledek načetly.
 
-## 4. Pravidelné spouštění (Plánovač úloh ve Windows)
+## 4. Běh na pozadí (`watch`) – doporučeno
 
-Plánovač nemůže otevřít prohlížeč, proto se agent spouští s `--non-interactive`.
-V tomto režimu se na nic neptá. Když ticket vyprší, pošle report `failed`
-s hláškou „STAG ticket expired, run stag_agent.py login“ (uvidíš ji v profilu)
-a skončí s kódem 4. Pak stačí jednou ručně spustit `python3 stag_agent.py login`.
+```bash
+python3 stag_agent.py watch
+```
 
-Vytvoření úlohy (*Task Scheduler → Create Task*):
+Agent běží trvale a sám rozhoduje, kdy synchronizovat:
 
-- **Triggers**: např. denně v 7:00, nebo „At log on“ se zpožděním 5 minut
-  (než se připojí VPN).
-- **Actions → Start a program**:
-  - Program: `C:\Windows\System32\wsl.exe`
-  - Arguments:
-    ```
-    -d Ubuntu -- python3 /home/<uzivatel>/eduvio-project/stag_mock_import/stag_agent.py --non-interactive
-    ```
-- **General**: „Run only when user is logged on“ (agent čte konfiguraci
-  z domovské složky uživatele ve WSL).
+- Každých **90 s** se zeptá serveru (`GET /stag/agent/pending`), jestli jsi
+  v aplikaci nezmáčkl **Synchronizovat teď**. Server se k notebooku nikdy
+  nepřipojuje, ptá se jen agent. Aplikace podle těchto dotazů ukazuje
+  „Notebook online“ (dotaz za posledních 5 minut).
+- Sync spustí, když ho vyžádáš v aplikaci (do ~2 minut), nebo když od
+  posledního pokusu uplynul interval (výchozí **60 min**, změníš ho
+  v `~/.eduvio-agent/config.json` klíčem `"sync_interval_minutes": 30`).
+- Před syncem ověří, že je dostupné STAG WS. Když nejsi na **VPN UPOL / eduroamu**,
+  sync odloží: nic neposílá a vyžádaný sync počká, až se připojíš.
+- Když ticket do STAGu chybí nebo vypršel, otevře přihlášení do STAGu
+  v prohlížeči (nejvýš jednou za 12 hodin) a do té doby hlásí v aplikaci
+  „Přihlas se do STAGu na notebooku“. Přihlášení můžeš kdykoli udělat i ručně
+  příkazem `python3 stag_agent.py login`.
+- Výpadek sítě nebo serveru agenta neukončí: zkouší to dál s rostoucí pauzou
+  (90 s → 3 → 6 → max. 10 min).
+- Běží jen jedna instance (zámek `~/.eduvio-agent/agent.lock`). Další `watch`
+  skončí s kódem 5.
+- Log: `~/.eduvio-agent/agent.log` (rotuje se po ~1 MB, 2 zálohy). Tokeny ani
+  tickety v něm nejsou.
+- Ukončení: Ctrl+C, nebo `SIGTERM` (např. `pkill -f "stag_agent.py watch"`).
 
-Nebo z příkazové řádky:
+### Automatické spuštění ve Windows
+
+Skript ve složce `windows/` vytvoří v Plánovači úloh úlohu **Eduvio STAG agent**:
+spustí `wsl.exe -d <distro> -- python3 <cesta>/stag_agent.py watch` skrytě
+(bez okna konzole) **při přihlášení do Windows** a každých 15 minut ji zkusí
+spustit znovu, kdyby agent spadl.
+
+1. Ve WSL nejdřív jednou nastav agenta a přihlas se do STAGu (body 1 a 2).
+2. Otevři **PowerShell ve Windows** (Start → „PowerShell“, bez správce)
+   a spusť instalaci. `-ExecutionPolicy Bypass` povolí spuštění jen tohoto
+   skriptu, nastavení systému se nemění:
+
+   ```powershell
+   cd \\wsl.localhost\Ubuntu\home\<uzivatel>\eduvio-project\stag_mock_import\windows
+   powershell -ExecutionPolicy Bypass -File .\install-agent.ps1 -StartNow
+   ```
+
+   Distribuci WSL a cestu k agentovi skript zjistí z umístění skriptu. Jinak je
+   předej parametry `-Distro Ubuntu -AgentPath /home/<uzivatel>/eduvio-project/stag_mock_import/stag_agent.py`.
+   Na starších Windows bez `conhost --headless` použij `-NoHeadless`
+   (zůstane otevřené okno konzole).
+3. Do ~2 minut ukáže aplikace v profilu „Notebook online“.
+
+Odinstalace (zastaví i běžícího agenta, konfigurace a ticket zůstanou):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\uninstall-agent.ps1
+```
+
+### Alternativa: jednorázový sync v plánovači
+
+Bez `watch` jde agent spouštět i jednorázově s `--non-interactive`. Na nic se
+neptá a prohlížeč neotevře. Když ticket vyprší, pošle report `failed`
+s hláškou „STAG ticket expired, run stag_agent.py login“ a skončí s kódem 4.
 
 ```bat
 schtasks /Create /TN "Eduvio STAG sync" /SC DAILY /ST 07:00 ^
@@ -120,11 +162,12 @@ zkus ve `%UserProfile%\.wslconfig` nastavit `networkingMode=mirrored`
 
 | Kód | Význam | Report do aplikace |
 |---|---|---|
-| 0 | Synchronizace proběhla (nebo `--dry-run`, `setup`, `login` OK) | `success` (ne u `--dry-run`) |
+| 0 | Synchronizace proběhla (nebo `--dry-run`, `setup`, `login` OK; `watch` po Ctrl+C / SIGTERM) | `success` (ne u `--dry-run`) |
 | 1 | Synchronizace selhala (chyba STAG WS, API, sítě) | `failed` se stručnou chybou |
 | 2 | Nejsi připojený k síti UPOL (VPN) | neposílá se – nejde o chybu syncu |
 | 3 | Chyba konfigurace nebo API: chybí `setup`, neplatný/zrušený token, `http://` mimo localhost, API nedostupné | neposílá se |
-| 4 | Je potřeba se přihlásit do STAGu (`--non-interactive`, nebo se přihlášení nepodařilo) | `failed` („STAG ticket expired…“) |
+| 4 | Je potřeba se přihlásit do STAGu (`--non-interactive`, nebo se přihlášení nepodařilo) | `failed` („STAG ticket expired…“, ve `watch` „Přihlas se do STAGu na notebooku“) |
+| 5 | `watch` už běží (jiná instance drží zámek) | neposílá se |
 | 130 | Přerušeno uživatelem (Ctrl+C) | neposílá se |
 
 ## Bezpečnost

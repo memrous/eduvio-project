@@ -24,7 +24,7 @@ class MaterialManagementTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake('public');
+        Storage::fake('local');
         $this->user = $this->createUser('john');
         $this->subject = $this->createSubject($this->user, 'UNIXS');
     }
@@ -92,7 +92,7 @@ class MaterialManagementTest extends TestCase
 
     private function storedPath(Material $material): string
     {
-        return $material->storedFilePath();
+        return $material->file_path;
     }
 
     // ─── Editing own materials ──────────────────────────────────
@@ -152,7 +152,7 @@ class MaterialManagementTest extends TestCase
     {
         $material = $this->uploadFile('stare.pdf');
         $oldPath = $this->storedPath($material);
-        Storage::disk('public')->assertExists($oldPath);
+        Storage::disk('local')->assertExists($oldPath);
 
         $this->actingAs($this->user, 'sanctum')->post("/api/materials/{$material->id}", [
             '_method' => 'PATCH',
@@ -161,8 +161,8 @@ class MaterialManagementTest extends TestCase
         ], ['Accept' => 'application/json'])->assertOk()->assertJsonPath('file_name', 'nove.pdf');
 
         $material->refresh();
-        Storage::disk('public')->assertMissing($oldPath);
-        Storage::disk('public')->assertExists($this->storedPath($material));
+        Storage::disk('local')->assertMissing($oldPath);
+        Storage::disk('local')->assertExists($this->storedPath($material));
         $this->assertSame('Slajdy 2026', $material->title);
     }
 
@@ -217,7 +217,7 @@ class MaterialManagementTest extends TestCase
         $this->actingAs($this->user, 'sanctum')->deleteJson("/api/materials/{$material->id}")->assertOk();
 
         $this->assertModelMissing($material);
-        Storage::disk('public')->assertMissing($path);
+        Storage::disk('local')->assertMissing($path);
     }
 
     public function test_deleting_own_link_works(): void

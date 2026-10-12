@@ -84,7 +84,10 @@
     "pleaseDownload": "Soubor si prosím stáhněte a otevřete ve svém zařízení.",
     "noPreview": "Pro tento typ souboru není náhled k dispozici.",
     "loadTextError": "Nepodařilo se načíst textový soubor.",
-    "loadDocxError": "Nepodařilo se načíst soubor DOCX."
+    "loadDocxError": "Nepodařilo se načíst soubor DOCX.",
+    "loadingFile": "Načítám soubor...",
+    "loadFileError": "Soubor se nepodařilo načíst.",
+    "downloadFailed": "Soubor se nepodařilo stáhnout."
   },
   "emptyState": {
     "title": "Žádné materiály neodpovídají vašemu vyhledávání",

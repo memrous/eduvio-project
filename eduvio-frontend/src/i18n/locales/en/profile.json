@@ -125,6 +125,21 @@
       "agentMode": "In this installation IS/STAG is synced by the agent on your computer. Signing in or syncing from the server is not available here."
     },
     "agent": {
+      "sync": {
+        "title": "Notebook with the agent",
+        "online": "Notebook online",
+        "offline": "Notebook offline – last seen {{time}}",
+        "neverSeen": "The notebook has not connected yet",
+        "syncNow": "Sync now",
+        "waitingOnline": "Waiting for the notebook…",
+        "waitingOffline": "Runs as soon as the notebook is online.",
+        "done": "STAG sync finished.",
+        "tooSoon": "A sync is already requested. Try again in {{seconds}} s.",
+        "requestFailed": "The sync could not be requested.",
+        "notConfigured": "Create an agent token and set up the agent on your notebook first.",
+        "loginNeeded": "Log in to STAG on your notebook",
+        "loginNeededHint": "The agent opened the STAG login in the notebook's browser. You can also run python3 stag_agent.py login there."
+      },
       "card": {
         "subtitle": "Synced by the agent on your computer",
         "helper": "IS/STAG is only reachable from the UPOL network (VPN). The agent on your computer downloads your schedule and subjects and sends them to Eduvio using an agent token. The token can only upload STAG data."
@@ -171,8 +186,9 @@
         "setup": "Setup – enter the Eduvio address and the agent token:",
         "login": "Sign in to IS/STAG (opens a browser):",
         "sync": "Sync – run it on a computer connected to the UPOL VPN:",
+        "watch": "Background mode – syncs on \"Sync now\" and regularly (on Windows, windows/install-agent.ps1 starts it at logon):",
         "copyLabel": "Copy command {{command}}",
-        "footer": "The agent lives in the stag_mock_import folder. See AGENT.md for the full guide, including scheduled runs."
+        "footer": "The agent lives in the stag_mock_import folder. See AGENT.md for the full guide, including starting it automatically on Windows."
       },
       "copy": "Copy",
       "copied": "Copied to clipboard.",

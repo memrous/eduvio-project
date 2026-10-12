@@ -15,6 +15,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useAuth } from '../context/AuthContext'
+import { useAppConfig } from '../hooks/useAppConfig'
 import logoImg from '../assets/images/logo.png'
 
 // ── Left brand panel feature list ────────────────────────────────
@@ -36,6 +37,7 @@ const validate = (email, password) => {
 const LoginPage = () => {
   const { login, isAuthenticated, isLoading: authLoading } = useAuth()
   const { t } = useTranslation('auth')
+  const { registrationEnabled } = useAppConfig()
 
   const [email,       setEmail]       = useState('')
   const [password,    setPassword]    = useState('')
@@ -241,13 +243,19 @@ const LoginPage = () => {
             </button>
           </form>
 
-          {/* Register link */}
-          <p className="text-body-md text-on-surface-variant text-center">
-            {t('login.links.noAccount')}{' '}
-            <Link to="/register" className="text-primary font-semibold hover:underline">
-              {t('login.links.createOne')}
-            </Link>
-          </p>
+          {/* Register link (only when the backend allows registration) */}
+          {registrationEnabled ? (
+            <p className="text-body-md text-on-surface-variant text-center">
+              {t('login.links.noAccount')}{' '}
+              <Link to="/register" className="text-primary font-semibold hover:underline">
+                {t('login.links.createOne')}
+              </Link>
+            </p>
+          ) : (
+            <p className="text-body-md text-on-surface-variant text-center">
+              {t('login.links.registrationClosed')}
+            </p>
+          )}
         </div>
       </div>
     </div>

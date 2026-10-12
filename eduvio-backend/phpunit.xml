@@ -32,5 +32,6 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="STAG_MODE" value="server"/>
+        <env name="REGISTRATION_ENABLED" value="true"/>
     </php>
 </phpunit>

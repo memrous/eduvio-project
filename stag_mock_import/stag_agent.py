@@ -13,21 +13,29 @@ Použití:
     python3 stag_agent.py                 # synchronizace
     python3 stag_agent.py --dry-run       # stáhne a převede data, nic neposílá
     python3 stag_agent.py --non-interactive   # pro plánovač úloh
+    python3 stag_agent.py watch           # trvale na pozadí: sync na požadavek z aplikace a pravidelně
 
 Viz AGENT.md.
 """
 
 import argparse
 import base64
+import contextlib
 import getpass
+import io
 import json
+import logging
+import logging.handlers
 import os
+import platform
 import re
+import signal
+import subprocess
 import sys
 import threading
 import time
 import webbrowser
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, quote, urlparse
@@ -50,6 +58,7 @@ EXIT_SYNC_FAILED = 1
 EXIT_NO_VPN = 2
 EXIT_CONFIG = 3
 EXIT_LOGIN_REQUIRED = 4
+EXIT_ALREADY_RUNNING = 5
 EXIT_INTERRUPTED = 130
 
 
@@ -120,6 +129,8 @@ def save_config(config: dict, home: Path = AGENT_HOME) -> None:
         "api_url": config.get("api_url", ""),
         "agent_token": config.get("agent_token", ""),
         "stag_ws_base_url": config.get("stag_ws_base_url") or DEFAULT_STAG_WS_BASE_URL,
+        # Volitelné: jak často `watch` synchronizuje bez požadavku z aplikace (minuty)
+        **({"sync_interval_minutes": config["sync_interval_minutes"]} if config.get("sync_interval_minutes") else {}),
     })
 
 
@@ -402,7 +413,7 @@ def run_sync(args, config: dict, home: Path) -> int:
             raw_subjects = fetch_subjects(ticket, ws_base_url, semestr)
         except LoginRequired:
             if args.non_interactive:
-                return fail(TICKET_EXPIRED_MESSAGE, EXIT_LOGIN_REQUIRED)
+                return fail(getattr(args, "login_required_message", TICKET_EXPIRED_MESSAGE), EXIT_LOGIN_REQUIRED)
             print("🔑 STAG ticket chybí nebo vypršel, je potřeba se přihlásit.")
             ticket = login(config, home)
             secrets.append(ticket["ticket"])
@@ -444,7 +455,7 @@ def run_sync(args, config: dict, home: Path) -> int:
         stag.odesli_info_studenta_bezpecne(api_url, token, student_info)
         stag.odesli_terminy_bezpecne(api_url, token, exam_terms)
     except LoginRequired:
-        return fail(TICKET_EXPIRED_MESSAGE, EXIT_LOGIN_REQUIRED)
+        return fail(getattr(args, "login_required_message", TICKET_EXPIRED_MESSAGE), EXIT_LOGIN_REQUIRED)
     except stag.StagWsError as e:
         # Celé tělo odpovědi do reportu nepatří, stačí stav
         return fail(f"STAG WS vrátilo chybu (Status: {e.status_code})")
@@ -460,6 +471,378 @@ def run_sync(args, config: dict, home: Path) -> int:
     # 5. Report
     send_report(api_url, token, "success")
     print("✅ Synchronizace dokončena.")
+    return EXIT_OK
+
+
+# ── Režim watch: agent na pozadí ────────────────────────────────────
+#
+# `stag_agent.py watch` běží trvale (Plánovač úloh ho spouští při přihlášení).
+# Každých POLL_SECONDS se zeptá serveru (GET /stag/agent/pending), jestli
+# uživatel v aplikaci nechtěl sync, a podle toho nebo podle intervalu spustí
+# stejný sync jako `stag_agent.py --non-interactive`. Server se k notebooku
+# nikdy nepřipojuje.
+
+DEFAULT_SYNC_INTERVAL_MINUTES = 60
+POLL_SECONDS = 90
+MAX_BACKOFF_SECONDS = 10 * 60
+LOGIN_PROMPT_INTERVAL = timedelta(hours=12)
+WATCH_LOGIN_WAIT_SECONDS = 5 * 60
+LOGIN_NEEDED_MESSAGE = "Přihlas se do STAGu na notebooku"
+STATE_FILE = "state.json"
+LOG_FILE = "agent.log"
+LOCK_FILE = "agent.lock"
+LOG_MAX_BYTES = 1_000_000
+LOG_BACKUPS = 2
+
+
+class SyncDecision:
+    """Co má watch udělat: sync / postpone (STAG nedostupné) / idle."""
+
+    SYNC, POSTPONE, IDLE = "sync", "postpone", "idle"
+
+    def __init__(self, action: str, reason=None):
+        self.action = action
+        self.reason = reason  # "requested" | "interval" | None
+
+    def __eq__(self, other):
+        return isinstance(other, SyncDecision) and (self.action, self.reason) == (other.action, other.reason)
+
+    def __repr__(self):
+        return f"SyncDecision({self.action!r}, {self.reason!r})"
+
+
+def decide_sync(now: datetime, sync_requested: bool, last_attempt_at, interval_minutes: int,
+                stag_reachable) -> SyncDecision:
+    """Kdy synchronizovat.
+
+    Sync je na řadě, když ho uživatel vyžádal v aplikaci, nebo když od posledního
+    pokusu (úspěšného i neúspěšného) uplynul interval. Dostupnost STAG WS
+    (VPN / eduroam) se zjišťuje až tehdy (`stag_reachable` je funkce) – bez ní se
+    sync odloží a požadavek ze serveru zůstane čekat.
+    """
+    if sync_requested:
+        reason = "requested"
+    elif last_attempt_at is None or now - last_attempt_at >= timedelta(minutes=interval_minutes):
+        reason = "interval"
+    else:
+        return SyncDecision(SyncDecision.IDLE)
+
+    if not stag_reachable():
+        return SyncDecision(SyncDecision.POSTPONE, reason)
+    return SyncDecision(SyncDecision.SYNC, reason)
+
+
+def backoff_delay(failures: int, base: int = POLL_SECONDS, cap: int = MAX_BACKOFF_SECONDS) -> int:
+    """Pauza před dalším dotazem: bez chyby `base`, po chybách exponenciálně až do `cap`."""
+    if failures <= 0:
+        return base
+    return min(cap, base * 2 ** failures)
+
+
+def should_prompt_login(now: datetime, last_prompt_at) -> bool:
+    """Prohlížeč s přihlášením do STAGu se otevře nejvýš jednou za 12 hodin."""
+    return last_prompt_at is None or now - last_prompt_at >= LOGIN_PROMPT_INTERVAL
+
+
+# ── Stav, zámek, log ────────────────────────────────────────────────
+
+def _parse_time(value):
+    try:
+        return datetime.fromisoformat(value) if value else None
+    except ValueError:
+        return None
+
+
+def load_state(home: Path) -> dict:
+    raw = read_json(home / STATE_FILE) or {}
+    return {key: _parse_time(raw.get(key)) for key in ("last_attempt_at", "last_success_at", "last_login_prompt_at")}
+
+
+def save_state(state: dict, home: Path) -> None:
+    write_private_json(home / STATE_FILE, {key: value.isoformat() if value else None for key, value in state.items()})
+
+
+class AgentLock:
+    """Jen jedna běžící instance `watch` (zámek souboru, uvolní se i při pádu procesu)."""
+
+    def __init__(self, path: Path):
+        self.path = path
+        self._fd = None
+
+    def acquire(self) -> bool:
+        ensure_agent_home(self.path.parent)
+        fd = os.open(self.path, os.O_RDWR | os.O_CREAT, 0o600)
+        try:
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            os.close(fd)
+            return False
+        os.ftruncate(fd, 0)
+        os.write(fd, str(os.getpid()).encode())
+        self._fd = fd
+        return True
+
+    def release(self) -> None:
+        if self._fd is None:
+            return
+        try:
+            if os.name == "nt":
+                import msvcrt
+                os.lseek(self._fd, 0, os.SEEK_SET)
+                msvcrt.locking(self._fd, msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(self._fd, fcntl.LOCK_UN)
+        finally:
+            os.close(self._fd)
+            self._fd = None
+
+    def __enter__(self):
+        if not self.acquire():
+            raise AgentError("Agent už běží (jiná instance `watch` drží zámek).", EXIT_ALREADY_RUNNING)
+        return self
+
+    def __exit__(self, *exc):
+        self.release()
+
+
+class MaskingFilter(logging.Filter):
+    """Maskuje token agenta, ticket a vše, co tak vypadá, v každém záznamu logu."""
+
+    def __init__(self, secrets_fn):
+        super().__init__()
+        self._secrets_fn = secrets_fn
+
+    def filter(self, record):
+        record.msg = mask_secrets(record.getMessage(), [s for s in self._secrets_fn() if s])
+        record.args = ()
+        return True
+
+
+def setup_logger(home: Path, secrets_fn, console: bool = True) -> logging.Logger:
+    """Log do ~/.eduvio-agent/agent.log s rotací (~1 MB, 2 zálohy), bez tajných hodnot."""
+    ensure_agent_home(home)
+    log_path = home / LOG_FILE
+    if not log_path.exists():
+        os.close(os.open(log_path, os.O_WRONLY | os.O_CREAT, 0o600))
+
+    logger = logging.getLogger(f"eduvio-agent:{home}")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    for handler in list(logger.handlers):
+        logger.removeHandler(handler)
+        handler.close()
+    for flt in list(logger.filters):
+        logger.removeFilter(flt)
+    logger.addFilter(MaskingFilter(secrets_fn))
+
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    file_handler = logging.handlers.RotatingFileHandler(
+        log_path, maxBytes=LOG_MAX_BYTES, backupCount=LOG_BACKUPS, encoding="utf-8",
+    )
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    if console:
+        stream = logging.StreamHandler(sys.stderr)
+        stream.setFormatter(formatter)
+        logger.addHandler(stream)
+    return logger
+
+
+class _LogWriter(io.TextIOBase):
+    """Přesměruje print() ze syncu do logu (po řádcích, přes maskování)."""
+
+    def __init__(self, logger: logging.Logger, level: int):
+        self._logger = logger
+        self._level = level
+        self._buffer = ""
+
+    def write(self, text):
+        self._buffer += text
+        while "\n" in self._buffer:
+            line, self._buffer = self._buffer.split("\n", 1)
+            if line.strip():
+                self._logger.log(self._level, line.strip())
+        return len(text)
+
+    def flush(self):
+        if self._buffer.strip():
+            self._logger.log(self._level, self._buffer.strip())
+        self._buffer = ""
+
+
+# ── Server a STAG ───────────────────────────────────────────────────
+
+def fetch_pending(api_url: str, token: str) -> dict:
+    """GET /stag/agent/pending → {sync_requested, requested_at}. Chyby vyhazuje."""
+    response = requests.get(f"{api_url}/stag/agent/pending", headers=_auth_headers(token), timeout=10)
+    if response.status_code in (401, 403):
+        raise AgentError("Token agenta je neplatný nebo zrušený (vytvoř nový v profilu a spusť setup).", EXIT_CONFIG)
+    if response.status_code != 200:
+        raise AgentError(f"Eduvio API vrátilo stav {response.status_code}.", EXIT_SYNC_FAILED)
+    data = response.json()
+    return data if isinstance(data, dict) else {}
+
+
+def is_stag_reachable(ws_base_url: str) -> bool:
+    try:
+        check_vpn(ws_base_url)
+        return True
+    except AgentError:
+        return False
+
+
+def _is_wsl() -> bool:
+    return "microsoft" in platform.uname().release.lower()
+
+
+def open_browser(url: str) -> None:
+    """Ve WSL otevře prohlížeč ve Windows, jinde výchozí prohlížeč systému."""
+    if _is_wsl():
+        for command in (["wslview", url], ["explorer.exe", url]):
+            try:
+                subprocess.run(command, check=False, timeout=15,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return
+            except (OSError, subprocess.SubprocessError):
+                continue
+    webbrowser.open(url)
+
+
+def browser_login(config: dict, home: Path, logger: logging.Logger, stop: threading.Event,
+                  timeout: int = WATCH_LOGIN_WAIT_SECONDS):
+    """Přihlášení bez terminálu: otevře STAG login a čeká na localhost callback."""
+    result = {}
+    callback_done = threading.Event()
+    server = HTTPServer(("127.0.0.1", 0), _make_callback_handler(home, result, callback_done))
+    port = server.server_address[1]
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        logger.info("Otevírám přihlášení do STAGu v prohlížeči (čekám max. %d min).", timeout // 60)
+        open_browser(build_login_url(config["stag_ws_base_url"], f"http://localhost:{port}/callback"))
+        deadline = time.monotonic() + timeout
+        while not callback_done.wait(timeout=1) and not stop.is_set() and time.monotonic() < deadline:
+            pass
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    if "ticket" in result:
+        logger.info("Přihlášení do STAGu dokončeno.")
+        return result["ticket"]
+    if "error" in result:
+        logger.warning("Přihlášení do STAGu se nepodařilo: %s", result["error"])
+    else:
+        logger.info("Přihlášení do STAGu nedokončeno; další pokus nejdřív za 12 h nebo po `stag_agent.py login`.")
+    return None
+
+
+# ── Smyčka ──────────────────────────────────────────────────────────
+
+def _watch_sync_args():
+    return argparse.Namespace(
+        dry_run=False, non_interactive=True, api_url=None, login_required_message=LOGIN_NEEDED_MESSAGE,
+    )
+
+
+def _run_sync_logged(config: dict, home: Path, logger: logging.Logger) -> int:
+    out, err = _LogWriter(logger, logging.INFO), _LogWriter(logger, logging.WARNING)
+    try:
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            return run_sync(_watch_sync_args(), config, home)
+    except AgentError as e:
+        logger.warning("%s", e)
+        return e.exit_code
+    finally:
+        out.flush()
+        err.flush()
+
+
+def watch_sync(config: dict, home: Path, logger: logging.Logger, stop: threading.Event, reason: str,
+               now_fn=lambda: datetime.now(timezone.utc)) -> int:
+    """Jeden sync ve watch: zapíše stav a při chybějícím ticketu nabídne login."""
+    logger.info("Synchronizuji (%s).", "požadavek z aplikace" if reason == "requested" else "pravidelný interval")
+    state = load_state(home)
+    code = _run_sync_logged(config, home, logger)
+    now = now_fn()
+
+    if code == EXIT_NO_VPN:
+        # VPN spadla mezi kontrolou a syncem: jako odložení, nic se nezapočítá
+        logger.info("STAG WS nedostupné, sync odložen.")
+        return code
+
+    state["last_attempt_at"] = now
+    if code == EXIT_OK:
+        state["last_success_at"] = now
+    save_state(state, home)
+
+    if code == EXIT_LOGIN_REQUIRED and should_prompt_login(now, state["last_login_prompt_at"]):
+        state["last_login_prompt_at"] = now
+        save_state(state, home)
+        if browser_login(config, home, logger, stop) and not stop.is_set():
+            return watch_sync(config, home, logger, stop, reason, now_fn)
+    return code
+
+
+def cmd_watch(config: dict, home: Path = AGENT_HOME, stop: threading.Event = None) -> int:
+    api_url = validate_api_url(config.get("api_url"))
+    token = config.get("agent_token")
+    if not token:
+        raise AgentError("Chybí token agenta. Spusť `python3 stag_agent.py setup`.", EXIT_CONFIG)
+    interval = int(config.get("sync_interval_minutes") or DEFAULT_SYNC_INTERVAL_MINUTES)
+    ws_base_url = config["stag_ws_base_url"]
+
+    logger = setup_logger(home, lambda: [token, (load_ticket(home) or {}).get("ticket")])
+    stop = stop or threading.Event()
+
+    with AgentLock(home / LOCK_FILE):
+        def handle_signal(signum, frame):
+            stop.set()
+
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            try:
+                signal.signal(sig, handle_signal)
+            except (ValueError, OSError):
+                pass  # mimo hlavní vlákno (testy) signály nenastavujeme
+
+        logger.info("Agent běží na pozadí: API %s, kontrola každých %d s, sync aspoň každých %d min.",
+                    api_url, POLL_SECONDS, interval)
+        failures = 0
+        while not stop.is_set():
+            try:
+                pending = fetch_pending(api_url, token)
+            except (requests.RequestException, AgentError, ValueError) as e:
+                failures += 1
+                delay = backoff_delay(failures)
+                logger.warning("Server nedostupný (%s); další pokus za %d s.",
+                               e if isinstance(e, AgentError) else type(e).__name__, delay)
+                stop.wait(delay)
+                continue
+
+            decision = decide_sync(
+                datetime.now(timezone.utc), bool(pending.get("sync_requested")),
+                load_state(home)["last_attempt_at"], interval,
+                lambda: is_stag_reachable(ws_base_url),
+            )
+            if decision.action == SyncDecision.POSTPONE:
+                logger.info("STAG WS nedostupné (VPN / eduroam?), %s sync odložen.",
+                            "vyžádaný" if decision.reason == "requested" else "pravidelný")
+            elif decision.action == SyncDecision.SYNC:
+                code = watch_sync(config, home, logger, stop, decision.reason)
+                if code == EXIT_CONFIG:
+                    # Neplatný token apod.: nezahlcovat server, zpomalit jako při výpadku
+                    failures += 1
+                    stop.wait(backoff_delay(failures))
+                    continue
+            failures = 0
+            stop.wait(POLL_SECONDS)
+
+        logger.info("Agent ukončen.")
     return EXIT_OK
 
 
@@ -504,7 +887,7 @@ def cmd_setup(home: Path) -> int:
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description="Eduvio STAG agent — synchronizace STAGu přes VPN UPOL.")
-    parser.add_argument("command", nargs="?", choices=["sync", "setup", "login"], default="sync")
+    parser.add_argument("command", nargs="?", choices=["sync", "setup", "login", "watch"], default="sync")
     parser.add_argument("--non-interactive", action="store_true",
                         help="nikdy neotevírat prohlížeč ani se na nic neptat (plánovač úloh)")
     parser.add_argument("--dry-run", action="store_true", help="stáhnout a převést data, nic neposílat")
@@ -528,6 +911,11 @@ def main(argv=None, home: Path = AGENT_HOME) -> int:
             check_vpn(config["stag_ws_base_url"])
             login(config, home)
             return EXIT_OK
+
+        if args.command == "watch":
+            if args.dry_run:
+                raise AgentError("watch nejde s --dry-run.", EXIT_CONFIG)
+            return cmd_watch(config, home)
 
         return run_sync(args, config, home)
     except AgentError as e:

@@ -171,6 +171,12 @@ export const register = async (...args) => {
   return success({ user: sanitizeUser(newUser), token })
 }
 
+// Registration is always open in the mock
+export const getAppConfig = async () => {
+  await delay(50)
+  return success({ registration: { enabled: true, allowed_domains: [] } })
+}
+
 export const checkAvailability = async ({ email, username }) => {
   await delay(MOCK_DELAY)
 
@@ -329,6 +335,10 @@ export const getStagSyncStatus = async () => {
       stag_sync_error: currentUser.stag_sync_error ?? null,
       next_allowed_at: null,
       agent_token: agentToken,
+      // The mock has no agent polling; window.__eduvioMock.stagAgentReport() finishes a request
+      agent_online: false,
+      agent_last_seen_at: null,
+      sync_requested_at: currentUser.stag_sync_requested_at ?? null,
     })
   }
 
@@ -382,6 +392,8 @@ const mockStagAgentReport = (status = 'success', error = null) => {
   if (!hasValidAgentToken(currentUser)) return false
 
   currentUser.stag_agent_token.last_used_at = new Date().toISOString()
+  // Like the backend: a report finishes a sync requested from the app
+  currentUser.stag_sync_requested_at = null
   currentUser.stag_sync_status = status
   if (status === 'success') {
     currentUser.stag_synced_at = new Date().toISOString()
@@ -394,6 +406,16 @@ const mockStagAgentReport = (status = 'success', error = null) => {
 
 if (import.meta.env.VITE_USE_MOCK === 'true' && import.meta.env.DEV && typeof window !== 'undefined') {
   window.__eduvioMock = { ...(window.__eduvioMock ?? {}), stagAgentReport: mockStagAgentReport }
+}
+
+export const requestStagSync = async () => {
+  await delay(200)
+  const currentUser = getCurrentMockUser()
+  if (!currentUser) return failure('unauthorized')
+  if (MOCK_STAG_MODE !== 'agent') return resyncStag()
+  if (!isStagConnected(currentUser)) return failure('agent_not_configured')
+  currentUser.stag_sync_requested_at = new Date().toISOString()
+  return success({ sync_requested_at: currentUser.stag_sync_requested_at, agent_online: false })
 }
 
 export const resyncStag = async () => {
@@ -573,6 +595,18 @@ export const updateEventStatus = async (userId, eventId, status) => {
   localStorage.setItem(key, JSON.stringify(updatedList))
   const updatedEvent = updatedList.find((e) => e.id === Number(eventId))
   return success(updatedEvent)
+}
+
+// The mock keeps no file contents (no File objects in localStorage), only its URL if any
+export const getMaterialFile = async (resource) => {
+  if (!resource?.url) return failure('not_found')
+  try {
+    const res = await fetch(resource.url)
+    if (!res.ok) return failure('not_found')
+    return success(await res.blob())
+  } catch {
+    return failure('network_error')
+  }
 }
 
 export const getResources = async (userId) => {

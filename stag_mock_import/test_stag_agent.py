@@ -836,5 +836,221 @@ class ExamTermTransformTest(unittest.TestCase):
             fetch({"neco": "jineho"})
 
 
+# ── Režim watch ─────────────────────────────────────────────────────
+
+NOW = stag_agent.datetime(2026, 10, 13, 12, 0, tzinfo=stag_agent.timezone.utc)
+MINUTE = stag_agent.timedelta(minutes=1)
+
+
+class DecideSyncTest(unittest.TestCase):
+    def decide(self, requested=False, last_attempt=None, reachable=True, interval=60):
+        calls = []
+
+        def reachable_fn():
+            calls.append(1)
+            return reachable
+
+        decision = stag_agent.decide_sync(NOW, requested, last_attempt, interval, reachable_fn)
+        return decision, len(calls)
+
+    def test_request_from_the_app_syncs_even_right_after_a_sync(self):
+        decision, _ = self.decide(requested=True, last_attempt=NOW - MINUTE)
+        self.assertEqual(decision, stag_agent.SyncDecision("sync", "requested"))
+
+    def test_interval_elapsed_syncs(self):
+        decision, _ = self.decide(last_attempt=NOW - 60 * MINUTE)
+        self.assertEqual(decision, stag_agent.SyncDecision("sync", "interval"))
+
+    def test_first_run_syncs(self):
+        decision, _ = self.decide(last_attempt=None)
+        self.assertEqual(decision, stag_agent.SyncDecision("sync", "interval"))
+
+    def test_nothing_to_do_does_not_even_check_stag(self):
+        decision, checks = self.decide(last_attempt=NOW - 59 * MINUTE)
+        self.assertEqual(decision, stag_agent.SyncDecision("idle"))
+        self.assertEqual(checks, 0)
+
+    def test_custom_interval(self):
+        decision, _ = self.decide(last_attempt=NOW - 15 * MINUTE, interval=15)
+        self.assertEqual(decision.action, "sync")
+
+    def test_without_vpn_the_sync_is_postponed(self):
+        decision, _ = self.decide(requested=True, reachable=False)
+        self.assertEqual(decision, stag_agent.SyncDecision("postpone", "requested"))
+        decision, _ = self.decide(last_attempt=None, reachable=False)
+        self.assertEqual(decision, stag_agent.SyncDecision("postpone", "interval"))
+
+
+class BackoffTest(unittest.TestCase):
+    def test_normal_poll_then_exponential_up_to_ten_minutes(self):
+        delays = [stag_agent.backoff_delay(n) for n in range(6)]
+        self.assertEqual(delays, [90, 180, 360, 600, 600, 600])
+
+    def test_never_above_the_cap(self):
+        self.assertEqual(stag_agent.backoff_delay(50), stag_agent.MAX_BACKOFF_SECONDS)
+
+
+class LoginPromptTest(unittest.TestCase):
+    def test_at_most_once_in_twelve_hours(self):
+        self.assertTrue(stag_agent.should_prompt_login(NOW, None))
+        self.assertFalse(stag_agent.should_prompt_login(NOW, NOW - 11 * 60 * MINUTE))
+        self.assertTrue(stag_agent.should_prompt_login(NOW, NOW - 12 * 60 * MINUTE))
+
+
+class WatchLogTest(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.home = Path(self._tmp.name) / "agent"
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_log_never_contains_token_or_ticket(self):
+        logger = stag_agent.setup_logger(self.home, lambda: [TOKEN, TICKET], console=False)
+        logger.info("token %s ticket %s", TOKEN, TICKET)
+        logger.warning("Authorization: Bearer some-other-token")
+        logger.info("callback?stagUserTicket=abc123&x=1 and 7|%s", "Z" * 40)
+        # print() from the sync goes through the same logger
+        writer = stag_agent._LogWriter(logger, stag_agent.logging.INFO)
+        writer.write(f"sending {TOKEN}\npartial {TICKET}")
+        writer.flush()
+        for handler in logger.handlers:
+            handler.flush()
+
+        log = (self.home / stag_agent.LOG_FILE).read_text(encoding="utf-8")
+        for secret in (TOKEN, TICKET, "some-other-token", "abc123", "Z" * 40):
+            self.assertNotIn(secret, log)
+        self.assertIn("***", log)
+        self.assertIn("sending", log)
+        self.assertEqual(stat.S_IMODE(os.stat(self.home / stag_agent.LOG_FILE).st_mode), 0o600)
+
+    def test_log_rotates_at_about_one_megabyte(self):
+        logger = stag_agent.setup_logger(self.home, lambda: [], console=False)
+        handler = logger.handlers[0]
+        self.assertIsInstance(handler, stag_agent.logging.handlers.RotatingFileHandler)
+        self.assertEqual(handler.maxBytes, 1_000_000)
+        self.assertGreaterEqual(handler.backupCount, 1)
+
+
+class AgentLockTest(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmp.name) / "agent" / stag_agent.LOCK_FILE
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_only_one_instance(self):
+        first, second = stag_agent.AgentLock(self.path), stag_agent.AgentLock(self.path)
+        self.assertTrue(first.acquire())
+        self.assertFalse(second.acquire())
+        first.release()
+        self.assertTrue(second.acquire())
+        second.release()
+
+    def test_context_manager_refuses_a_second_instance(self):
+        with stag_agent.AgentLock(self.path):
+            with self.assertRaises(stag_agent.AgentError) as ctx:
+                with stag_agent.AgentLock(self.path):
+                    pass
+            self.assertEqual(ctx.exception.exit_code, stag_agent.EXIT_ALREADY_RUNNING)
+        # Released after the block
+        with stag_agent.AgentLock(self.path):
+            pass
+
+
+class _CountingStop(stag_agent.threading.Event):
+    """Stop event whose wait() records the delay and stops the loop after `limit` waits."""
+
+    def __init__(self, limit):
+        super().__init__()
+        self.limit = limit
+        self.delays = []
+
+    def wait(self, timeout=None):
+        self.delays.append(timeout)
+        if len(self.delays) >= self.limit:
+            self.set()
+        return self.is_set()
+
+
+class WatchLoopTest(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.home = Path(self._tmp.name) / "agent"
+        self.config = {
+            "api_url": "https://eduvio.example/api",
+            "agent_token": TOKEN,
+            "stag_ws_base_url": "https://stag.example/ws",
+        }
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    @staticmethod
+    def quiet_logger():
+        logger = stag_agent.logging.getLogger("eduvio-agent-test")
+        logger.propagate = False
+        if not logger.handlers:
+            logger.addHandler(stag_agent.logging.NullHandler())
+        return logger
+
+    def run_watch(self, pending, reachable=True, sync_code=stag_agent.EXIT_OK, waits=2):
+        stop = _CountingStop(waits)
+        run_sync = mock.Mock(return_value=sync_code)
+        with mock.patch.object(stag_agent, "fetch_pending", side_effect=pending), \
+             mock.patch.object(stag_agent, "is_stag_reachable", return_value=reachable), \
+             mock.patch.object(stag_agent, "run_sync", run_sync), \
+             mock.patch.object(stag_agent, "browser_login", return_value=None) as login, \
+             mock.patch.object(stag_agent, "setup_logger", lambda home, secrets_fn: self.quiet_logger()):
+            code = stag_agent.cmd_watch(self.config, self.home, stop)
+        return code, stop.delays, run_sync, login
+
+    def test_server_outage_does_not_stop_the_loop_and_backs_off(self):
+        code, delays, run_sync, _ = self.run_watch(
+            pending=[requests.ConnectionError("down"), requests.ConnectionError("down"), {"sync_requested": False}],
+            waits=3,
+        )
+        self.assertEqual(code, stag_agent.EXIT_OK)
+        self.assertEqual(delays[:2], [180, 360])
+        run_sync.assert_called_once()  # first successful poll: interval due (never synced)
+
+    def test_requested_sync_runs_and_is_recorded(self):
+        _, delays, run_sync, _ = self.run_watch(pending=[{"sync_requested": True}], waits=1)
+        run_sync.assert_called_once()
+        self.assertTrue(run_sync.call_args.args[0].non_interactive)
+        self.assertEqual(run_sync.call_args.args[0].login_required_message, stag_agent.LOGIN_NEEDED_MESSAGE)
+        state = stag_agent.load_state(self.home)
+        self.assertIsNotNone(state["last_success_at"])
+        self.assertEqual(delays, [stag_agent.POLL_SECONDS])
+
+    def test_without_vpn_nothing_runs_and_nothing_is_reported(self):
+        post = mock.Mock()
+        with mock.patch("requests.post", post):
+            _, _, run_sync, _ = self.run_watch(pending=[{"sync_requested": True}], reachable=False, waits=1)
+        run_sync.assert_not_called()
+        post.assert_not_called()
+        self.assertIsNone(stag_agent.load_state(self.home)["last_attempt_at"])
+
+    def test_missing_ticket_opens_login_at_most_once_in_twelve_hours(self):
+        _, _, run_sync, login = self.run_watch(
+            pending=[{"sync_requested": True}, {"sync_requested": True}],
+            sync_code=stag_agent.EXIT_LOGIN_REQUIRED, waits=2,
+        )
+        self.assertEqual(run_sync.call_count, 2)
+        login.assert_called_once()
+        self.assertIsNotNone(stag_agent.load_state(self.home)["last_login_prompt_at"])
+
+    def test_second_instance_is_refused(self):
+        with stag_agent.AgentLock(self.home / stag_agent.LOCK_FILE):
+            with self.assertRaises(stag_agent.AgentError) as ctx:
+                self.run_watch(pending=[{"sync_requested": False}], waits=1)
+        self.assertEqual(ctx.exception.exit_code, stag_agent.EXIT_ALREADY_RUNNING)
+
+    def test_watch_keeps_sync_interval_in_config(self):
+        stag_agent.save_config({**self.config, "sync_interval_minutes": 30}, self.home)
+        self.assertEqual(stag_agent.load_config(self.home)["sync_interval_minutes"], 30)
+
+
 if __name__ == "__main__":
     unittest.main()

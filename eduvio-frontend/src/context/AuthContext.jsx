@@ -25,6 +25,10 @@ const getAuthErrorMessage = (error) => {
       return 'errors.networkError'
     case 'server_error':
       return 'errors.serverError'
+    case 'rate_limited':
+      return 'errors.tooManyAttempts'
+    case 'registration_disabled':
+      return 'errors.registrationDisabled'
     case 'unauthorized':
       return 'errors.unauthorized'
     default:

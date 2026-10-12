@@ -2,7 +2,9 @@ import { useState, useRef, useEffect } from 'react'
 import { renderAsync } from 'docx-preview'
 import { useTranslation } from 'react-i18next'
 import { Download, File, X } from 'lucide-react'
-import { getPreviewInfo, resolveResourceUrl } from '../../utils/materialPreview'
+import { getPreviewInfo, loadMaterialFile } from '../../utils/materialPreview'
+import { hasPrivateFile } from '../../utils/materialKinds'
+import MaterialDownloadLink from './MaterialDownloadLink'
 
 const ResourcePreviewModal = ({ resource, onClose }) => {
   const { t } = useTranslation('resources')
@@ -14,7 +16,31 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
   const renderedDocxUrlRef = useRef(null)
 
   const previewInfo = resource ? getPreviewInfo(resource) : { canPreview: false, type: 'unsupported' }
-  const url = resolveResourceUrl(resource?.url || "")
+
+  // Uploaded files are in private storage: fetched with the token into a blob: URL
+  const ownFile = resource ? hasPrivateFile(resource) : false
+  const [ownFileState, setOwnFileState] = useState({ id: null, url: null, error: null })
+  useEffect(() => {
+    if (!resource || !ownFile) return
+    let active = true
+    let objectUrl = null
+    loadMaterialFile(resource)
+      .then((blob) => {
+        objectUrl = URL.createObjectURL(blob)
+        if (active) setOwnFileState({ id: resource.id, url: objectUrl, error: null })
+        else URL.revokeObjectURL(objectUrl)
+      })
+      .catch(() => {
+        if (active) setOwnFileState({ id: resource.id, url: null, error: 'resources:preview.loadFileError' })
+      })
+    return () => {
+      active = false
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [resource, ownFile])
+  const ownFileLoaded = ownFileState.id === resource?.id
+  const ownFileError = ownFileLoaded ? ownFileState.error : null
+  const url = ownFile ? (ownFileLoaded ? ownFileState.url || '' : '') : resource?.url || ''
 
   useEffect(() => {
     if (previewInfo.type !== 'text' || !url) return
@@ -89,16 +115,14 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <a
+            <MaterialDownloadLink
+              resource={resource}
               href={url}
-              download
-              target="_blank"
-              rel="noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 border border-outline-variant hover:bg-surface-container rounded-xl text-sm font-semibold text-on-surface transition-colors"
             >
               <Download className="size-4" />
               <span>{t('resources:actions.download')}</span>
-            </a>
+            </MaterialDownloadLink>
             <button
               onClick={onClose}
               className="p-1.5 rounded-full hover:bg-surface-container transition-colors text-on-surface-variant hover:text-on-surface cursor-pointer bg-transparent border-0"
@@ -116,15 +140,23 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
           </div>
 
           <div className="flex-1 bg-surface rounded-2xl overflow-hidden border border-outline-variant flex items-center justify-center relative">
-            {previewInfo.type === 'image' && (
+            {ownFile && previewInfo.type !== 'unsupported' && previewInfo.type !== 'office-local' && !url && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface">
+                <span className={`text-sm font-medium ${ownFileError ? 'text-error' : 'text-on-surface-variant'}`}>
+                  {t(ownFileError ?? 'resources:preview.loadingFile')}
+                </span>
+              </div>
+            )}
+
+            {previewInfo.type === 'image' && url && (
               <img src={url} alt={resource.title} className="w-full h-full object-contain" />
             )}
 
-            {previewInfo.type === 'pdf' && (
+            {previewInfo.type === 'pdf' && url && (
               <iframe src={url} title={resource.title} className="w-full h-full border-0" />
             )}
 
-            {previewInfo.type === 'video' && (
+            {previewInfo.type === 'video' && url && (
               <video controls src={url} className="max-w-full max-h-full" />
             )}
 
@@ -168,10 +200,10 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
                     <File className="w-12 h-12 text-error mb-3" />
                     <p className="text-sm text-error font-semibold mb-1">{t('resources:preview.failedRenderDocument')}</p>
                     <p className="text-sm text-on-surface-variant mb-4">{docxError}</p>
-                    <a href={url} download className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
+                    <MaterialDownloadLink resource={resource} href={url} newTab={false} className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
                       <Download className="w-4 h-4" />
                       <span>{t('resources:actions.downloadFile')}</span>
-                    </a>
+                    </MaterialDownloadLink>
                   </div>
                 )}
                 <div
@@ -186,14 +218,15 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
                 <File className="w-16 h-16 text-on-surface-variant mb-4" />
                 <p className="text-sm text-on-surface font-semibold mb-2">{t('resources:preview.directPreviewLocalOffice')}</p>
                 <p className="text-sm text-on-surface-variant mb-4">{t('resources:preview.pleaseDownload')}</p>
-                <a
+                <MaterialDownloadLink
+                  resource={resource}
                   href={url}
-                  download
+                  newTab={false}
                   className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
                 >
                   <Download className="w-4 h-4" />
                   <span>{t('resources:actions.downloadFile')}</span>
-                </a>
+                </MaterialDownloadLink>
               </div>
             )}
 
@@ -201,14 +234,25 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
               <div className="flex flex-col items-center justify-center text-center p-8">
                 <File className="w-16 h-16 text-on-surface-variant mb-4" />
                 <p className="text-sm text-on-surface mb-4">{t('resources:preview.noPreview')}</p>
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors shadow-sm"
-                >
-                  {t('resources:openInNewTab')}
-                </a>
+                {ownFile ? (
+                  <MaterialDownloadLink
+                    resource={resource}
+                    href={url}
+                    className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>{t('resources:actions.downloadFile')}</span>
+                  </MaterialDownloadLink>
+                ) : (
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors shadow-sm"
+                  >
+                    {t('resources:openInNewTab')}
+                  </a>
+                )}
               </div>
             )}
           </div>

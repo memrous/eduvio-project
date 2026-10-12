@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Storage;
 
 class Material extends Model
 {
@@ -19,6 +21,7 @@ class Material extends Model
         'url',
         'size',
         'file_name',
+        'file_path',
         'event_id',
         'requirement_id',
         'category',
@@ -52,9 +55,11 @@ class Material extends Model
         'seen_at' => 'datetime',
     ];
 
-    // The full snapshot is only needed for comparison on the server
+    // The full snapshot is only needed for comparison on the server; the storage
+    // path stays internal (clients use GET /api/materials/{id}/file)
     protected $hidden = [
         'page_links',
+        'file_path',
     ];
 
     protected $appends = [
@@ -63,6 +68,7 @@ class Material extends Model
         'eventId',
         'requirementId',
         'category',
+        'has_file',
     ];
 
     public function subject()
@@ -117,11 +123,40 @@ class Material extends Model
         return ! $this->isFromMoodle() && ! $this->isAutoLink();
     }
 
+    /** Disk with uploaded files (MATERIALS_DISK: "local" locally, "s3" in production). */
+    public static function filesDiskName(): string
+    {
+        return (string) config('filesystems.materials_disk', 'local');
+    }
+
+    public static function filesDisk(): FilesystemAdapter
+    {
+        return Storage::disk(self::filesDiskName());
+    }
+
+    /** File uploaded by the user, kept on the private materials disk. */
+    public function hasOwnFile(): bool
+    {
+        return $this->file_path !== null;
+    }
+
+    public function getHasFileAttribute(): bool
+    {
+        return $this->hasOwnFile();
+    }
+
+    /** Address of the file for clients; needs the Bearer token. */
+    public function fileUrl(): string
+    {
+        return url("/api/materials/{$this->id}/file");
+    }
+
     /**
-     * Path on the "public" disk when the file was uploaded to our storage
-     * (url ".../storage/materials/x.pdf"), otherwise null.
+     * Before files moved to the private disk: path on the "public" disk taken
+     * from the url (".../storage/materials/x.pdf"), otherwise null.
+     * Only used by `php artisan materials:move-to-private`.
      */
-    public function storedFilePath(): ?string
+    public function legacyPublicPath(): ?string
     {
         $path = (string) parse_url((string) $this->url, PHP_URL_PATH);
         if (! str_starts_with($path, '/storage/materials/')) {

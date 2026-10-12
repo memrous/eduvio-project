@@ -125,6 +125,21 @@
       "agentMode": "IS/STAG se v této instalaci synchronizuje přes agenta na vašem počítači. Přihlášení ani synchronizace ze serveru tu nejsou k dispozici."
     },
     "agent": {
+      "sync": {
+        "title": "Notebook s agentem",
+        "online": "Notebook online",
+        "offline": "Notebook offline – naposledy {{time}}",
+        "neverSeen": "Notebook se zatím nepřipojil",
+        "syncNow": "Synchronizovat teď",
+        "waitingOnline": "Čeká na notebook…",
+        "waitingOffline": "Provede se, až bude notebook online.",
+        "done": "Synchronizace ze STAGu dokončena.",
+        "tooSoon": "Synchronizace už je vyžádaná. Znovu to půjde za {{seconds}} s.",
+        "requestFailed": "Synchronizaci se nepodařilo vyžádat.",
+        "notConfigured": "Nejdřív vytvoř token agenta a nastav agenta na notebooku.",
+        "loginNeeded": "Přihlas se do STAGu na notebooku",
+        "loginNeededHint": "Agent otevřel přihlášení do STAGu v prohlížeči na notebooku. Případně tam spusť python3 stag_agent.py login."
+      },
       "card": {
         "subtitle": "Synchronizace přes agenta na vašem počítači",
         "helper": "IS/STAG je dostupný jen ze sítě UPOL (VPN). Rozvrh a předměty proto stahuje agent na vašem počítači a posílá je do Eduvia s tokenem agenta. Token smí jen nahrávat data ze STAGu."
@@ -171,8 +186,9 @@
         "setup": "Nastavení – zadáte adresu Eduvia a token agenta:",
         "login": "Přihlášení do IS/STAG (otevře prohlížeč):",
         "sync": "Synchronizace – spouštějte na počítači připojeném k VPN UPOL:",
+        "watch": "Běh na pozadí – sync na tlačítko „Synchronizovat teď“ i pravidelně (ve Windows ho spustí windows/install-agent.ps1 při přihlášení):",
         "copyLabel": "Kopírovat příkaz {{command}}",
-        "footer": "Agent najdete ve složce stag_mock_import. Podrobný návod včetně pravidelného spouštění je v AGENT.md."
+        "footer": "Agent najdete ve složce stag_mock_import. Podrobný návod včetně automatického spouštění ve Windows je v AGENT.md."
       },
       "copy": "Kopírovat",
       "copied": "Zkopírováno do schránky.",

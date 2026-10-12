@@ -1,19 +1,26 @@
 # Frontend ignorované soubory
-studyhub-frontend/node_modules/
-studyhub-frontend/.env.development
-studyhub-frontend/.env.production
-studyhub-frontend/.env.*.local
-studyhub-frontend/dist/
+eduvio-frontend/node_modules/
+eduvio-frontend/.env
+eduvio-frontend/.env.development
+eduvio-frontend/.env.production
+eduvio-frontend/.env.*.local
+eduvio-frontend/dist/
 
 # Backend ignorované soubory
-studyhub-backend/.env
-studyhub-backend/vendor/
-studyhub-backend/storage/*.key
-studyhub-backend/storage/framework/cache/data/*
-studyhub-backend/storage/framework/views/*
-studyhub-backend/storage/framework/sessions/*
-studyhub-backend/storage/logs/*.log
-studyhub-backend/bootstrap/cache/*
+eduvio-backend/.env
+eduvio-backend/vendor/
+eduvio-backend/storage/*.key
+eduvio-backend/storage/framework/cache/data/*
+eduvio-backend/storage/framework/views/*
+eduvio-backend/storage/framework/sessions/*
+eduvio-backend/storage/logs/*.log
+eduvio-backend/bootstrap/cache/*
+
+# Databázové dumpy (mohou obsahovat osobní údaje a tokeny)
+*.sql
+
+# Lokální konfigurace STAG agenta (obsahuje token)
+stag_mock_import/**/config.json
 
 # Systémové soubory
 .DS_Store

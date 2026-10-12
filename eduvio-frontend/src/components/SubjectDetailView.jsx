@@ -25,9 +25,10 @@ import { formatSemesterLabel } from '../utils/semester'
 import { getOwnDescription, getSafeHttpUrl, normalizeText } from '../utils/subjectDetails'
 import { getSemesterLinkSourceLabel, getSemesterLinkTitle, isAutoSemesterLink } from '../utils/semesterLinks'
 import { getSubjectIdOf, isSameId } from '../utils/ids'
-import { isHidden } from '../utils/materialKinds'
+import { hasPrivateFile, isHidden } from '../utils/materialKinds'
 import { buildSemesterStarts } from '../utils/lessons'
 import MaterialActionsMenu from './materials/MaterialActionsMenu'
+import MaterialDownloadLink from './materials/MaterialDownloadLink'
 import MaterialTypeIcon from './materials/MaterialTypeIcon'
 import { useMaterialActions } from './materials/useMaterialActions'
 import { useToast } from '../context/ToastContext'
@@ -192,15 +193,27 @@ const MaterialsTab = ({ subject, materials, menuFor, onSetForExam }) => {
                       <span>{t('resources:materialActions.forExamBadge')}</span>
                     </button>
                   )}
-                  <a
-                    href={res.url || '#'}
-                    target={isLink ? '_blank' : '_self'}
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container"
-                  >
-                    {isLink ? <ExternalLink className="size-4" /> : <Download className="size-4" />}
-                    <span>{isLink ? t('academic:subjectDetail.preview') : t('academic:subjectDetail.download')}</span>
-                  </a>
+                  {hasPrivateFile(res) ? (
+                    // Uploaded file: private storage, downloaded with the token
+                    <MaterialDownloadLink
+                      resource={res}
+                      href={res.url}
+                      className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container"
+                    >
+                      <Download className="size-4" />
+                      <span>{t('academic:subjectDetail.download')}</span>
+                    </MaterialDownloadLink>
+                  ) : (
+                    <a
+                      href={res.url || '#'}
+                      target={isLink ? '_blank' : '_self'}
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container"
+                    >
+                      {isLink ? <ExternalLink className="size-4" /> : <Download className="size-4" />}
+                      <span>{isLink ? t('academic:subjectDetail.preview') : t('academic:subjectDetail.download')}</span>
+                    </a>
+                  )}
                   {menu && <MaterialActionsMenu label={menu.label} items={menu.items} />}
                 </div>
               </div>

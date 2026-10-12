@@ -53,6 +53,12 @@ class StagAgentController extends Controller
 
         $user = $request->user();
 
+        // Either way the requested sync has been handled, and the agent is evidently online
+        $user->update([
+            'stag_sync_requested_at'  => null,
+            'stag_agent_last_seen_at' => now(),
+        ]);
+
         if ($validated['status'] === 'success') {
             $user->update([
                 'stag_sync_status' => 'success',
@@ -73,6 +79,21 @@ class StagAgentController extends Controller
         return response()->json([
             'stag_sync_status' => $user->stag_sync_status,
             'stag_synced_at'   => $user->stag_synced_at,
+        ]);
+    }
+
+    /**
+     * GET /stag/agent/pending — polled by `stag_agent.py watch` (about every 90 s):
+     * records that the agent is online and tells it whether the user asked for a sync.
+     */
+    public function pending(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->update(['stag_agent_last_seen_at' => now()]);
+
+        return response()->json([
+            'sync_requested' => $user->stag_sync_requested_at !== null,
+            'requested_at'   => $user->stag_sync_requested_at?->toIso8601String(),
         ]);
     }
 

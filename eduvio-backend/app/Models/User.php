@@ -32,6 +32,8 @@ class User extends Authenticatable
         'stag_sync_error',
         'stag_synced_at',
         'stag_last_sync_attempt_at',
+        'stag_sync_requested_at',
+        'stag_agent_last_seen_at',
         'moodle_sync_status',
         'moodle_sync_error',
         'moodle_synced_at',
@@ -95,6 +97,8 @@ class User extends Authenticatable
             'stag_ticket_expires_at'     => 'datetime',
             'stag_synced_at'             => 'datetime',
             'stag_last_sync_attempt_at'  => 'datetime',
+            'stag_sync_requested_at'     => 'datetime',
+            'stag_agent_last_seen_at'    => 'datetime',
             'moodle_wstoken'             => 'encrypted',
             'moodle_synced_at'           => 'datetime',
             'moodle_last_sync_attempt_at'=> 'datetime',
@@ -108,6 +112,15 @@ class User extends Authenticatable
      * Name of the restricted Sanctum token used by the local STAG agent.
      */
     public const STAG_AGENT_TOKEN = 'stag-agent';
+
+    /** The agent polls every 90 s; without a poll for this long it counts as offline. */
+    public const STAG_AGENT_ONLINE_MINUTES = 5;
+
+    public function isStagAgentOnline(): bool
+    {
+        return $this->stag_agent_last_seen_at !== null
+            && $this->stag_agent_last_seen_at->gt(now()->subMinutes(self::STAG_AGENT_ONLINE_MINUTES));
+    }
 
     /**
      * The user's STAG agent tokens (at most one is kept at a time).

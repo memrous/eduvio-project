@@ -37,7 +37,8 @@ import { useMaterialActions } from './materials/useMaterialActions'
 import { getMaterialKind, isHidden } from '../utils/materialKinds'
 import SemesterLinkModal from './materials/SemesterLinkModal'
 import ResourcePreviewModal from './materials/ResourcePreviewModal'
-import { getPreviewInfo, resolveResourceUrl } from '../utils/materialPreview'
+import { getPreviewInfo } from '../utils/materialPreview'
+import MaterialDownloadLink from './materials/MaterialDownloadLink'
 import { getSemesterLinkSourceLabel, getSemesterLinkTitle, isAutoSemesterLink } from '../utils/semesterLinks'
 import { getEventIdOf, getSubjectIdOf, isPersistedId, isSameId } from '../utils/ids'
 import {
@@ -125,7 +126,6 @@ const ResourceRow = ({ resource, onOpen, menu }) => {
 const ResourceCard = ({ resource, subjectName, onPreview, menu, t }) => {
   const isLink = resource.type === "LINK"
   const previewInfo = getPreviewInfo(resource)
-  const url = resolveResourceUrl(resource.url)
 
   const handleOpen = () => {
     if (isLink || !previewInfo.canPreview) {
@@ -162,16 +162,14 @@ const ResourceCard = ({ resource, subjectName, onPreview, menu, t }) => {
         <span className="text-[11px] text-on-surface-variant/70 font-medium truncate pr-2">{resource.size || t('resources:defaults.attachment')} • {displayDate}</span>
         <div className="flex items-center gap-1 shrink-0">
           {!isLink && (
-            <a
-              href={url}
-              download
-              target="_blank"
-              rel="noreferrer"
+            <MaterialDownloadLink
+              resource={resource}
+              href={resource.url}
               className="flex size-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-primary/15 hover:text-primary"
               title={t('resources:actions.download')}
             >
               <Download className="size-4" />
-            </a>
+            </MaterialDownloadLink>
           )}
           <button
             onClick={handleOpen}
@@ -467,7 +465,7 @@ const SemesterLinkItem = ({ resource: res, subject, menu, onSeen }) => {
         <MaterialTypeIcon resource={res} tile="md" />
         <div className="min-w-0 flex-1">
           <a
-            href={res.url || resolveResourceUrl(res.url)}
+            href={res.url}
             target="_blank"
             rel="noopener noreferrer"
             onClick={markSeen}

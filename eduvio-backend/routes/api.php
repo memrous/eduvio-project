@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppConfigController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\EventController;
@@ -22,9 +23,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Veřejné endpointy
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/check-availability', [AuthController::class, 'checkAvailability']);
+Route::get('/config', [AppConfigController::class, 'show']);
+// 5 pokusů za minutu na IP + e-mail (limiter "auth" v AppServiceProvider)
+Route::middleware('throttle:auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
+Route::post('/check-availability', [AuthController::class, 'checkAvailability'])->middleware('throttle:30,1');
 
 // Endpointy STAG agenta: projde token s ability "stag:sync" (stag-agent) i plný token "*"
 // (StagSyncJob v režimu server). Jediné routy, kam smí omezený token agenta.
@@ -35,6 +40,8 @@ Route::middleware(['auth:sanctum', 'ability:stag:sync', 'throttle:30,1'])->group
     Route::post('/stag/sync-exam-terms', [ExamTermController::class, 'sync']);
     Route::post('/stag/agent/report',  [StagAgentController::class, 'report']);
     Route::get('/stag/agent/whoami',   [StagAgentController::class, 'whoami']);
+    // Polled by `stag_agent.py watch`: presence + "sync now" requests from the app
+    Route::get('/stag/agent/pending',  [StagAgentController::class, 'pending']);
 });
 
 // Chráněné endpointy (vyžadují v hlavičce: Authorization: Bearer <token> s plným přístupem)
@@ -80,6 +87,8 @@ Route::middleware(['auth:sanctum', 'full-access'])->group(function () {
     // Materials (Resources)
     Route::get('/materials', [MaterialController::class, 'index']);
     Route::post('/materials', [MaterialController::class, 'store']);
+    // Uploaded file (private disk): owner only, inline or ?download=1
+    Route::get('/materials/{material}/file', [MaterialController::class, 'file']);
     Route::put('/materials/{material}', [MaterialController::class, 'update']);
     Route::patch('/materials/{material}', [MaterialController::class, 'patch']);
     Route::post('/materials/{material}/hide', [MaterialController::class, 'hide']);
@@ -96,6 +105,7 @@ Route::middleware(['auth:sanctum', 'full-access'])->group(function () {
     Route::delete('/user/stag',        [StagConnectController::class, 'disconnect']);
     Route::get('/user/stag/status',    [StagConnectController::class, 'status']);
     Route::post('/user/stag/resync',   [StagConnectController::class, 'resync']);
+    Route::post('/user/stag/request-sync', [StagConnectController::class, 'requestSync']);
     Route::get('/user/stag/redirect',  [StagAuthController::class, 'redirect']);
     Route::post('/user/stag/agent-token',   [StagAgentController::class, 'createToken']);
     Route::delete('/user/stag/agent-token', [StagAgentController::class, 'revokeToken']);

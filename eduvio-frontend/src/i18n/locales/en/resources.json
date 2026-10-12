@@ -84,7 +84,10 @@
     "pleaseDownload": "Please download the file to view it on your device.",
     "noPreview": "No preview is available for this file type.",
     "loadTextError": "Failed to load text file.",
-    "loadDocxError": "Failed to load DOCX file."
+    "loadDocxError": "Failed to load DOCX file.",
+    "loadingFile": "Loading the file...",
+    "loadFileError": "The file could not be loaded.",
+    "downloadFailed": "The file could not be downloaded."
   },
   "emptyState": {
     "title": "No resources match your search criteria",

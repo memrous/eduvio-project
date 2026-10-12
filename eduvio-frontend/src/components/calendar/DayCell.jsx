@@ -23,7 +23,6 @@ const DayCell = ({
   subjects = [],
 }) => {
   const { t } = useTranslation()
-  const MAX_ITEMS_MOBILE = 1
   const MAX_ITEMS_DESKTOP = 3
   const allItems = [
     ...dayDeadlines.map(d => ({ ...d, _kind: 'deadline' })),
@@ -31,8 +30,6 @@ const DayCell = ({
   ]
   const visibleDesktop = allItems.slice(0, MAX_ITEMS_DESKTOP)
   const overflowDesktop = allItems.length - MAX_ITEMS_DESKTOP
-  const visibleMobile = allItems.slice(0, MAX_ITEMS_MOBILE)
-  const overflowMobile = allItems.length - MAX_ITEMS_MOBILE
   const hasDeadline = dayDeadlines.length > 0
   const firstEventSubject = subjects.find(s => s.id === (dayEvents[0]?.subjectId ?? dayEvents[0]?.subject_id))
   const firstEventStyle = getSubjectStyle(firstEventSubject)

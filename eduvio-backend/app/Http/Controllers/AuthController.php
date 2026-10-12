@@ -3,17 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // POST /api/check-availability
+    // POST /api/check-availability (registration form only; closed with registration)
     public function checkAvailability(Request $request)
     {
+        if ($closed = $this->registrationClosed()) {
+            return $closed;
+        }
+
         $request->validate([
-            'email'    => 'required|email|unique:users,email',
+            'email'    => ['required', 'email', 'unique:users,email', $this->allowedDomainRule()],
             'username' => 'required|string|alpha_dash|unique:users,username',
         ]);
 
@@ -25,9 +30,13 @@ class AuthController extends Controller
     // Jen údaje účtu; studijní údaje dodává STAG sync (POST /stag/sync-student)
     public function register(Request $request)
     {
+        if ($closed = $this->registrationClosed()) {
+            return $closed;
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => ['required', 'email', 'unique:users,email', $this->allowedDomainRule()],
             'username' => 'required|string|alpha_dash|unique:users,username',
             'password' => 'required|string|min:8',
         ]);
@@ -94,5 +103,35 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logged out successfully.'
         ]);
+    }
+
+    // ── Registration switch (config/registration.php) ────────────
+
+    /** 403 while self-registration is turned off, otherwise null. */
+    private function registrationClosed(): ?JsonResponse
+    {
+        if (config('registration.enabled')) {
+            return null;
+        }
+
+        return response()->json([
+            'error'   => 'registration_disabled',
+            'message' => 'Registration is disabled.',
+        ], 403);
+    }
+
+    /** E-mail must be in one of REGISTRATION_ALLOWED_DOMAINS (when any are set). */
+    private function allowedDomainRule(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail) {
+            $domains = config('registration.allowed_domains', []);
+            if ($domains === [] || ! is_string($value)) {
+                return;
+            }
+            $domain = strtolower((string) substr(strrchr($value, '@') ?: '', 1));
+            if (! in_array($domain, $domains, true)) {
+                $fail('Registration is limited to e-mail addresses at: '.implode(', ', $domains).'.');
+            }
+        };
     }
 }

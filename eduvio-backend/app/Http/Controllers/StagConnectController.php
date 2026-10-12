@@ -13,6 +13,9 @@ use Illuminate\Support\Carbon;
  */
 class StagConnectController extends Controller
 {
+    /** Minimum time between two "Sync now" requests in agent mode. */
+    private const SYNC_REQUEST_COOLDOWN_SECONDS = 120;
+
     public function disconnect(Request $request): JsonResponse
     {
         $request->user()->update([
@@ -59,6 +62,10 @@ class StagConnectController extends Controller
             'stag_synced_at'   => $user->stag_synced_at,
             // Hidden from the user model; exposed here so the owner can see why a sync failed
             'stag_sync_error'  => $user->stag_sync_error,
+            // Agent mode: is the notebook agent polling, and is a sync from the app waiting for it
+            'agent_online'       => $user->isStagAgentOnline(),
+            'agent_last_seen_at' => $user->stag_agent_last_seen_at?->toIso8601String(),
+            'sync_requested_at'  => $user->stag_sync_requested_at?->toIso8601String(),
             // Metadata only — the plain token is returned solely when it is created
             'agent_token'      => $agentToken ? [
                 'created_at'   => $agentToken->created_at?->toIso8601String(),
@@ -66,6 +73,50 @@ class StagConnectController extends Controller
                 'last_used_at' => $agentToken->last_used_at?->toIso8601String(),
             ] : null,
         ]);
+    }
+
+    /**
+     * POST /user/stag/request-sync — "Sync now" in the app.
+     * Agent mode: leaves a request the agent picks up on its next poll
+     * (GET /stag/agent/pending); at most once per 2 minutes.
+     * Server mode: the existing server-side resync.
+     */
+    public function requestSync(Request $request): JsonResponse
+    {
+        if (config('stag.mode') !== 'agent') {
+            return $this->resync($request);
+        }
+
+        $user = $request->user();
+
+        // 422 — nothing could pick the request up
+        if (! $user->stag_connected) {
+            return response()->json([
+                'error'   => 'agent_not_configured',
+                'message' => 'Create an agent token and set up the STAG agent first.',
+            ], 422);
+        }
+
+        // 429 — asked a moment ago
+        $requestedAt = $user->stag_sync_requested_at;
+        if ($requestedAt !== null) {
+            $retryAfter = self::SYNC_REQUEST_COOLDOWN_SECONDS - (int) $requestedAt->diffInSeconds(now(), true);
+            if ($retryAfter > 0) {
+                return response()->json([
+                    'message'           => 'A sync was requested a moment ago.',
+                    'retry_after'       => $retryAfter,
+                    'sync_requested_at' => $requestedAt->toIso8601String(),
+                ], 429);
+            }
+        }
+
+        $user->update(['stag_sync_requested_at' => now()]);
+
+        return response()->json([
+            'message'           => 'Sync requested; the agent runs it on its next check.',
+            'sync_requested_at' => $user->stag_sync_requested_at->toIso8601String(),
+            'agent_online'      => $user->isStagAgentOnline(),
+        ], 202);
     }
 
     public function resync(Request $request): JsonResponse

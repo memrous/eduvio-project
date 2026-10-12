@@ -14,8 +14,10 @@ const MobileEventDetailSheet = ({
   const [sheetVisible, setSheetVisible] = useState(false)
   const [closingEvent, setClosingEvent] = useState(null)
 
+  // Keeps the last event while the sheet slides out, so the state follows the prop on purpose
   useEffect(() => {
     if (selectedDetailEvent) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setClosingEvent(selectedDetailEvent)
       requestAnimationFrame(() => setSheetVisible(true))
     } else if (closingEvent) {
@@ -23,6 +25,8 @@ const MobileEventDetailSheet = ({
       const timer = setTimeout(() => setClosingEvent(null), 300)
       return () => clearTimeout(timer)
     }
+    // closingEvent is only read to know whether a sheet is open, not to react to it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDetailEvent])
 
   if (!closingEvent) return null

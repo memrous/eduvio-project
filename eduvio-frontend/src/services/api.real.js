@@ -33,6 +33,11 @@ const normalizeHttpError = (error) => {
     }
   }
 
+  if (error?.response?.status === 403 && typeof error?.response?.data?.error === 'string') {
+    // Forbidden with a machine-readable code (e.g. 'registration_disabled')
+    return failure(error.response.data.error)
+  }
+
   if (error?.response?.status === 409 && typeof error?.response?.data?.error === 'string') {
     // Conflict with a machine-readable code (e.g. 'agent_mode' when STAG is synced by the local agent)
     return failure(error.response.data.error)
@@ -95,6 +100,11 @@ export const register = async (...args) => {
   return result
 }
 
+// Public settings before login (whether registration is open)
+export const getAppConfig = async () => {
+  return request(() => httpClient.get('/config').then((res) => res.data))
+}
+
 export const checkAvailability = async ({ email, username }) => {
   return request(() => httpClient.post('/check-availability', { email, username }).then((res) => res.data))
 }
@@ -136,6 +146,11 @@ export const getStagSyncStatus = async () => {
 
 export const resyncStag = async () => {
   return request(() => httpClient.post('/user/stag/resync').then((res) => res.data))
+}
+
+// "Sync now": agent mode leaves a request for the notebook agent, server mode resyncs
+export const requestStagSync = async () => {
+  return request(() => httpClient.post('/user/stag/request-sync').then((res) => res.data))
 }
 
 export const startMoodleLaunch = async () => {
@@ -193,6 +208,18 @@ export const updateEventStatus = async (userId, eventId, status) => {
 
 export const getResources = async (userId) => {
   return request(() => httpClient.get('/materials').then((res) => res.data))
+}
+
+// Uploaded file of a material (private storage): fetched with the Bearer token as a Blob
+export const getMaterialFile = async (resource, { download = false } = {}) => {
+  return request(() =>
+    httpClient.get(`/materials/${resource.id}/file`, {
+      params: download ? { download: 1 } : undefined,
+      responseType: 'blob',
+      // Files may have up to 50 MB
+      timeout: 120000,
+    }).then((res) => res.data)
+  )
 }
 
 export const createResource = async (userId, newResource) => {

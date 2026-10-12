@@ -20,6 +20,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { checkAvailability } from '../services/api'
+import { useAppConfig } from '../hooks/useAppConfig'
 import logoImg from '../assets/images/logo.png'
 
 
@@ -74,8 +75,13 @@ const validateForm = (form) => {
 
 const formatError = (t, error) => {
   if (Array.isArray(error)) return t(error[0])
+  // { key, values } for messages with parameters
+  if (error && typeof error === 'object') return t(error.key, error.values)
   return error ? t(error) : ''
 }
+
+const emailDomainAllowed = (email, domains) =>
+  domains.length === 0 || domains.includes(email.trim().split('@').pop().toLowerCase())
 
 const getStrengthLabelKey = (level) => {
   switch (level) {
@@ -96,6 +102,8 @@ const RegisterPage = () => {
   const { register, isAuthenticated, isLoading: authLoading } = useAuth()
   const { t } = useTranslation('auth')
   const toast = useToast()
+  const { registrationEnabled, allowedDomains } = useAppConfig()
+  const domainsLabel = allowedDomains.join(', ')
 
   const [form, setForm] = useState({
     name: '',
@@ -117,6 +125,31 @@ const RegisterPage = () => {
     return <Navigate to="/dashboard" replace />
   }
 
+  // ── Registration turned off on the backend ───────────────────────
+  if (!registrationEnabled) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface-container-lowest px-6 font-inter relative">
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+          <LanguageSwitcher />
+        </div>
+        <div className="w-full max-w-[400px] flex flex-col gap-5 text-center">
+          <div className="flex items-center justify-center gap-3">
+            <img src={logoImg} alt="Eduvio" className="w-9 h-9 object-contain" />
+            <span className="font-geist font-bold text-xl text-on-surface tracking-tight">Eduvio</span>
+          </div>
+          <div className="flex flex-col gap-2 rounded-2xl border border-outline-variant bg-surface p-6">
+            <Info className="mx-auto w-6 h-6 text-primary" />
+            <h2 className="text-xl font-bold text-on-surface">{t('register.closedTitle')}</h2>
+            <p className="text-body-md text-on-surface-variant">{t('register.closedText')}</p>
+          </div>
+          <Link to="/login" className="text-primary font-semibold hover:underline">
+            {t('register.links.signIn')}
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   // ── Handlers ─────────────────────────────────────────────────────
   const set = (key) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
@@ -129,6 +162,9 @@ const RegisterPage = () => {
     setServerError('')
 
     const fieldErrors = validateForm(form)
+    if (!fieldErrors.email && !emailDomainAllowed(form.email, allowedDomains)) {
+      fieldErrors.email = { key: 'errors.emailDomain', values: { domains: domainsLabel } }
+    }
     if (Object.keys(fieldErrors).length) {
       setErrors(fieldErrors)
       return
@@ -245,6 +281,11 @@ const RegisterPage = () => {
             <p className="text-body-md text-on-surface-variant">
               {t('register.subtitle')}
             </p>
+            {allowedDomains.length > 0 && (
+              <p className="text-sm text-on-surface-variant">
+                {t('register.allowedDomains', { domains: domainsLabel })}
+              </p>
+            )}
           </div>
 
           {/* Server error */}

@@ -7,12 +7,35 @@ use App\Models\Material;
 use App\Models\Subject;
 use App\Support\FileSize;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class MaterialController extends Controller
 {
+    /**
+     * GET /api/materials/{id}/file — the uploaded file of the user's material,
+     * inline (preview) or as an attachment with ?download=1. Streamed from the
+     * materials disk (local or S3), never redirected to a public address.
+     */
+    public function file(Request $request, $id)
+    {
+        $material = $this->findOwned($request->user()->id, $id);
+
+        $disk = Material::filesDisk();
+        if (! $material->hasOwnFile() || ! $disk->exists($material->file_path)) {
+            abort(404);
+        }
+
+        $name = $material->file_name ?: basename($material->file_path);
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return $disk->response($material->file_path, $name, [
+            'Cache-Control'          => 'private, max-age=0, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ], $disposition);
+    }
+
     public function index(Request $request)
     {
         $materials = Material::where(function ($query) use ($request) {
@@ -66,8 +89,7 @@ class MaterialController extends Controller
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $path = $file->store('materials', 'public');
-            $material->url = Storage::disk('public')->url($path);
+            $material->file_path = $file->store('materials', Material::filesDiskName());
             $material->size = FileSize::format($file->getSize());
             $material->file_name = $file->getClientOriginalName();
         } else {
@@ -76,7 +98,19 @@ class MaterialController extends Controller
             $material->file_name = null;
         }
 
-        $material->save();
+        if (! $material->hasOwnFile()) {
+            $material->save();
+
+            return response()->json($material, 201);
+        }
+
+        // The file's address needs the id (url is NOT NULL, so a placeholder first)
+        DB::transaction(function () use ($material) {
+            $material->url = '';
+            $material->save();
+            $material->url = $material->fileUrl();
+            $material->save();
+        });
 
         return response()->json($material, 201);
     }
@@ -189,10 +223,10 @@ class MaterialController extends Controller
 
         $oldFile = null;
         if ($request->hasFile('file')) {
-            $oldFile = $material->storedFilePath();
+            $oldFile = $material->file_path;
             $file = $request->file('file');
-            $path = $file->store('materials', 'public');
-            $material->url = Storage::disk('public')->url($path);
+            $material->file_path = $file->store('materials', Material::filesDiskName());
+            $material->url = $material->fileUrl();
             $material->size = FileSize::format($file->getSize());
             $material->file_name = $file->getClientOriginalName();
         }
@@ -200,8 +234,8 @@ class MaterialController extends Controller
         $material->save();
 
         // The replaced file is removed only after the new one is saved
-        if ($oldFile !== null && $oldFile !== $material->storedFilePath()) {
-            Storage::disk('public')->delete($oldFile);
+        if ($oldFile !== null && $oldFile !== $material->file_path) {
+            Material::filesDisk()->delete($oldFile);
         }
 
         return response()->json($material);
@@ -270,10 +304,10 @@ class MaterialController extends Controller
             ], 422);
         }
 
-        $storedFile = $material->storedFilePath();
+        $storedFile = $material->file_path;
         $material->delete();
         if ($storedFile !== null) {
-            Storage::disk('public')->delete($storedFile);
+            Material::filesDisk()->delete($storedFile);
         }
 
         return response()->json([
@@ -322,7 +356,7 @@ class MaterialController extends Controller
                 $errors['file'] = 'Semester links have no file.';
             }
         } elseif ($material->isManual()) {
-            $ownFile = $material->storedFilePath() !== null;
+            $ownFile = $material->hasOwnFile();
             if ($ownFile && in_array('url', $sent, true)) {
                 $errors['url'] = 'An uploaded file has no address; replace the file instead.';
             }

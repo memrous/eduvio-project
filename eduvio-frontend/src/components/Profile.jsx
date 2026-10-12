@@ -20,6 +20,8 @@ import AccountTab from './profile/tabs/AccountTab'
 import SecurityTab from './profile/tabs/SecurityTab'
 import AppearanceTab from './profile/tabs/AppearanceTab'
 import StagIntegrationCard from './profile/StagIntegrationCard'
+import StagAgentSyncControl from './profile/StagAgentSyncControl'
+import { useStagStatus } from '../hooks/useStagStatus'
 import MoodleIntegrationCard from './profile/MoodleIntegrationCard'
 import LanguageSelect from './profile/LanguageSelect'
 import ProfileStudyCard from './profile/ProfileStudyCard'
@@ -37,6 +39,7 @@ const Profile = ({ user: initialUser }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { refreshUser, logout } = useAuth()
+  const { mode: stagMode } = useStagStatus()
   const toast = useToast()
   const [user, setUser] = useState(initialUser ?? null)
   const [isFetching] = useState(!initialUser)
@@ -376,6 +379,12 @@ const Profile = ({ user: initialUser }) => {
                       <div className="min-w-0">
                         <strong className="block text-sm font-semibold text-on-surface">{item.name}</strong>
                         <p className="text-xs text-on-surface-variant mt-0.5">{item.description}</p>
+                        {/* Agent mode: notebook state and "Sync now" right in the overview (mobile too) */}
+                        {item.id === 'stag' && stagMode === 'agent' && item.connected && (
+                          <div className="mt-2.5">
+                            <StagAgentSyncControl compact />
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         <span
