@@ -29,6 +29,16 @@ export const getPreviewInfo = (resource) => {
   return { canPreview: ownFile, type: 'unsupported' }
 }
 
+/**
+ * Mobile browsers can't show a PDF inside an iframe (Android Chrome shows
+ * nothing, iOS only the first page), so there it is drawn with pdf.js.
+ */
+export const needsCanvasPdfViewer = () => {
+  if (typeof window === 'undefined') return false
+  const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false
+  return coarsePointer || navigator.pdfViewerEnabled === false
+}
+
 /** Contents of an uploaded file as a Blob (rejects when it cannot be loaded). */
 export const loadMaterialFile = async (resource, options) => {
   const result = await api.getMaterialFile(resource, options)

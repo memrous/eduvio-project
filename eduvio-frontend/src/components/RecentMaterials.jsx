@@ -1,4 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { FolderOpen } from 'lucide-react'
@@ -47,7 +48,8 @@ const buildRecentItems = (resources) => {
 const RecentMaterials = ({ resources, subjects, isLoading, onMarkSeen }) => {
   const { t, i18n } = useTranslation(['dashboard', 'resources'])
   const locale = getLocaleFromLanguage(i18n.language)
-  const [previewResource, setPreviewResource] = useState(null)
+  // The modal goes to the page root like on the Materials page, not into the narrow sticky column
+  const [preview, setPreview] = useState(null)
 
   const items = useMemo(() => buildRecentItems(resources), [resources])
 
@@ -136,7 +138,11 @@ const RecentMaterials = ({ resources, subjects, isLoading, onMarkSeen }) => {
                   {renderRowContent(item)}
                 </a>
               ) : (
-                <button type="button" onClick={() => setPreviewResource(item.resource)} className={rowClass}>
+                <button
+                  type="button"
+                  onClick={(e) => setPreview({ resource: item.resource, root: e.currentTarget.closest('[data-page-root]') ?? document.body })}
+                  className={rowClass}
+                >
                   {renderRowContent(item)}
                 </button>
               )}
@@ -145,10 +151,11 @@ const RecentMaterials = ({ resources, subjects, isLoading, onMarkSeen }) => {
         </ul>
       )}
 
-      {previewResource && (
+      {preview && createPortal(
         <Suspense fallback={null}>
-          <ResourcePreviewModal resource={previewResource} onClose={() => setPreviewResource(null)} />
-        </Suspense>
+          <ResourcePreviewModal resource={preview.resource} onClose={() => setPreview(null)} />
+        </Suspense>,
+        preview.root,
       )}
     </section>
   )

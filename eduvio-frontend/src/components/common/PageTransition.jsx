@@ -101,7 +101,7 @@ const PageTransition = ({ children, className }) => {
   }, { scope: containerRef, dependencies: [location.pathname] })
 
   return (
-    <div ref={containerRef} className={className}>
+    <div ref={containerRef} className={className} data-page-root>
       {children}
     </div>
   )

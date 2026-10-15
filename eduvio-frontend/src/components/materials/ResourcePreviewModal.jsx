@@ -1,10 +1,13 @@
-import { useState, useRef, useEffect } from 'react'
+import { lazy, Suspense, useState, useRef, useEffect } from 'react'
 import { renderAsync } from 'docx-preview'
 import { useTranslation } from 'react-i18next'
 import { Download, File, X } from 'lucide-react'
-import { getPreviewInfo, loadMaterialFile } from '../../utils/materialPreview'
+import { getPreviewInfo, loadMaterialFile, needsCanvasPdfViewer } from '../../utils/materialPreview'
 import { hasPrivateFile } from '../../utils/materialKinds'
 import MaterialDownloadLink from './MaterialDownloadLink'
+
+// pdf.js is only loaded where the browser can't show a PDF in an iframe
+const PdfCanvasViewer = lazy(() => import('./PdfCanvasViewer'))
 
 const ResourcePreviewModal = ({ resource, onClose }) => {
   const { t } = useTranslation('resources')
@@ -104,8 +107,8 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
   const docPreviewUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`
 
   return (
-    <div className="fixed inset-0 bg-scrim/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-      <div className="bg-surface rounded-2xl shadow-2xl border border-outline-variant w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden font-inter">
+    <div className="fixed inset-0 bg-scrim/60 backdrop-blur-xs flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-surface rounded-2xl shadow-2xl border border-outline-variant w-full max-w-7xl h-[95dvh] flex flex-col overflow-hidden font-inter">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface shrink-0">
           <div className="flex items-center gap-3 min-w-0">
@@ -133,13 +136,12 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 bg-surface-container-low overflow-hidden p-6 flex flex-col">
-          <div className="mb-4 shrink-0">
-            <p className="text-sm font-semibold text-on-surface">{resource.title}</p>
-            <p className="text-sm text-on-surface-variant">{resource.description}</p>
-          </div>
+        <div className="flex-1 min-h-0 bg-surface-container-low overflow-hidden p-2 sm:p-4 flex flex-col">
+          {resource.description && (
+            <p className="mb-2 shrink-0 text-sm text-on-surface-variant">{resource.description}</p>
+          )}
 
-          <div className="flex-1 bg-surface rounded-2xl overflow-hidden border border-outline-variant flex items-center justify-center relative">
+          <div className="flex-1 min-h-0 bg-surface rounded-xl overflow-hidden border border-outline-variant flex items-center justify-center relative">
             {ownFile && previewInfo.type !== 'unsupported' && previewInfo.type !== 'office-local' && !url && (
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface">
                 <span className={`text-sm font-medium ${ownFileError ? 'text-error' : 'text-on-surface-variant'}`}>
@@ -153,7 +155,13 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
             )}
 
             {previewInfo.type === 'pdf' && url && (
-              <iframe src={url} title={resource.title} className="w-full h-full border-0" />
+              needsCanvasPdfViewer() ? (
+                <Suspense fallback={null}>
+                  <PdfCanvasViewer url={url} />
+                </Suspense>
+              ) : (
+                <iframe src={url} title={resource.title} className="w-full h-full border-0" />
+              )
             )}
 
             {previewInfo.type === 'video' && url && (
