@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CalendarDays, Clock, ExternalLink, MapPin, UserRound } from 'lucide-react'
+import {
+  ArrowSquareOut,
+  CalendarDots,
+  Clock,
+  MapPin,
+  User,
+} from '../../ui/icons'
 import Icon from '../../common/Icon'
 import { useExamTerms } from '../../../hooks/useExam'
 import { getLocaleFromLanguage } from '../../../utils/locale'
@@ -40,7 +46,7 @@ const TermRow = ({ term, highlight }) => {
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
-          <Icon icon={CalendarDays} className="text-on-surface-variant" />
+          <Icon icon={CalendarDots} className="text-on-surface-variant" />
           {dateLabel}
         </span>
         {term.start_time && (
@@ -76,7 +82,7 @@ const TermRow = ({ term, highlight }) => {
           )}
           {term.examiner && (
             <span className="inline-flex min-w-0 items-center gap-1.5">
-              <Icon icon={UserRound} />
+              <Icon icon={User} />
               <span className="break-words">{term.examiner}</span>
             </span>
           )}
@@ -117,7 +123,7 @@ const ExamTermsCard = ({ subject }) => {
     <section className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">
-          <Icon icon={CalendarDays} className="text-on-surface-variant" />
+          <Icon icon={CalendarDots} className="text-on-surface-variant" />
           {t('academic:subjectDetail.exam.terms.title')}
         </h3>
         {stagUrl && (
@@ -128,7 +134,7 @@ const ExamTermsCard = ({ subject }) => {
             className="inline-flex items-center gap-1.5 text-label-md font-semibold text-primary hover:underline"
           >
             {t('academic:subjectDetail.exam.terms.registerInStag')}
-            <Icon icon={ExternalLink} />
+            <Icon icon={ArrowSquareOut} />
           </a>
         )}
       </div>

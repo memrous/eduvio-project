@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Paperclip, MapPin } from 'lucide-react'
+import { CaretLeft, CaretRight, MapPin, Paperclip } from '../ui/icons'
 import { useTranslation } from 'react-i18next'
 import { deadlineTimeLabel, deadlineTitle, getAssessmentLabel, isAssessmentType, isWebAssessment } from '../../utils/assessments'
 import { formatRoom } from '../../utils/room'
@@ -75,7 +75,7 @@ const WeekView = ({
                 aria-label={t('academic:calendarGrid.prevDay')}
                 className="p-1.5 rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <CaretLeft className="w-4 h-4" />
               </button>
               <div className="flex flex-col items-center gap-0.5">
                 <span className="text-xs font-bold uppercase tracking-wide text-on-surface-variant">
@@ -92,7 +92,7 @@ const WeekView = ({
                 aria-label={t('academic:calendarGrid.nextDay')}
                 className="p-1.5 rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors"
               >
-                <ChevronRight className="w-4 h-4" />
+                <CaretRight className="w-4 h-4" />
               </button>
             </div>
           )

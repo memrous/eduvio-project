@@ -3,29 +3,28 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import {
-  Download,
-  ExternalLink,
+  ArrowSquareOut,
+  ArrowsClockwise,
+  CalendarDots,
+  CaretDown,
+  CircleNotch,
+  DownloadSimple,
   Eye,
-  Search,
-  Plus,
-  X,
-  Pin,
-  Users,
-  GraduationCap,
-  CalendarDays,
+  EyeSlash,
   File,
-  SlidersHorizontal,
-  Pencil,
-  Trash2,
-  RefreshCw,
-  Loader2,
-  Globe,
-  Sparkles,
-  ChevronDown,
-  CalendarClock,
-  EyeOff,
   FolderOpen,
-} from "lucide-react"
+  Globe,
+  GraduationCap,
+  MagnifyingGlass,
+  PencilSimple,
+  Plus,
+  PushPin,
+  SlidersHorizontal,
+  Sparkle,
+  Trash,
+  Users,
+  X,
+} from './ui/icons'
 import Dropdown from './common/Dropdown'
 import Icon from './common/Icon'
 import MaterialTypeIcon from './materials/MaterialTypeIcon'
@@ -116,7 +115,7 @@ const ResourceRow = ({ resource, onOpen, menu }) => {
 
       {menu && <MaterialActionsMenu label={menu.label} items={menu.items} />}
       <span className="flex size-8 shrink-0 items-center justify-center rounded-lg text-on-surface-variant opacity-100 transition-all hover:bg-primary/15 hover:text-primary md:opacity-0 md:group-hover:opacity-100">
-        {isLink ? <ExternalLink className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        {isLink ? <ArrowSquareOut className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
       </span>
     </div>
   )
@@ -168,7 +167,7 @@ const ResourceCard = ({ resource, subjectName, onPreview, menu, t }) => {
               className="flex size-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-primary/15 hover:text-primary"
               title={t('resources:actions.download')}
             >
-              <Download className="size-4" />
+              <DownloadSimple className="size-4" />
             </MaterialDownloadLink>
           )}
           <button
@@ -176,7 +175,7 @@ const ResourceCard = ({ resource, subjectName, onPreview, menu, t }) => {
             className="flex size-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-primary/15 hover:text-primary cursor-pointer bg-transparent border-0"
             title={t('resources:actions.open')}
           >
-            {isLink || !previewInfo.canPreview ? <ExternalLink className="size-4" /> : <Eye className="size-4" />}
+            {isLink || !previewInfo.canPreview ? <ArrowSquareOut className="size-4" /> : <Eye className="size-4" />}
           </button>
           {menu && <MaterialActionsMenu label={menu.label} items={menu.items} />}
         </div>
@@ -338,7 +337,7 @@ const UploadModal = ({ onClose, onSave, subjects, events, semesterStarts, preset
               />
               {showSuggestion && (
                 <p className="flex items-center gap-1.5 text-xs text-primary">
-                  <Sparkles className="size-4 shrink-0" aria-hidden="true" />
+                  <Sparkle className="size-4 shrink-0" aria-hidden="true" />
                   {t('resources:lessons.suggestionNote')}
                 </p>
               )}
@@ -513,9 +512,9 @@ const SemesterLinkItem = ({ resource: res, subject, menu, onSeen }) => {
               aria-controls={listId}
               className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary transition-colors hover:bg-primary/15 cursor-pointer border-0"
             >
-              <Sparkles className="size-3" aria-hidden="true" />
+              <Sparkle className="size-3" aria-hidden="true" />
               {t('resources:pageChanges.newCount', { count: shownLinks.length })}
-              <ChevronDown className={`size-3 transition-transform motion-reduce:transition-none ${expandedLinks ? 'rotate-180' : ''}`} aria-hidden="true" />
+              <CaretDown className={`size-3 transition-transform motion-reduce:transition-none ${expandedLinks ? 'rotate-180' : ''}`} aria-hidden="true" />
             </button>
             {changedAt && (
               <span className="text-[11px] text-on-surface-variant/80">
@@ -533,7 +532,7 @@ const SemesterLinkItem = ({ resource: res, subject, menu, onSeen }) => {
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 rounded-md text-xs text-on-surface-variant transition-colors hover:text-primary"
                   >
-                    <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
+                    <ArrowSquareOut className="size-3 shrink-0" aria-hidden="true" />
                     <span className="truncate">{link.text || link.url}</span>
                   </a>
                 </li>
@@ -574,7 +573,7 @@ const RefreshLinksButton = ({ departmentLinks }) => {
         disabled={isRefreshing || onCooldown}
         className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-on-surface-variant transition-colors hover:bg-primary/10 hover:text-primary cursor-pointer bg-transparent border-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent disabled:hover:text-on-surface-variant"
       >
-        <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin motion-reduce:animate-none' : ''}`} aria-hidden="true" />
+        <ArrowsClockwise className={`size-4 ${isRefreshing ? 'animate-spin motion-reduce:animate-none' : ''}`} aria-hidden="true" />
         {label}
       </button>
       <p role="status" className="text-[11px] text-on-surface-variant/80 empty:hidden">
@@ -859,7 +858,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
         {/* Filters Row */}
         <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface p-3 @xl:flex-row @xl:flex-wrap @xl:items-center page-section">
           <div className="relative flex-1 @xl:min-w-56">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant" />
+            <MagnifyingGlass className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-on-surface-variant" />
             <input
               type="text"
               placeholder={t('resources:searchPlaceholder')}
@@ -870,7 +869,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
           </div>
           <Dropdown label={subjectLabel} icon={SlidersHorizontal} options={SUBJECT_OPTIONS} value={subjectFilter} onChange={setSubjectFilter} />
           <Dropdown label={typeLabel}    icon={SlidersHorizontal} options={TYPE_OPTIONS}    value={typeFilter}    onChange={setTypeFilter} />
-          <Dropdown label={weekLabel}    icon={CalendarDays}      options={WEEK_OPTIONS}    value={weekFilter}    onChange={setWeekFilter} menuClassName="max-h-80 overflow-y-auto" />
+          <Dropdown label={weekLabel}    icon={CalendarDots}      options={WEEK_OPTIONS}    value={weekFilter}    onChange={setWeekFilter} menuClassName="max-h-80 overflow-y-auto" />
           {(hiddenCount > 0 || showHidden) && (
             <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-2 py-2 text-sm text-on-surface-variant select-none">
               <input
@@ -879,7 +878,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
                 onChange={(e) => setShowHidden(e.target.checked)}
                 className="size-4 accent-primary cursor-pointer"
               />
-              <EyeOff className="size-4" aria-hidden="true" />
+              <EyeSlash className="size-4" aria-hidden="true" />
               {t('resources:materialActions.showHidden', { count: hiddenCount })}
             </label>
           )}
@@ -987,7 +986,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
                                       {session.event.title}
                                     </h3>
                                     <p className="flex items-center gap-1.5 text-xs text-on-surface-variant">
-                                      <CalendarDays className="size-4" />
+                                      <CalendarDots className="size-4" />
                                       {formatEventDate(session.event.date)}
                                     </p>
                                   </div>
@@ -1078,7 +1077,7 @@ const ResourcesView = ({ resources, subjects, events, onUploadResource, onUpdate
             className="rounded-2xl border border-primary/25 bg-primary/[0.06] min-w-0 p-5 @4xl:sticky @4xl:top-8 page-section"
           >
             <div className="mb-3 flex items-center gap-2">
-              <Pin className="size-4 text-primary" />
+              <PushPin className="size-4 text-primary" />
               <h2 className="text-sm font-semibold text-on-surface">{t('resources:library.semesterMaterials')}</h2>
             </div>
             <p className="mb-4 text-xs text-on-surface-variant/80">

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ClipboardCheck, Scale, PenLine, Info } from 'lucide-react'
+import { ClipboardText, Info, PencilLine, Scales } from '../ui/icons'
 import ExpandableText from '../common/ExpandableText'
 import SubjectStagResultCard from './SubjectStagResultCard'
 import { normalizeText } from '../../utils/subjectDetails'
@@ -32,17 +32,17 @@ const SubjectFulfillment = ({ subject }) => {
       {hasAny ? (
         <div className="flex flex-col gap-5 rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
           {requirements && (
-            <Section icon={ClipboardCheck} title={t('academic:subjectDetail.fulfillment.requirements')}>
+            <Section icon={ClipboardText} title={t('academic:subjectDetail.fulfillment.requirements')}>
               <ExpandableText text={requirements} />
             </Section>
           )}
           {assessment && (
-            <Section icon={Scale} title={t('academic:subjectDetail.fulfillment.assessment')}>
+            <Section icon={Scales} title={t('academic:subjectDetail.fulfillment.assessment')}>
               <ExpandableText text={assessment} />
             </Section>
           )}
           {examForm && (
-            <Section icon={PenLine} title={t('academic:subjectDetail.fulfillment.examForm')}>
+            <Section icon={PencilLine} title={t('academic:subjectDetail.fulfillment.examForm')}>
               <p className="text-sm text-on-surface-variant">{examForm}</p>
             </Section>
           )}

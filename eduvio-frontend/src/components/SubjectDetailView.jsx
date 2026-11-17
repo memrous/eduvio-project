@@ -2,16 +2,16 @@ import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ArrowLeft,
-  CalendarRange,
+  ArrowSquareOut,
+  CalendarDots,
+  DownloadSimple,
   FolderOpen,
   GraduationCap,
-  NotebookPen,
-  Download,
-  ExternalLink,
   Info,
   ListChecks,
-  Trash2,
-} from 'lucide-react'
+  NotePencil,
+  Trash,
+} from './ui/icons'
 
 import SubjectSummaryStrip from './subject/SubjectSummaryStrip'
 import SubjectMoodleActivities from './subject/SubjectMoodleActivities'
@@ -102,7 +102,7 @@ const StagRemovedNotice = ({ subject, onDelete }) => {
           onClick={handleDelete}
           className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-on-surface-variant transition-colors hover:border-error-container/50 hover:bg-error-container/40 hover:text-error cursor-pointer"
         >
-          <Trash2 className="size-4" />
+          <Trash className="size-4" />
           {t('academic:stagRemoved.delete')}
         </button>
       )}
@@ -200,7 +200,7 @@ const MaterialsTab = ({ subject, materials, menuFor, onSetForExam }) => {
                       href={res.url}
                       className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container"
                     >
-                      <Download className="size-4" />
+                      <DownloadSimple className="size-4" />
                       <span>{t('academic:subjectDetail.download')}</span>
                     </MaterialDownloadLink>
                   ) : (
@@ -210,7 +210,7 @@ const MaterialsTab = ({ subject, materials, menuFor, onSetForExam }) => {
                       rel="noreferrer"
                       className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-container"
                     >
-                      {isLink ? <ExternalLink className="size-4" /> : <Download className="size-4" />}
+                      {isLink ? <ArrowSquareOut className="size-4" /> : <DownloadSimple className="size-4" />}
                       <span>{isLink ? t('academic:subjectDetail.preview') : t('academic:subjectDetail.download')}</span>
                     </a>
                   )}
@@ -279,10 +279,10 @@ const NotesTab = ({ note, onSaveNote }) => {
 
 const TABS = [
   { key: 'exam', Icon: GraduationCap },
-  { key: 'syllabus', Icon: CalendarRange },
+  { key: 'syllabus', Icon: CalendarDots },
   { key: 'tasks', Icon: ListChecks },
   { key: 'materials', Icon: FolderOpen },
-  { key: 'notes', Icon: NotebookPen },
+  { key: 'notes', Icon: NotePencil },
 ]
 
 // ─── Main SubjectDetailView Component ───────────────────────

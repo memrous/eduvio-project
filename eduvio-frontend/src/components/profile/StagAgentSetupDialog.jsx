@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ExternalLink } from 'lucide-react'
+import { ArrowSquareOut } from '../ui/icons'
 import Icon from '../common/Icon'
 import InfoDialog from '../common/InfoDialog'
 import CopyButton from './CopyButton'
@@ -50,7 +50,7 @@ const StagAgentSetupDialog = ({ open, onClose, toast }) => {
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 self-start text-sm font-semibold text-primary hover:underline"
       >
-        <Icon icon={ExternalLink} />
+        <Icon icon={ArrowSquareOut} />
         {t('stag.agent.setupDialog.guideLink')}
       </a>
     </InfoDialog>

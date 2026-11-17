@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { PanelRightOpen } from 'lucide-react'
+import { CaretLineLeft } from './ui/icons'
 import { useTranslation } from 'react-i18next'
 import { useCalendarState, getSubjectStyle } from './calendar/useCalendarState'
 import CalendarToolbar from './calendar/CalendarToolbar'
@@ -179,7 +179,7 @@ const CalendarView = ({
           aria-label={t('academic:calendarView.showPanel', 'Zobrazit panel')}
           className="absolute right-0 top-1/2 hidden -translate-y-1/2 items-center rounded-l-lg border border-r-0 border-outline-variant bg-surface-container-lowest px-1.5 py-3 text-on-surface-variant shadow-sm transition-colors hover:bg-surface-container hover:text-foreground @5xl:flex"
         >
-          <PanelRightOpen className="size-4" />
+          <CaretLineLeft className="size-4" />
         </button>
       )}
 

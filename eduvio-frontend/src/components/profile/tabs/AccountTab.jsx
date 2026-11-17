@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { UserRound } from 'lucide-react'
+import { User } from '../../ui/icons'
 import LanguageSelect from '../LanguageSelect'
 
 const AccountTab = ({ effectiveUser }) => {
@@ -9,7 +9,7 @@ const AccountTab = ({ effectiveUser }) => {
     <div className="rounded-2xl border border-outline-variant bg-surface p-6 space-y-6 shadow-ambient">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-          <UserRound className="w-4 h-4" />
+          <User className="w-4 h-4" />
         </div>
         <div>
           <h3 className="text-base font-bold text-on-surface">{t('tabs.account', 'Osobní údaje')}</h3>

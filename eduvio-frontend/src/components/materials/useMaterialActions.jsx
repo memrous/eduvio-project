@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CalendarClock, Eye, EyeOff, GraduationCap, Pencil, Trash2 } from 'lucide-react'
+import {
+  CalendarDots,
+  Eye,
+  EyeSlash,
+  GraduationCap,
+  PencilSimple,
+  Trash,
+} from '../ui/icons'
 import { useToast } from '../../context/ToastContext'
 import { getSubjectIdOf, isPersistedId, isSameId } from '../../utils/ids'
 import { getMaterialKind, isHidden, isOwnFile, isSemesterLink } from '../../utils/materialKinds'
@@ -64,7 +71,7 @@ export const useMaterialActions = ({ subjects, events, semesterStarts, actions }
       items.push({
         key: 'edit',
         label: t('resources:materialActions.edit'),
-        icon: Pencil,
+        icon: PencilSimple,
         onSelect: () => setDialog({ kind: semesterLink ? 'editLink' : 'edit', resource }),
       })
     }
@@ -72,7 +79,7 @@ export const useMaterialActions = ({ subjects, events, semesterStarts, actions }
       items.push({
         key: 'move',
         label: t('resources:lessons.moveShort'),
-        icon: CalendarClock,
+        icon: CalendarDots,
         onSelect: () => setDialog({ kind: 'move', resource }),
       })
     }
@@ -87,11 +94,11 @@ export const useMaterialActions = ({ subjects, events, semesterStarts, actions }
       })
     }
     if (kind === 'manual') {
-      items.push({ key: 'delete', label: t('resources:materialActions.delete'), icon: Trash2, danger: true, onSelect: () => confirmDelete(resource) })
+      items.push({ key: 'delete', label: t('resources:materialActions.delete'), icon: Trash, danger: true, onSelect: () => confirmDelete(resource) })
     } else if (isHidden(resource)) {
       items.push({ key: 'unhide', label: t('resources:materialActions.unhide'), icon: Eye, onSelect: () => run(actions.setHidden(resource.id, false), 'resources:materialActions.hideFailed') })
     } else {
-      items.push({ key: 'hide', label: t('resources:materialActions.hide'), icon: EyeOff, onSelect: () => run(actions.setHidden(resource.id, true), 'resources:materialActions.hideFailed') })
+      items.push({ key: 'hide', label: t('resources:materialActions.hide'), icon: EyeSlash, onSelect: () => run(actions.setHidden(resource.id, true), 'resources:materialActions.hideFailed') })
     }
 
     return items

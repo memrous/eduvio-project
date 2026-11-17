@@ -23,7 +23,7 @@ const MobileNavItem = ({ to, icon, labelKey }) => {
       {({ isActive }) => (
         <div className={`flex min-w-0 flex-col items-center gap-1 transition-colors cursor-pointer ${isActive ? 'text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}>
           <div className={`flex items-center justify-center rounded-full px-4 py-1 ${isActive ? 'bg-primary/10' : ''}`}>
-            <Icon icon={icon} size="md" />
+            <Icon icon={icon} size="md" weight={isActive ? 'fill' : 'regular'} />
           </div>
           <span className="max-w-full truncate text-[10px] font-bold tracking-tight">{t(labelKey)}</span>
         </div>
@@ -44,7 +44,7 @@ const MobileDashboardItem = () => {
               isActive ? 'shadow-lg shadow-primary/40' : 'shadow-md'
             }`}
           >
-            <Icon icon={DASHBOARD_ITEM.icon} size="md" />
+            <Icon icon={DASHBOARD_ITEM.icon} size="md" weight={isActive ? 'fill' : 'regular'} />
           </div>
           <span className={`text-[10px] font-bold tracking-tight ${isActive ? 'text-primary' : 'text-on-surface-variant'}`}>
             {t(DASHBOARD_ITEM.labelKey)}

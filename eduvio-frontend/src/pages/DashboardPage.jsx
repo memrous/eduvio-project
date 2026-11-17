@@ -1,4 +1,4 @@
-import { CalendarDays } from 'lucide-react'
+import { CalendarDots } from '../components/ui/icons'
 import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation, Trans } from 'react-i18next'
@@ -237,7 +237,7 @@ const DashboardPage = () => {
             </h1>
             <div className="flex items-center gap-2 text-body-md text-on-surface-variant font-medium">
               <div className="w-5 h-5 bg-error-container text-on-error-container flex items-center justify-center rounded-sm">
-                <Icon icon={CalendarDays} />
+                <Icon icon={CalendarDots} />
               </div>
               <span>
                 <Trans

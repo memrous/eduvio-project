@@ -1,4 +1,4 @@
-import { X, CalendarDays, Clock, ExternalLink } from 'lucide-react'
+import { ArrowSquareOut, CalendarDots, Clock, X } from '../ui/icons'
 import { useTranslation } from 'react-i18next'
 import { getSubjectStyle } from './useCalendarState'
 import { getLocaleFromLanguage } from '../../utils/locale'
@@ -51,7 +51,7 @@ const DeadlineDetailContent = ({ deadline, currentSubjects, onClose, onOpenSubje
 
       <dl className="flex flex-col gap-3.5 text-sm border-t border-outline-variant/30 pt-4">
         <div className="flex items-start gap-3">
-          <Icon icon={CalendarDays} className="mt-0.5 text-on-surface-variant" />
+          <Icon icon={CalendarDots} className="mt-0.5 text-on-surface-variant" />
           <div className="min-w-0">
             <dt className="text-xs text-on-surface-variant font-medium">{t('academic:eventModal.fields.date', 'Datum')}</dt>
             <dd className="font-semibold text-on-surface first-letter:uppercase">
@@ -96,7 +96,7 @@ const DeadlineDetailContent = ({ deadline, currentSubjects, onClose, onOpenSubje
             className="flex items-center justify-center gap-1.5 border border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant font-semibold py-2 rounded-lg text-sm transition-colors"
           >
             {t('academic:subjectDetail.syllabus.openSource')}
-            <Icon icon={ExternalLink} className="size-3.5" />
+            <Icon icon={ArrowSquareOut} className="size-3.5" />
           </a>
         )}
       </div>

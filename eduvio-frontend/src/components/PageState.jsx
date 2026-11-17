@@ -1,16 +1,16 @@
-import { AlertCircle, Inbox, Loader2 } from 'lucide-react'
+import { CircleNotch, Tray, WarningCircle } from './ui/icons'
 
 const VARIANTS = {
   loading: {
-    icon: Loader2,
+    icon: CircleNotch,
     iconClassName: 'animate-spin text-primary',
   },
   error: {
-    icon: AlertCircle,
+    icon: WarningCircle,
     iconClassName: 'text-error',
   },
   empty: {
-    icon: Inbox,
+    icon: Tray,
     iconClassName: 'text-on-surface-variant',
   },
 }

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Moon, Palette, Sun } from 'lucide-react'
+import { Moon, Palette, Sun } from '../../ui/icons'
 import { useTheme } from '../../../context/ThemeContext'
 import LanguageSelect from '../LanguageSelect'
 

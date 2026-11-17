@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FolderOpen, X } from 'lucide-react'
+import { FolderOpen, X } from '../../ui/icons'
 import Icon from '../../common/Icon'
 import MaterialTypeIcon from '../../materials/MaterialTypeIcon'
 import { getPreviewInfo } from '../../../utils/materialPreview'

@@ -1,4 +1,4 @@
-import { Paperclip, MapPin, Clock } from 'lucide-react'
+import { Clock, MapPin, Paperclip } from '../ui/icons'
 import { useTranslation } from 'react-i18next'
 import { formatRoom } from '../../utils/room'
 import { deadlineTimeLabel, getAssessmentLabel, isWebAssessment } from '../../utils/assessments'

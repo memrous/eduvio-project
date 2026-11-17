@@ -2,22 +2,29 @@
  * Assessments from teachers' course pages (written tests, credit tests,
  * retakes…) and the dates of schedule rows.
  */
-import { ClipboardCheck, FolderKanban, GraduationCap, PenLine, RotateCcw, Upload } from 'lucide-react'
+import {
+  ArrowCounterClockwise,
+  ClipboardText,
+  GraduationCap,
+  Kanban,
+  PencilLine,
+  UploadSimple,
+} from '../components/ui/icons'
 
 const ICONS = {
-  test: PenLine,
-  credit_test: ClipboardCheck,
-  retake: RotateCcw,
+  test: PencilLine,
+  credit_test: ClipboardText,
+  retake: ArrowCounterClockwise,
   exam: GraduationCap,
-  deadline: Upload,
-  project: FolderKanban,
+  deadline: UploadSimple,
+  project: Kanban,
 }
 
 /** Whether a requirement / deadline type is one of the assessment types. */
 export const isAssessmentType = (type) => Object.hasOwn(ICONS, type ?? '')
 
 /** Icon of an assessment type ("test", "credit_test", …). */
-export const getAssessmentIcon = (type) => ICONS[type] ?? PenLine
+export const getAssessmentIcon = (type) => ICONS[type] ?? PencilLine
 
 /** Calendar deadline that comes from a teacher's course page (no time, no submission). */
 export const isWebAssessment = (item) => item?.source === 'web'

@@ -1,6 +1,13 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CalendarDays, Flame, Zap, GraduationCap, BookOpen, MapPin } from 'lucide-react'
+import {
+  BookOpen,
+  CalendarDots,
+  Flame,
+  GraduationCap,
+  Lightning,
+  MapPin,
+} from '../ui/icons'
 import { formatRoom } from '../../utils/room'
 import { getSubjectStyle } from './useCalendarState'
 import { deadlineTimeLabel, getAssessmentIcon, getAssessmentLabel, isAssessmentType, isWebAssessment } from '../../utils/assessments'
@@ -9,7 +16,7 @@ const getDeadlineIcon = (type) => {
   if (isAssessmentType(type)) return getAssessmentIcon(type)
   const t = String(type).toLowerCase()
   if (t.includes('test') || t.includes('quiz')) {
-    return Zap
+    return Lightning
   }
   if (t.includes('exam') || t.includes('zkouška')) {
     return GraduationCap
@@ -62,7 +69,7 @@ const QuickOverviewPanel = ({
       {/* Dnešní výuka Section */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2 text-on-surface-variant font-bold text-sm">
-          <CalendarDays className="w-4 h-4 text-primary" />
+          <CalendarDots className="w-4 h-4 text-primary" />
           <span>{t('academic:calendarView.quickOverview.todayClasses')}</span>
         </div>
 

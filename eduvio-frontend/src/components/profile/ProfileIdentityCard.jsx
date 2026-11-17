@@ -1,5 +1,5 @@
 ﻿import { useTranslation } from 'react-i18next'
-import { GraduationCap, Mail } from 'lucide-react'
+import { Envelope, GraduationCap } from '../ui/icons'
 import Avatar from '../common/Avatar'
 import Icon from '../common/Icon'
 
@@ -39,7 +39,7 @@ const ProfileIdentityCard = ({ effectiveUser }) => {
 
       <div className="border-t border-outline-variant pt-3 text-body-md text-on-surface-variant">
         <span className="flex items-center gap-2 truncate">
-          <Mail className="w-4 h-4 text-on-surface-variant shrink-0" />
+          <Envelope className="w-4 h-4 text-on-surface-variant shrink-0" />
           <span className="truncate">{effectiveUser?.email}</span>
         </span>
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useId } from 'react'
-import { X } from 'lucide-react'
+import { X } from '../ui/icons'
 import Icon from './Icon'
 
 /**

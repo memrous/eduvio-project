@@ -1,5 +1,5 @@
 
-import { X } from 'lucide-react'
+import { X } from '../ui/icons'
 import { useTranslation } from 'react-i18next'
 import { getSubjectStyle } from './useCalendarState'
 

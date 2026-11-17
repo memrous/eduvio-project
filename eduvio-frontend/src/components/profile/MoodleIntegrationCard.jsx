@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import {
-  AlertCircle,
-  ChevronDown,
-  ExternalLink,
-  Loader2,
+  ArrowSquareOut,
+  ArrowsClockwise,
+  CaretDown,
+  CircleNotch,
+  LinkBreak,
+  LinkSimple,
   ShieldCheck,
-  Unlink2,
-  Link2,
-  RefreshCw,
-} from 'lucide-react'
+  WarningCircle,
+} from '../ui/icons'
 import * as api from '../../services/api'
 import { extractMoodleToken } from '../../utils/moodleToken'
 import { clearMoodleLaunchPending, isMoodleLaunchPending, markMoodleLaunchPending } from '../../utils/moodleLaunch'
@@ -306,7 +306,7 @@ const MoodleIntegrationCard = ({
         disabled={manualSubmitting || !manualToken.trim()}
         className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {manualSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+        {manualSubmitting ? <CircleNotch className="h-4 w-4 animate-spin" /> : <LinkSimple className="h-4 w-4" />}
         {t('moodle.actions.connectManual')}
       </button>
     </form>
@@ -332,7 +332,7 @@ const MoodleIntegrationCard = ({
 
       {isMoodleConnected && moodleSyncStatus === 'pending' && (
         <div className="flex min-h-13 items-center gap-2.5 px-4 py-3 bg-primary-container border border-primary/30 rounded-lg">
-          <Loader2 className="w-4 h-4 text-primary shrink-0 animate-spin" />
+          <CircleNotch className="w-4 h-4 text-primary shrink-0 animate-spin" />
           <p className="text-label-sm text-on-primary-container">{t('moodle.status.syncing')}</p>
         </div>
       )}
@@ -348,7 +348,7 @@ const MoodleIntegrationCard = ({
 
       {isMoodleConnected && moodleSyncStatus === 'failed' && (
         <div className="flex min-h-13 items-center gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
-          <AlertCircle className="w-4 h-4 text-error shrink-0" />
+          <WarningCircle className="w-4 h-4 text-error shrink-0" />
           <p className="text-label-sm text-error">{t('moodle.status.failed')}</p>
         </div>
       )}
@@ -357,7 +357,7 @@ const MoodleIntegrationCard = ({
         <div className="flex flex-1 flex-col gap-4">
           {launchReturnFailed && (
             <div role="status" className="flex items-start gap-2.5 px-4 py-3 bg-warning-container border border-warning/30 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-on-warning-container shrink-0 mt-0.5" />
+              <WarningCircle className="w-4 h-4 text-on-warning-container shrink-0 mt-0.5" />
               <p className="text-label-sm text-on-warning-container">{t('moodle.card.returnFailed')}</p>
             </div>
           )}
@@ -375,7 +375,7 @@ const MoodleIntegrationCard = ({
                 aria-busy={launchStarting}
                 className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+                {launchStarting ? <CircleNotch className="h-4 w-4 animate-spin" /> : <LinkSimple className="h-4 w-4" />}
                 {t('moodle.actions.connect')}
               </button>
 
@@ -388,7 +388,7 @@ const MoodleIntegrationCard = ({
                   aria-controls="profile-moodle-manual"
                   className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
                 >
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${manualOpen ? 'rotate-180' : ''}`} />
+                  <CaretDown className={`h-3.5 w-3.5 transition-transform ${manualOpen ? 'rotate-180' : ''}`} />
                   {t('moodle.card.manualToggle')}
                 </button>
                 {manualOpen && <div id="profile-moodle-manual" className="mt-3">{manualForm}</div>}
@@ -408,7 +408,7 @@ const MoodleIntegrationCard = ({
                   aria-busy={launchStarting}
                   className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-3.5 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {launchStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+                  {launchStarting ? <CircleNotch className="h-4 w-4 animate-spin" /> : <ArrowSquareOut className="h-4 w-4" />}
                   {t('moodle.actions.openMoodleLogin')}
                 </button>
               </div>
@@ -438,9 +438,9 @@ const MoodleIntegrationCard = ({
               className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {moodleResyncLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <CircleNotch className="h-4 w-4 animate-spin" />
               ) : (
-                <RefreshCw className="h-4 w-4" />
+                <ArrowsClockwise className="h-4 w-4" />
               )}
               {t('moodle.actions.syncNow')}
             </button>
@@ -451,7 +451,7 @@ const MoodleIntegrationCard = ({
               disabled={moodleDisconnecting}
               className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-error-container bg-surface px-4 py-2.5 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {moodleDisconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Unlink2 className="h-4 w-4" />}
+              {moodleDisconnecting ? <CircleNotch className="h-4 w-4 animate-spin" /> : <LinkBreak className="h-4 w-4" />}
               {t('moodle.actions.disconnect')}
             </button>
           </div>

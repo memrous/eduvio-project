@@ -1,4 +1,10 @@
-import { ChevronLeft, ChevronRight, Plus, PanelRightClose, PanelRightOpen } from 'lucide-react'
+import {
+  CaretLeft,
+  CaretLineLeft,
+  CaretLineRight,
+  CaretRight,
+  Plus,
+} from '../ui/icons'
 import Dropdown from '../common/Dropdown'
 
 const CalendarToolbar = ({
@@ -37,14 +43,14 @@ const CalendarToolbar = ({
         onClick={handlePrev}
         className="flex size-8 items-center justify-center rounded-l-lg text-on-surface-variant transition-colors hover:bg-surface-container hover:text-foreground"
       >
-        <ChevronLeft className="size-4" />
+        <CaretLeft className="size-4" />
       </button>
       <button
         aria-label={t('academic:calendarView.next', 'Následující')}
         onClick={handleNext}
         className="flex size-8 items-center justify-center rounded-r-lg border-l border-outline-variant text-on-surface-variant transition-colors hover:bg-surface-container hover:text-foreground"
       >
-        <ChevronRight className="size-4" />
+        <CaretRight className="size-4" />
       </button>
     </div>
   )
@@ -140,9 +146,9 @@ const CalendarToolbar = ({
             className="hidden size-9 items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant @5xl:flex transition-colors hover:bg-surface-container hover:text-foreground"
           >
             {panelOpen ? (
-              <PanelRightClose className="size-4" />
+              <CaretLineRight className="size-4" />
             ) : (
-              <PanelRightOpen className="size-4" />
+              <CaretLineLeft className="size-4" />
             )}
           </button>
         </div>

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { CalendarClock, MapPin, UserRound, ArrowRight } from 'lucide-react'
+import { ArrowRight, CalendarDots, MapPin, User } from '../ui/icons'
 import { useEvents } from '../../hooks/useEvents'
 import { formatRoom } from '../../utils/room'
 import { getLocaleFromLanguage } from '../../utils/locale'
@@ -135,7 +135,7 @@ const SubjectSchedule = ({ subject }) => {
   return (
     <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
       <div className="flex items-center gap-2">
-        <CalendarClock className="size-4 text-on-surface-variant" />
+        <CalendarDots className="size-4 text-on-surface-variant" />
         <h2 className="text-sm font-bold text-foreground">{t('academic:subjectSchedule.title')}</h2>
       </div>
 
@@ -169,7 +169,7 @@ const SubjectSchedule = ({ subject }) => {
               )}
               {nextEvent.teacherName && (
                 <span className="inline-flex items-center gap-1.5 min-w-0">
-                  <UserRound className="size-4 shrink-0" />
+                  <User className="size-4 shrink-0" />
                   <span className="break-words">{nextEvent.teacherName}</span>
                 </span>
               )}
@@ -206,7 +206,7 @@ const SubjectSchedule = ({ subject }) => {
               )}
               {g.teachers.size > 0 && (
                 <span className="inline-flex items-center gap-1.5 text-on-surface-variant min-w-0">
-                  <UserRound className="size-4 shrink-0" />
+                  <User className="size-4 shrink-0" />
                   <span className="break-words">{[...g.teachers].join(', ')}</span>
                 </span>
               )}

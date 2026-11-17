@@ -1,5 +1,5 @@
 import ProgressBar from '../common/ProgressBar'
-import { GraduationCap, TrendingUp } from 'lucide-react'
+import { GraduationCap, TrendUp } from '../ui/icons'
 import { useTranslation } from 'react-i18next'
 
 const QuickProgress = ({ progress }) => {
@@ -60,7 +60,7 @@ const QuickProgress = ({ progress }) => {
         <div className="rounded-xl bg-success-container p-3">
           <p className="flex items-center gap-1 text-xs text-on-success-container">
             {t('quickProgress.averageScore')}
-            <TrendingUp className="size-3 text-success" aria-hidden="true" />
+            <TrendUp className="size-3 text-success" aria-hidden="true" />
           </p>
           <p className="mt-0.5 text-xl font-bold tabular-nums text-on-success-container">
             {averageScore} %

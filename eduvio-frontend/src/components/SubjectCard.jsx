@@ -1,4 +1,4 @@
-import { UserRound, Trash2, Building2, BookOpen } from 'lucide-react'
+import { BookOpen, Buildings, Trash, User } from './ui/icons'
 import { useTranslation } from 'react-i18next'
 import { formatSemesterLabel } from '../utils/semester'
 import Icon from './common/Icon'
@@ -71,7 +71,7 @@ const SubjectCard = ({ subject, onSelect, onDelete }) => {
       <div className="flex items-center justify-between gap-2 text-body-md text-on-surface-variant mt-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0">
-            <UserRound className="size-4 shrink-0 text-on-surface-variant" />
+            <User className="size-4 shrink-0 text-on-surface-variant" />
             <span className="truncate text-[13px] font-medium" title={subject.lecturer}>
               {subject.lecturer}
             </span>
@@ -81,7 +81,7 @@ const SubjectCard = ({ subject, onSelect, onDelete }) => {
               className="inline-flex items-center gap-1 text-[11px] font-medium text-on-surface-variant/80 bg-surface-container-low px-1.5 py-0.5 rounded-sm shrink-0"
               title={subject.department}
             >
-              <Building2 className="w-3 h-3 shrink-0" />
+              <Buildings className="w-3 h-3 shrink-0" />
               {subject.department}
             </span>
           )}
@@ -111,7 +111,7 @@ const SubjectCard = ({ subject, onSelect, onDelete }) => {
               className="text-on-surface-variant hover:text-error hover:bg-error-container/40 p-2 rounded-md transition-all cursor-pointer border border-transparent hover:border-error-container/50"
               title={t('subjectCard.deleteSubject')}
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash className="w-4 h-4" />
             </button>
           )}
           <button 

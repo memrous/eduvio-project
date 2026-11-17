@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { File } from 'lucide-react'
+import { File } from '../ui/icons'
 // Legacy build: runs on older mobile Safari/Chrome too
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.min.mjs'
 import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'

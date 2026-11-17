@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronDown, Check } from 'lucide-react'
+import { CaretDown, Check } from '../ui/icons'
 
 /**
  * The app's picker: a button with a rotating chevron that opens a list.
@@ -71,7 +71,7 @@ const Dropdown = ({
           {Icon && <Icon className="size-4 text-on-surface-variant shrink-0" />}
           <span className="truncate">{label}</span>
         </span>
-        <ChevronDown
+        <CaretDown
           className={`size-4 shrink-0 text-on-surface-variant transition-transform duration-200 ${
             open ? 'rotate-180' : ''
           }`}

@@ -1,4 +1,4 @@
-import { Filter } from 'lucide-react'
+import { Funnel } from '../ui/icons'
 
 const CalendarFilterChips = ({
   SUBJECTS,
@@ -13,7 +13,7 @@ const CalendarFilterChips = ({
   return (
     <div className="flex flex-col gap-2 px-4 pb-3 @2xl:px-6">
       <span className="flex items-center gap-1.5 text-xs font-medium text-on-surface-variant">
-        <Filter className="size-4" />
+        <Funnel className="size-4" />
         {t('academic:calendarView.filterLabel', 'Filtr:')}
       </span>
       {/* Chips of the same width; long names end with "…" (full name on hover) */}

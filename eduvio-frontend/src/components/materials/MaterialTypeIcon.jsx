@@ -1,4 +1,12 @@
-import { FileText, FileType2, Globe, Link, NotebookText, Presentation, Video } from 'lucide-react'
+import {
+  FilePdf,
+  FileText,
+  Globe,
+  Link,
+  Notebook,
+  PresentationChart,
+  VideoCamera,
+} from '../ui/icons'
 import Icon from '../common/Icon'
 
 /**
@@ -7,11 +15,11 @@ import Icon from '../common/Icon'
  * WEBSITE is a course page link (category "platform").
  */
 const MATERIAL_TYPES = {
-  PDF:       { icon: FileType2,    tile: 'bg-error-container text-error' },
+  PDF:       { icon: FilePdf,    tile: 'bg-error-container text-error' },
   DOC:       { icon: FileText,     tile: 'bg-primary-container text-primary' },
-  SLIDES:    { icon: Presentation, tile: 'bg-tertiary-container text-on-tertiary-container' },
-  NOTES:     { icon: NotebookText, tile: 'bg-warning-container text-on-warning-container' },
-  RECORDING: { icon: Video,        tile: 'bg-success-container text-success' },
+  SLIDES:    { icon: PresentationChart, tile: 'bg-tertiary-container text-on-tertiary-container' },
+  NOTES:     { icon: Notebook, tile: 'bg-warning-container text-on-warning-container' },
+  RECORDING: { icon: VideoCamera,        tile: 'bg-success-container text-success' },
   LINK:      { icon: Link,         tile: 'bg-secondary-container text-on-secondary-container' },
   WEBSITE:   { icon: Globe,        tile: 'bg-secondary-container text-on-secondary-container' },
 }

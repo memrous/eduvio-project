@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FileText, ListChecks, Pencil, Plus, Trash2 } from 'lucide-react'
+import {
+  FileText,
+  ListChecks,
+  PencilSimple,
+  Plus,
+  Trash,
+} from '../../ui/icons'
 import Icon from '../../common/Icon'
 import ProgressBar from '../../common/ProgressBar'
 import { useExamTopics } from '../../../hooks/useExam'
@@ -71,7 +77,7 @@ const TopicRow = ({ topic, onToggle, onRename, onDelete }) => {
             aria-label={t('academic:subjectDetail.exam.topics.edit', { title: topic.title })}
             className={iconButton}
           >
-            <Icon icon={Pencil} />
+            <Icon icon={PencilSimple} />
           </button>
           <button
             type="button"
@@ -86,7 +92,7 @@ const TopicRow = ({ topic, onToggle, onRename, onDelete }) => {
               ? `${iconButtonBase} bg-error-container text-error ring-1 ring-error hover:bg-error-container`
               : `${iconButton} hover:text-error`}
           >
-            <Icon icon={Trash2} />
+            <Icon icon={Trash} />
           </button>
         </span>
       )}

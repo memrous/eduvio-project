@@ -245,10 +245,10 @@ Following the modern SaaS aesthetic, the system uses a **Rounded (8px/0.5rem)** 
 This "soft-square" approach feels professional yet approachable, avoiding the clinical feel of sharp corners or the overly casual look of full pills.
 
 ## Icons
-Only `lucide-react` (no image icons). Use `components/common/Icon`: `sm` 16 px in text and badges, `md` 20 px in navigation and buttons, `lg` 24 px in empty states and card headings; stroke 1.75 (also the `LucideProvider` default in `main.jsx`); color is `currentColor` from a text token; decorative icons are `aria-hidden`.
-- One meaning, one icon: dashboard `LayoutDashboard`, subjects `BookOpen`, calendar/date `CalendarDays`, materials `FolderOpen`, planning `ListChecks`, profile/person `UserRound`, time `Clock`, deadlines `Bell`, course web page `Globe`.
-- Material types (`components/materials/MaterialTypeIcon`): PDF `FileType2`, DOC `FileText`, SLIDES `Presentation`, NOTES `NotebookText`, RECORDING `Video`, LINK `Link`, on a tinted `*-container` tile.
-- Navigation: active item `bg-primary/10 text-primary`, inactive `text-on-surface-variant` with a `surface-container` hover.
+Only `@phosphor-icons/react` via `src/components/ui/icons.js` (no image icons). Use `components/common/Icon`: `sm` 16 px in text and badges, `md` 20 px in navigation and buttons, `lg` 24 px in empty states and card headings; `weight="regular"` (or `weight="fill"` for active navigation items); color is `currentColor` from a text token; decorative icons are `aria-hidden`.
+- One meaning, one icon: dashboard `SquaresFour`, subjects `BookOpen`, calendar/date `CalendarDots`, materials `FolderOpen`, planning `ListChecks`, profile/person `User`, time `Clock`, deadlines `Bell`, course web page `Globe`.
+- Material types (`components/materials/MaterialTypeIcon`): PDF `FilePdf`, DOC `FileText`, SLIDES `PresentationChart`, NOTES `Notebook`, RECORDING `VideoCamera`, LINK `Link`, on a tinted `*-container` tile.
+- Navigation: active item `bg-primary/10 text-primary` with `weight="fill"`, inactive `text-on-surface-variant` with a `surface-container` hover and `weight="regular"`.
 
 ## Components
 - **Buttons:** Primary buttons use `bg-primary text-on-primary` and `hover:bg-primary/90`. Secondary buttons use a surface fill with a 1px `outline-variant` border. Destructive buttons use `bg-error text-on-error`, or `text-error` with an `error/30` border when outlined.

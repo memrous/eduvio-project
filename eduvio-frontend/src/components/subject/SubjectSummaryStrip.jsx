@@ -1,7 +1,7 @@
 import ProgressBar from '../common/ProgressBar'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Percent, CheckCircle2, AlertCircle } from 'lucide-react'
+import { CheckCircle, Percent, WarningCircle } from '../ui/icons'
 
 const SubjectSummaryStrip = ({ subject, requirements = [], className = '' }) => {
   const { t } = useTranslation(['academic', 'dashboard'])
@@ -103,7 +103,7 @@ const SubjectSummaryStrip = ({ subject, requirements = [], className = '' }) => 
                 : 'bg-success-container text-on-success-container'
             }`}
           >
-            {remainingCount > 0 ? <AlertCircle className="size-6" /> : <CheckCircle2 className="size-6" />}
+            {remainingCount > 0 ? <WarningCircle className="size-6" /> : <CheckCircle className="size-6" />}
           </div>
           <div className="min-w-0">
             <p className="text-xs font-medium text-on-surface-variant">

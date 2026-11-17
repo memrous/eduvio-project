@@ -1,20 +1,20 @@
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  UserRound,
-  AlertCircle,
-  CalendarDays,
-  BarChart3,
-  Loader2,
-  CheckCircle2,
-  Check,
-  Info,
   BookOpen,
-} from 'lucide-react'
+  CalendarDots,
+  ChartBar,
+  Check,
+  CheckCircle,
+  CircleNotch,
+  Envelope,
+  Eye,
+  EyeSlash,
+  Info,
+  Lock,
+  User,
+  WarningCircle,
+} from '../components/ui/icons'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useAuth } from '../context/AuthContext'
@@ -26,8 +26,8 @@ import logoImg from '../assets/images/logo.png'
 
 const FEATURES = [
   { icon: BookOpen, key: 'features.manageSubjects' },
-  { icon: CalendarDays, key: 'features.calendar' },
-  { icon: BarChart3, key: 'features.progress' },
+  { icon: CalendarDots, key: 'features.calendar' },
+  { icon: ChartBar, key: 'features.progress' },
 ]
 
 const getStrength = (pw) => {
@@ -291,7 +291,7 @@ const RegisterPage = () => {
           {/* Server error */}
           {serverError && (
             <div className="flex items-start gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
+              <WarningCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
               <p className="text-label-sm text-on-error-container">{t(serverError)}</p>
             </div>
           )}
@@ -306,7 +306,7 @@ const RegisterPage = () => {
                 {t('register.fields.name.label')}
               </label>
               <div className="relative">
-                <UserRound className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <User className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="reg-name"
                   type="text"
@@ -319,7 +319,7 @@ const RegisterPage = () => {
               </div>
               {errors.name && (
                 <p className="text-label-sm text-error flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> {formatError(t, errors.name)}
+                  <WarningCircle className="w-3 h-3" /> {formatError(t, errors.name)}
                 </p>
               )}
             </div>
@@ -330,7 +330,7 @@ const RegisterPage = () => {
                 {t('register.fields.username.label')}
               </label>
               <div className="relative">
-                <UserRound className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <User className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="reg-username"
                   type="text"
@@ -343,7 +343,7 @@ const RegisterPage = () => {
               </div>
               {errors.username && (
                 <p className="text-error text-sm mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> {formatError(t, errors.username)}
+                  <WarningCircle className="w-3 h-3" /> {formatError(t, errors.username)}
                 </p>
               )}
             </div>
@@ -354,7 +354,7 @@ const RegisterPage = () => {
                 {t('register.fields.email.label')}
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Envelope className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="reg-email"
                   type="email"
@@ -367,7 +367,7 @@ const RegisterPage = () => {
               </div>
               {errors.email && (
                 <p className="text-error text-sm mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> {formatError(t, errors.email)}
+                  <WarningCircle className="w-3 h-3" /> {formatError(t, errors.email)}
                 </p>
               )}
             </div>
@@ -394,7 +394,7 @@ const RegisterPage = () => {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
                   aria-label={showPass ? t('register.aria.hidePassword') : t('register.aria.showPassword')}
                 >
-                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPass ? <EyeSlash className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
 
@@ -418,7 +418,7 @@ const RegisterPage = () => {
 
               {errors.password && (
                 <p className="text-label-sm text-error flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> {formatError(t, errors.password)}
+                  <WarningCircle className="w-3 h-3" /> {formatError(t, errors.password)}
                 </p>
               )}
             </div>
@@ -445,16 +445,16 @@ const RegisterPage = () => {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
                   aria-label={showConfirm ? t('register.aria.hidePassword') : t('register.aria.showPassword')}
                 >
-                  {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showConfirm ? <EyeSlash className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
 
                 {form.confirmPassword && form.password === form.confirmPassword && (
-                  <CheckCircle2 className="w-4 h-4 text-success absolute right-9 top-1/2 -translate-y-1/2" />
+                  <CheckCircle className="w-4 h-4 text-success absolute right-9 top-1/2 -translate-y-1/2" />
                 )}
               </div>
               {errors.confirmPassword && (
                 <p className="text-label-sm text-error flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> {formatError(t, errors.confirmPassword)}
+                  <WarningCircle className="w-3 h-3" /> {formatError(t, errors.confirmPassword)}
                 </p>
               )}
             </div>
@@ -467,9 +467,9 @@ const RegisterPage = () => {
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-primary hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-on-primary font-semibold rounded-lg text-label-md transition-all shadow-sm cursor-pointer"
               >
                 {checking ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> {t('register.actions.checking')}</>
+                  <><CircleNotch className="w-4 h-4 animate-spin" /> {t('register.actions.checking')}</>
                 ) : submitting ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> {t('register.actions.creatingAccount')}</>
+                  <><CircleNotch className="w-4 h-4 animate-spin" /> {t('register.actions.creatingAccount')}</>
                 ) : (
                   <>{t('register.actions.completeRegistration')} <Check className="w-4 h-4" /></>
                 )}

@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ClipboardCheck, ExternalLink, Eye, EyeOff, Globe, Paperclip } from 'lucide-react'
+import {
+  ArrowSquareOut,
+  ClipboardText,
+  Eye,
+  EyeSlash,
+  Globe,
+  Paperclip,
+} from '../../ui/icons'
 import Icon from '../../common/Icon'
 import { getLocaleFromLanguage } from '../../../utils/locale'
 import { daysFromToday, getAssessmentIcon, getAssessmentLabel, toLocalDate } from '../../../utils/assessments'
@@ -94,7 +101,7 @@ const AssessmentRow = ({ item, onHide, onUnhide }) => {
           title={t('academic:subjectDetail.exam.assessments.hide', { title: item.title })}
           className="flex size-8 shrink-0 items-center justify-center rounded-lg border-0 bg-transparent text-on-surface-variant opacity-100 transition-colors hover:bg-surface-container hover:text-foreground cursor-pointer md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
         >
-          <Icon icon={EyeOff} />
+          <Icon icon={EyeSlash} />
         </button>
       )}
     </li>
@@ -121,7 +128,7 @@ const ContinuousAssessmentCard = ({ items, hiddenItems = [], isLoading, sourceUr
     <section className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">
-          <Icon icon={ClipboardCheck} className="text-on-surface-variant" />
+          <Icon icon={ClipboardText} className="text-on-surface-variant" />
           {t('academic:subjectDetail.exam.assessments.title')}
         </h3>
         {assessments.length > 0 && <SourceChip url={pageUrl} />}
@@ -135,7 +142,7 @@ const ContinuousAssessmentCard = ({ items, hiddenItems = [], isLoading, sourceUr
           {pageUrl && (
             <a href={pageUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>
               {t('academic:subjectDetail.syllabus.openSource')}
-              <Icon icon={ExternalLink} className="size-3.5" />
+              <Icon icon={ArrowSquareOut} className="size-3.5" />
             </a>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Mail, Phone, UserRound } from 'lucide-react'
+import { Envelope, Phone, User } from '../ui/icons'
 
 const clean = (value) => (typeof value === 'string' && value.trim() ? value.trim() : null)
 
@@ -35,7 +35,7 @@ const ProfileStudyOfficeCard = ({ user }) => {
       <ul className="space-y-2.5 text-sm">
         {name && (
           <li className="flex items-start gap-2 min-w-0">
-            <UserRound className="w-4 h-4 mt-0.5 shrink-0 text-on-surface-variant" />
+            <User className="w-4 h-4 mt-0.5 shrink-0 text-on-surface-variant" />
             <span className="min-w-0">
               <span className="block font-medium text-on-surface break-words">{name}</span>
               <span className="block text-xs text-on-surface-variant">{t('studyOffice.officer')}</span>
@@ -44,7 +44,7 @@ const ProfileStudyOfficeCard = ({ user }) => {
         )}
         {email && (
           <li className="flex items-start gap-2 min-w-0">
-            <Mail className="w-4 h-4 mt-0.5 shrink-0 text-on-surface-variant" />
+            <Envelope className="w-4 h-4 mt-0.5 shrink-0 text-on-surface-variant" />
             {isEmail(email) ? (
               <a href={`mailto:${email}`} className={linkClass}>{email}</a>
             ) : (

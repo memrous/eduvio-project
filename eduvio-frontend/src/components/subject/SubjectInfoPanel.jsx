@@ -1,18 +1,18 @@
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Award,
+  ArrowSquareOut,
   BookOpenText,
-  Building2,
-  ChevronDown,
-  ExternalLink,
+  Buildings,
+  CaretDown,
   Globe,
   GraduationCap,
-  Layers,
-  Presentation,
-  UserCog,
+  Medal,
+  PresentationChart,
+  Stack,
+  UserGear,
   Users,
-} from 'lucide-react'
+} from '../ui/icons'
 import Icon from '../common/Icon'
 import SubjectSchedule from './SubjectSchedule'
 import { getStatutLabelKey, normalizeStatut } from '../../utils/semester'
@@ -58,12 +58,12 @@ const SubjectInfoPanel = ({ subject, semesterLinks = [], hasAbout, onShowInfo })
 
   // People from STAG; a manually entered lecturer only when STAG has none
   const people = [
-    { key: 'guarantor', icon: UserCog, names: splitPeople(subject.guarantor) },
-    { key: 'lecturers', icon: Presentation, names: splitPeople(subject.lecturers) },
+    { key: 'guarantor', icon: UserGear, names: splitPeople(subject.guarantor) },
+    { key: 'lecturers', icon: PresentationChart, names: splitPeople(subject.lecturers) },
     { key: 'tutors', icon: Users, names: splitPeople(subject.tutors) },
   ].filter((p) => p.names.length > 0)
   if (people.length === 0 && subject.lecturer && !PLACEHOLDER_LECTURERS.has(subject.lecturer.trim().toLowerCase())) {
-    people.push({ key: 'lecturer', icon: UserCog, names: splitPeople(subject.lecturer) })
+    people.push({ key: 'lecturer', icon: UserGear, names: splitPeople(subject.lecturer) })
   }
 
   const hasLinks = Boolean(stagUrl) || semesterLinks.length > 0 || hasAbout
@@ -83,7 +83,7 @@ const SubjectInfoPanel = ({ subject, semesterLinks = [], hasAbout, onShowInfo })
           <span className="sr-only">
             {t(isOpen ? 'academic:subjectDetail.infoPanel.hide' : 'academic:subjectDetail.infoPanel.show')}
           </span>
-          <Icon icon={ChevronDown} className={`text-on-surface-variant transition-transform motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`} />
+          <Icon icon={CaretDown} className={`text-on-surface-variant transition-transform motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`} />
         </button>
         <h2 className="hidden px-5 pt-5 text-sm font-bold text-foreground @5xl/page:block">
           {t('academic:subjectDetail.infoPanel.title')}
@@ -94,17 +94,17 @@ const SubjectInfoPanel = ({ subject, semesterLinks = [], hasAbout, onShowInfo })
             <InfoRow icon={GraduationCap} label={t('academic:subjectDetail.creditsLabel')}>
               {t('academic:subjectDetail.creditsEcts', { count: subject.credits })}
             </InfoRow>
-            <InfoRow icon={Award} label={t('academic:subjectDetail.completionLabel')}>
+            <InfoRow icon={Medal} label={t('academic:subjectDetail.completionLabel')}>
               {COMPLETION_KEYS[completionType] ? t(COMPLETION_KEYS[completionType]) : completionType || '—'}
               {creditBeforeExam && (
                 <span className="block text-xs text-on-surface-variant">{t('academic:subjectDetail.creditBeforeExam')}</span>
               )}
             </InfoRow>
-            <InfoRow icon={Layers} label={t('academic:subjectDetail.typeLabel')}>
+            <InfoRow icon={Stack} label={t('academic:subjectDetail.typeLabel')}>
               {t(getStatutLabelKey(statut))}
             </InfoRow>
             {subject.department && (
-              <InfoRow icon={Building2} label={t('academic:subjectDetail.departmentLabel')}>
+              <InfoRow icon={Buildings} label={t('academic:subjectDetail.departmentLabel')}>
                 {subject.department}
               </InfoRow>
             )}
@@ -138,7 +138,7 @@ const SubjectInfoPanel = ({ subject, semesterLinks = [], hasAbout, onShowInfo })
                 {stagUrl && (
                   <li>
                     <a href={stagUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>
-                      <Icon icon={ExternalLink} />
+                      <Icon icon={ArrowSquareOut} />
                       <span className="min-w-0 truncate">{t('academic:subjectDetail.openInStag')}</span>
                     </a>
                   </li>

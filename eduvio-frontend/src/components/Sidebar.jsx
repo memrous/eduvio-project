@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { CaretLineLeft, CaretLineRight, SignOut } from './ui/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { useStagStatus } from '../hooks/useStagStatus'
@@ -57,7 +57,7 @@ const Sidebar = ({ collapsed = false, onToggle }) => {
       aria-expanded={!collapsed}
       className="group relative flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
     >
-      <Icon icon={collapsed ? PanelLeftOpen : PanelLeftClose} size="md" />
+      <Icon icon={collapsed ? CaretLineRight : CaretLineLeft} size="md" />
       {collapsed && <RailTooltip>{toggleLabel}</RailTooltip>}
     </button>
   )
@@ -71,8 +71,12 @@ const Sidebar = ({ collapsed = false, onToggle }) => {
           <nav className="flex flex-col items-center gap-1">
             {NAV_ITEMS.map(({ to, icon, labelKey }) => (
               <NavLink key={to} to={to} className={railLinkClass} aria-label={t(labelKey)}>
-                <Icon icon={icon} size="md" />
-                <RailTooltip>{t(labelKey)}</RailTooltip>
+                {({ isActive }) => (
+                  <>
+                    <Icon icon={icon} size="md" weight={isActive ? 'fill' : 'regular'} />
+                    <RailTooltip>{t(labelKey)}</RailTooltip>
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -105,7 +109,7 @@ const Sidebar = ({ collapsed = false, onToggle }) => {
             aria-label={t('sidebar.logout')}
             className="group relative flex size-12 cursor-pointer items-center justify-center rounded-md border border-error/20 bg-surface-container-low text-error transition-all hover:bg-surface-container"
           >
-            <Icon icon={LogOut} size="md" />
+            <Icon icon={SignOut} size="md" />
             <RailTooltip>{t('sidebar.logout')}</RailTooltip>
           </button>
         </div>
@@ -131,8 +135,12 @@ const Sidebar = ({ collapsed = false, onToggle }) => {
         <nav className="flex flex-col gap-1">
           {NAV_ITEMS.map(({ to, icon, labelKey }) => (
             <NavLink key={to} to={to} className={getNavLinkClass}>
-              <Icon icon={icon} size="md" />
-              {t(labelKey)}
+              {({ isActive }) => (
+                <>
+                  <Icon icon={icon} size="md" weight={isActive ? 'fill' : 'regular'} />
+                  {t(labelKey)}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -142,8 +150,12 @@ const Sidebar = ({ collapsed = false, onToggle }) => {
       <div className="flex flex-col gap-4">
         <div className="border-t border-outline-variant"></div>
         <NavLink to={PROFILE_NAV_ITEM.to} className={getNavLinkClass}>
-          <Icon icon={PROFILE_NAV_ITEM.icon} size="md" />
-          {t(PROFILE_NAV_ITEM.labelKey)}
+          {({ isActive }) => (
+            <>
+              <Icon icon={PROFILE_NAV_ITEM.icon} size="md" weight={isActive ? 'fill' : 'regular'} />
+              {t(PROFILE_NAV_ITEM.labelKey)}
+            </>
+          )}
         </NavLink>
         {/* Profile Card */}
         <div className="bg-surface-container-low border border-outline-variant p-4 rounded-lg flex flex-col gap-3">
@@ -183,7 +195,7 @@ const Sidebar = ({ collapsed = false, onToggle }) => {
           onClick={logout}
           className="w-full flex items-center gap-3 px-3 py-2 bg-surface-container-low hover:bg-surface-container text-error rounded-md text-label-md transition-all cursor-pointer font-medium border border-error/20"
         >
-          <Icon icon={LogOut} size="md" />
+          <Icon icon={SignOut} size="md" />
           {t('sidebar.logout')}
         </button>
       </div>

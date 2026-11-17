@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { MoreVertical } from 'lucide-react'
+import { DotsThreeVertical } from '../ui/icons'
 
 /**
  * "⋮" menu with actions of one material (menu button pattern):
@@ -76,7 +76,7 @@ const MaterialActionsMenu = ({ label, items, className = '' }) => {
         onKeyDown={onButtonKeyDown}
         className="flex size-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-primary/15 hover:text-primary cursor-pointer bg-transparent border-0"
       >
-        <MoreVertical className="size-4" aria-hidden="true" />
+        <DotsThreeVertical className="size-4" aria-hidden="true" />
       </button>
 
       {open && (

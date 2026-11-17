@@ -2,15 +2,15 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import {
-  AlertCircle,
+  ArrowsClockwise,
   Check,
+  CircleNotch,
   Info,
-  KeyRound,
-  Loader2,
-  RefreshCw,
+  Key,
   ShieldCheck,
-  Trash2,
-} from 'lucide-react'
+  Trash,
+  WarningCircle,
+} from '../ui/icons'
 import Icon from '../common/Icon'
 import * as api from '../../services/api'
 import { STAG_STATUS_KEY } from '../../hooks/useStagStatus'
@@ -112,7 +112,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
     if (syncStatus === 'failed') {
       return (
         <div className="flex items-start gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
-          <Icon icon={AlertCircle} className="text-error mt-0.5" />
+          <Icon icon={WarningCircle} className="text-error mt-0.5" />
           <div className="min-w-0 text-label-sm text-error space-y-0.5">
             <p className="font-semibold">{t('stag.agent.status.title')} · {t('stag.agent.status.failed')}</p>
             <p>{t('stag.agent.status.lastSync')} {lastSync}</p>
@@ -142,7 +142,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
 
     return (
       <div className="flex items-start gap-2.5 px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg">
-        <Icon icon={RefreshCw} className="text-on-surface-variant mt-0.5" />
+        <Icon icon={ArrowsClockwise} className="text-on-surface-variant mt-0.5" />
         <div className="min-w-0 text-label-sm text-on-surface-variant space-y-0.5">
           <p className="font-semibold text-on-surface">{t('stag.agent.status.title')}</p>
           <p>{t('stag.agent.status.lastSync')} {lastSync}</p>
@@ -187,7 +187,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
 
       {agentToken && isStale && (
         <p className="flex items-start gap-2 text-xs text-on-surface-variant">
-          <Icon icon={AlertCircle} className="mt-0.5" />
+          <Icon icon={WarningCircle} className="mt-0.5" />
           {syncedAt ? t('stag.agent.stale.old') : t('stag.agent.stale.never')}
         </p>
       )}
@@ -196,7 +196,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
       {revealedToken && (
         <div className="space-y-3 rounded-xl border border-primary/30 bg-surface p-4 shadow-sm">
           <div className="flex items-start gap-2.5">
-            <Icon icon={KeyRound} className="text-primary mt-0.5" />
+            <Icon icon={Key} className="text-primary mt-0.5" />
             <div className="min-w-0">
               <p className="text-sm font-semibold text-on-surface">{t('stag.agent.reveal.title')}</p>
               <p className="text-xs text-on-surface-variant">{t('stag.agent.reveal.warning')}</p>
@@ -231,7 +231,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
           <div className="space-y-3">
             <p className="text-sm text-on-surface-variant">{t('stag.agent.token.none')}</p>
             <button type="button" onClick={handleCreateToken} disabled={creating} className={primaryButton}>
-              <Icon icon={creating ? Loader2 : KeyRound} className={creating ? 'animate-spin' : ''} />
+              <Icon icon={creating ? CircleNotch : Key} className={creating ? 'animate-spin' : ''} />
               {t('stag.agent.token.create')}
             </button>
           </div>
@@ -267,7 +267,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
                     onClick={pendingConfirm === 'regenerate' ? handleCreateToken : handleRevokeToken}
                     className={pendingConfirm === 'regenerate' ? primaryButton : dangerButton}
                   >
-                    <Icon icon={pendingConfirm === 'regenerate' ? RefreshCw : Trash2} />
+                    <Icon icon={pendingConfirm === 'regenerate' ? ArrowsClockwise : Trash} />
                     {pendingConfirm === 'regenerate'
                       ? t('stag.agent.confirm.regenerateConfirm')
                       : t('stag.agent.confirm.revokeConfirm')}
@@ -285,7 +285,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
                   disabled={creating || revoking}
                   className={secondaryButton}
                 >
-                  <Icon icon={creating ? Loader2 : RefreshCw} className={creating ? 'animate-spin' : ''} />
+                  <Icon icon={creating ? CircleNotch : ArrowsClockwise} className={creating ? 'animate-spin' : ''} />
                   {t('stag.agent.token.regenerate')}
                 </button>
                 <button
@@ -294,7 +294,7 @@ const StagAgentPanel = ({ status, refreshUser, onUserUpdate, toast }) => {
                   disabled={creating || revoking}
                   className={dangerButton}
                 >
-                  <Icon icon={revoking ? Loader2 : Trash2} className={revoking ? 'animate-spin' : ''} />
+                  <Icon icon={revoking ? CircleNotch : Trash} className={revoking ? 'animate-spin' : ''} />
                   {t('stag.agent.token.revoke')}
                 </button>
               </div>

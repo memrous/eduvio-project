@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { CircleNotch } from '../components/ui/icons'
 import { useTranslation } from 'react-i18next'
 import { extractMoodleToken } from '../utils/moodleToken'
 import { clearMoodleLaunchPending } from '../utils/moodleLaunch'
@@ -58,7 +58,7 @@ const MoodleCallbackPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="flex flex-col items-center gap-3">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <CircleNotch className="w-8 h-8 text-primary animate-spin" />
         <p className="text-sm font-medium text-on-surface-variant">
           {t('moodle.callback.connecting', 'Připojování k Moodlu...')}
         </p>

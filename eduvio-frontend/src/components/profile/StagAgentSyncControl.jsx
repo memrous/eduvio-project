@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { KeyRound, Laptop, Loader2, RefreshCw } from 'lucide-react'
+import { ArrowsClockwise, CircleNotch, Key, Laptop } from '../ui/icons'
 import Icon from '../common/Icon'
 import * as api from '../../services/api'
 import { useStagStatus } from '../../hooks/useStagStatus'
@@ -105,21 +105,21 @@ const StagAgentSyncControl = ({ compact = false }) => {
         compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 text-sm'
       }`}
     >
-      <Icon icon={requesting || waiting ? Loader2 : RefreshCw} className={requesting || waiting ? 'animate-spin' : ''} />
+      <Icon icon={requesting || waiting ? CircleNotch : ArrowsClockwise} className={requesting || waiting ? 'animate-spin' : ''} />
       {t('stag.agent.sync.syncNow')}
     </button>
   )
 
   const waitingNote = waiting && (
     <p className="flex items-center gap-1.5 text-xs text-on-surface-variant" role="status">
-      <Icon icon={Loader2} className="animate-spin text-primary" />
+      <Icon icon={CircleNotch} className="animate-spin text-primary" />
       {online ? t('stag.agent.sync.waitingOnline') : t('stag.agent.sync.waitingOffline')}
     </p>
   )
 
   const loginNote = loginNeeded && (
     <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning-container px-3 py-2 text-xs text-on-warning-container">
-      <Icon icon={KeyRound} className="mt-0.5" />
+      <Icon icon={Key} className="mt-0.5" />
       <div className="space-y-0.5">
         <p className="font-semibold">{t('stag.agent.sync.loginNeeded')}</p>
         {!compact && <p>{t('stag.agent.sync.loginNeededHint')}</p>}

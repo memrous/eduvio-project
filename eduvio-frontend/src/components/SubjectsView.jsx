@@ -1,12 +1,12 @@
 import { useState, useMemo, useCallback } from 'react'
 import {
-  SlidersHorizontal,
-  ArrowUpDown,
-  Plus,
-  X,
-  ChevronDown,
+  ArrowsDownUp,
   BookOpen,
-} from 'lucide-react'
+  CaretDown,
+  Plus,
+  SlidersHorizontal,
+  X,
+} from './ui/icons'
 import { useTranslation } from 'react-i18next'
 import Dropdown from './common/Dropdown'
 import SubjectOverviewCard from './SubjectOverviewCard'
@@ -318,7 +318,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
             <div className="w-full @xl:w-auto">
               <Dropdown
                 label={sortLabel}
-                icon={ArrowUpDown}
+                icon={ArrowsDownUp}
                 options={SORT_OPTIONS}
                 value={sortKey}
                 onChange={setSortKey}
@@ -384,7 +384,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                   title={isWinterOpen ? t('academic:subjectsView.semesters.collapse') : t('academic:subjectsView.semesters.expand')}
                   aria-label={isWinterOpen ? t('academic:subjectsView.semesters.collapse') : t('academic:subjectsView.semesters.expand')}
                 >
-                  <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isWinterOpen ? 'rotate-180' : ''}`} />
+                  <CaretDown className={`w-5 h-5 transition-transform duration-200 ${isWinterOpen ? 'rotate-180' : ''}`} />
                 </button>
               </div>
 
@@ -442,7 +442,7 @@ const SubjectsView = ({ subjects, onSelectSubject, onAddSubject, onDeleteSubject
                   title={isSummerOpen ? t('academic:subjectsView.semesters.collapse') : t('academic:subjectsView.semesters.expand')}
                   aria-label={isSummerOpen ? t('academic:subjectsView.semesters.collapse') : t('academic:subjectsView.semesters.expand')}
                 >
-                  <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isSummerOpen ? 'rotate-180' : ''}`} />
+                  <CaretDown className={`w-5 h-5 transition-transform duration-200 ${isSummerOpen ? 'rotate-180' : ''}`} />
                 </button>
               </div>
 

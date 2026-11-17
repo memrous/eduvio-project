@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import {
-  Clock,
+  BookBookmark,
   CheckSquare,
+  Clock,
+  DownloadSimple,
+  Link,
   Square,
-  Link as LinkIcon,
-  Download,
-  BookOpenCheck,
-} from 'lucide-react'
+} from '../ui/icons'
 
 import { formatAcademicGrade } from '../../utils/subjectColors'
 import { isSameId } from '../../utils/ids'
@@ -65,7 +65,7 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
       <div className="flex items-center justify-between border-b border-outline-variant pb-3">
         <div className="flex items-center gap-2.5">
           <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <BookOpenCheck className="size-4" />
+            <BookBookmark className="size-4" />
           </div>
           <h3 className="text-base font-semibold tracking-tight text-foreground">
             {t('academic:subjectDetail.sections.moodleHeader')}
@@ -233,7 +233,7 @@ const SubjectMoodleActivities = ({ requirements = [], resources = [] }) => {
                           rel="noreferrer"
                           className="inline-flex items-center gap-1.5 rounded-md border border-outline-variant px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant transition-colors hover:bg-surface-container"
                         >
-                          {isLink ? <LinkIcon className="size-3" /> : <Download className="size-3" />}
+                          {isLink ? <Link className="size-3" /> : <DownloadSimple className="size-3" />}
                           {mat.title}
                         </a>
                       )

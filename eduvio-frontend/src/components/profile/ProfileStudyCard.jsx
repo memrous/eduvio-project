@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Info } from 'lucide-react'
+import { Info } from '../ui/icons'
 import { getLocaleFromLanguage } from '../../utils/locale'
 import { formatDateTime, formatRelativeTime } from '../../utils/relativeTime'
 

@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  AlertCircle,
-  Loader2,
+  ArrowsClockwise,
+  CircleNotch,
+  LinkBreak,
+  LinkSimple,
   ShieldCheck,
-  Unlink2,
-  Link2,
-  LayoutGrid,
-  RefreshCw,
-} from 'lucide-react'
+  SquaresFour,
+  WarningCircle,
+} from '../ui/icons'
 import * as api from '../../services/api'
 import { useStagStatus } from '../../hooks/useStagStatus'
 import StagAgentPanel from './StagAgentPanel'
@@ -38,7 +38,7 @@ const StagIntegrationCard = (props) => {
     return (
       <div className="rounded-2xl border border-outline-variant bg-surface-container-low/80 p-5">
         <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <CircleNotch className="h-4 w-4 animate-spin" />
           {t('stag.card.title')}
         </div>
       </div>
@@ -202,7 +202,7 @@ const StagServerCard = ({
 
       {isStagConnected && syncStatus === 'pending' && (
         <div className="flex min-h-13 items-center gap-2.5 px-4 py-3 bg-primary-container border border-primary/30 rounded-lg">
-          <Loader2 className="w-4 h-4 text-primary shrink-0 animate-spin" />
+          <CircleNotch className="w-4 h-4 text-primary shrink-0 animate-spin" />
           <p className="text-label-sm text-on-primary-container">{t('stag.status.syncing')}</p>
         </div>
       )}
@@ -219,7 +219,7 @@ const StagServerCard = ({
               onClick={() => navigate('/dashboard')}
               className="cursor-pointer shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-success px-3 py-1.5 text-xs font-semibold text-on-success transition-colors"
             >
-              <LayoutGrid className="size-4" />
+              <SquaresFour className="size-4" />
               {t('profile:stag.actions.goToDashboard')}
             </button>
           )}
@@ -228,7 +228,7 @@ const StagServerCard = ({
 
       {isStagConnected && syncStatus === 'failed' && (
         <div className="flex min-h-13 items-center gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
-          <AlertCircle className="w-4 h-4 text-error shrink-0" />
+          <WarningCircle className="w-4 h-4 text-error shrink-0" />
           <p className="text-label-sm text-error">{t('stag.status.failed')}</p>
         </div>
       )}
@@ -245,7 +245,7 @@ const StagServerCard = ({
             disabled={stagRedirecting}
             className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {stagRedirecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+            {stagRedirecting ? <CircleNotch className="h-4 w-4 animate-spin" /> : <LinkSimple className="h-4 w-4" />}
             {t('stag.actions.connect')}
           </button>
         </div>
@@ -278,9 +278,9 @@ const StagServerCard = ({
               className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-on-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {resyncLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <CircleNotch className="h-4 w-4 animate-spin" />
               ) : (
-                <RefreshCw className="h-4 w-4" />
+                <ArrowsClockwise className="h-4 w-4" />
               )}
               {t('stag.actions.syncNow')}
             </button>
@@ -291,7 +291,7 @@ const StagServerCard = ({
               disabled={disconnecting}
               className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-error-container bg-surface px-4 py-2.5 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {disconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Unlink2 className="h-4 w-4" />}
+              {disconnecting ? <CircleNotch className="h-4 w-4 animate-spin" /> : <LinkBreak className="h-4 w-4" />}
               {t('stag.actions.disconnect')}
             </button>
           </div>

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { CalendarRange, ExternalLink } from 'lucide-react'
+import { ArrowSquareOut, CalendarDots } from '../ui/icons'
 import Icon from '../common/Icon'
 import { ItemLinks, SourceChip } from './exam/ContinuousAssessmentCard'
 import { getLocaleFromLanguage } from '../../utils/locale'
@@ -32,7 +32,7 @@ const SubjectSyllabusTab = ({ items, isLoading, error, sourceUrl }) => {
     <section className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">
-          <Icon icon={CalendarRange} className="text-on-surface-variant" />
+          <Icon icon={CalendarDots} className="text-on-surface-variant" />
           {t('academic:subjectDetail.syllabus.title')}
         </h3>
         {items.length > 0 && <SourceChip url={pageUrl} />}
@@ -49,7 +49,7 @@ const SubjectSyllabusTab = ({ items, isLoading, error, sourceUrl }) => {
           {pageUrl && (
             <a href={pageUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
               {t('academic:subjectDetail.syllabus.openSource')}
-              <Icon icon={ExternalLink} className="size-3.5" />
+              <Icon icon={ArrowSquareOut} className="size-3.5" />
             </a>
           )}
         </div>

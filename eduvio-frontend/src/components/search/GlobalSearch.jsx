@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Loader2, Search, X } from 'lucide-react'
+import { CircleNotch, MagnifyingGlass, X } from '../ui/icons'
 import Icon from '../common/Icon'
 import { useSubjects } from '../../hooks/useSubjects'
 import { useResources } from '../../hooks/useResources'
@@ -35,7 +35,7 @@ const Highlight = ({ text, match }) => {
 }
 
 /**
- * Search in the user's subjects and materials (combobox with a result list).
+ * MagnifyingGlass in the user's subjects and materials (combobox with a result list).
  *
  * variant "header": field in the desktop header with a dropdown and the
  * Ctrl+K / "/" shortcut. variant "mobile": full-width field in the mobile
@@ -243,7 +243,7 @@ const GlobalSearch = ({ variant = 'header', autoFocus = false, onDone }) => {
       }}
     >
       <div className="relative">
-        <Icon icon={Search} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
+        <Icon icon={MagnifyingGlass} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
         <input
           ref={inputRef}
           type="text"
@@ -309,7 +309,7 @@ const GlobalSearch = ({ variant = 'header', autoFocus = false, onDone }) => {
         >
           {isLoading && resultCount === 0 ? (
             <p className="flex items-center gap-2 px-2.5 py-3 text-sm text-on-surface-variant">
-              <Icon icon={Loader2} className="animate-spin" />
+              <Icon icon={CircleNotch} className="animate-spin" />
               {t('common:search.loading')}
             </p>
           ) : options.length === 0 ? (

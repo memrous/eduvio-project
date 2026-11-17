@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, X } from 'lucide-react'
+import { MagnifyingGlass, X } from '../ui/icons'
 import Icon from '../common/Icon'
 import GlobalSearch from './GlobalSearch'
 import { useSearchShortcut } from './searchShortcut'
 
 /**
- * Search button for the mobile header (a field-like button) and, with
+ * MagnifyingGlass button for the mobile header (a field-like button) and, with
  * `compact`, a magnifier for the narrow desktop header. Opens the same search
  * as the desktop header in a full-width panel at the top of the screen.
  */
@@ -38,7 +38,7 @@ const MobileSearch = ({ compact = false }) => {
             : 'flex h-9 w-full min-w-0 cursor-pointer items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-3.5 text-left text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface'
         }
       >
-        <Icon icon={Search} size={compact ? 'md' : 'sm'} />
+        <Icon icon={MagnifyingGlass} size={compact ? 'md' : 'sm'} />
         {!compact && <span className="truncate text-sm">{t('search.placeholder')}</span>}
       </button>
 

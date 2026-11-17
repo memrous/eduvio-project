@@ -1,14 +1,14 @@
-import { BookOpen, CalendarDays, FolderOpen, LayoutDashboard, UserRound } from 'lucide-react'
+import { BookOpen, CalendarDots, FolderOpen, SquaresFour, User } from '../ui/icons'
 
 /** Main sections — the same icons in the sidebar, the mobile drawer and the bottom bar. */
 export const NAV_ITEMS = [
-  { to: '/dashboard', icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
+  { to: '/dashboard', icon: SquaresFour, labelKey: 'sidebar.dashboard' },
   { to: '/subjects', icon: BookOpen, labelKey: 'sidebar.subjects' },
-  { to: '/calendar', icon: CalendarDays, labelKey: 'sidebar.calendar' },
+  { to: '/calendar', icon: CalendarDots, labelKey: 'sidebar.calendar' },
   { to: '/materials', icon: FolderOpen, labelKey: 'sidebar.resources' },
 ]
 
-export const PROFILE_NAV_ITEM = { to: '/profile', icon: UserRound, labelKey: 'sidebar.profile' }
+export const PROFILE_NAV_ITEM = { to: '/profile', icon: User, labelKey: 'sidebar.profile' }
 
 /**
  * Sidebar / drawer link: the active item has a light primary tint with

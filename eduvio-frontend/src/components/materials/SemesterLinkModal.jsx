@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, X } from 'lucide-react'
+import { CircleNotch, X } from '../ui/icons'
 import { getSemesterLinkTitle } from '../../utils/semesterLinks'
 import { getSubjectIdOf, isSameId } from '../../utils/ids'
 
@@ -94,7 +94,7 @@ const SemesterLinkModal = ({ link, subjects, onClose, onSave }) => {
               disabled={isSubmitting || subjects.length === 0}
               className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold shadow-sm transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+              {isSubmitting && <CircleNotch className="size-4 animate-spin" />}
               {t('resources:semesterLinks.save')}
             </button>
           </div>

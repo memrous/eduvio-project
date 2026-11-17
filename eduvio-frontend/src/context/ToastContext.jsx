@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useRef, useState } from 'react'
-import { CheckCircle2, XCircle, Info, X } from 'lucide-react'
+import { CheckCircle, Info, X, XCircle } from '../components/ui/icons'
 import { useTranslation } from 'react-i18next'
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -19,7 +19,7 @@ const VARIANT_STYLES = {
       'text-success',
     bar:
       'bg-success-soft',
-    Icon: CheckCircle2,
+    Icon: CheckCircle,
   },
 
   error: {

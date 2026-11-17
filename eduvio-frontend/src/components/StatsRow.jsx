@@ -1,4 +1,4 @@
-import { BookOpen, ListChecks, Clock } from 'lucide-react'
+import { BookOpen, Clock, ListChecks } from './ui/icons'
 import { useTranslation } from 'react-i18next'
 import Icon from './common/Icon'
 

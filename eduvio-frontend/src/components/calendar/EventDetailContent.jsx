@@ -1,4 +1,11 @@
-import { X, MapPin, CalendarDays, Clock, UserRound, GraduationCap } from 'lucide-react'
+import {
+  CalendarDots,
+  Clock,
+  GraduationCap,
+  MapPin,
+  User,
+  X,
+} from '../ui/icons'
 import { useTranslation } from 'react-i18next'
 import { getEventStyle } from './useCalendarState'
 import { getLocaleFromLanguage } from '../../utils/locale'
@@ -77,7 +84,7 @@ const EventDetailContent = ({
 
       <dl className="flex flex-col gap-3.5 text-sm border-t border-outline-variant/30 pt-4 mt-2">
         <div className="flex items-start gap-3">
-          <Icon icon={CalendarDays} className="mt-0.5 text-on-surface-variant" />
+          <Icon icon={CalendarDots} className="mt-0.5 text-on-surface-variant" />
           <div className="min-w-0">
             <span className="block text-xs text-on-surface-variant font-medium">{t('academic:eventModal.fields.date', 'Datum')}</span>
             <span className="font-semibold text-on-surface">
@@ -108,7 +115,7 @@ const EventDetailContent = ({
         {targetSubject && (
           <>
             <div className="flex items-start gap-3">
-              <Icon icon={UserRound} className="mt-0.5 text-on-surface-variant" />
+              <Icon icon={User} className="mt-0.5 text-on-surface-variant" />
               <div className="min-w-0">
                 <span className="block text-xs text-on-surface-variant font-medium">{t('academic:eventDetail.lecturer', 'Vyučující')}</span>
                 <span className="font-semibold text-on-surface">

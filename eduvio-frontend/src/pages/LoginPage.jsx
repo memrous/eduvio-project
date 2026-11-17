@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  CalendarDays,
-  BarChart3,
   ArrowRight,
-  Loader2,
   BookOpen,
-} from 'lucide-react'
+  CalendarDots,
+  ChartBar,
+  CircleNotch,
+  Envelope,
+  Eye,
+  EyeSlash,
+  Lock,
+  WarningCircle,
+} from '../components/ui/icons'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useAuth } from '../context/AuthContext'
@@ -21,8 +21,8 @@ import logoImg from '../assets/images/logo.png'
 // ── Left brand panel feature list ────────────────────────────────
 const FEATURES = [
   { icon: BookOpen, key: 'features.manageSubjects' },
-  { icon: CalendarDays, key: 'features.calendar' },
-  { icon: BarChart3, key: 'features.progress' },
+  { icon: CalendarDots, key: 'features.calendar' },
+  { icon: ChartBar, key: 'features.progress' },
 ]
 
 // ── Form field validation ─────────────────────────────────────────
@@ -153,7 +153,7 @@ const LoginPage = () => {
 
           {/* Mock credentials hint */}
           <div className="flex items-start gap-2.5 px-4 py-3 bg-primary-container border border-primary/30 rounded-lg">
-            <AlertCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <WarningCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             <p className="text-label-sm text-on-primary-container leading-snug">
               <span className="font-bold">{t('login.demoCredentials.label')} </span>
               student@eduvio.cz · password
@@ -163,7 +163,7 @@ const LoginPage = () => {
           {/* Server error banner */}
           {serverError && (
             <div className="flex items-start gap-2.5 px-4 py-3 bg-error-container border border-error/30 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
+              <WarningCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
               <p className="text-label-sm text-on-error-container">{t(serverError)}</p>
             </div>
           )}
@@ -177,7 +177,7 @@ const LoginPage = () => {
                 {t('login.fields.email.label')}
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Envelope className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="login-email"
                   type="email"
@@ -190,7 +190,7 @@ const LoginPage = () => {
               </div>
               {errors.email && (
                 <p className="text-label-sm text-error flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> {t(errors.email)}
+                  <WarningCircle className="w-3 h-3" /> {t(errors.email)}
                 </p>
               )}
             </div>
@@ -219,12 +219,12 @@ const LoginPage = () => {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
                   aria-label={showPass ? t('login.aria.hidePassword') : t('login.aria.showPassword')}
                 >
-                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPass ? <EyeSlash className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               {errors.password && (
                 <p className="text-label-sm text-error flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> {t(errors.password)}
+                  <WarningCircle className="w-3 h-3" /> {t(errors.password)}
                 </p>
               )}
             </div>
@@ -236,7 +236,7 @@ const LoginPage = () => {
               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-primary hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-on-primary font-semibold rounded-lg text-label-md transition-all shadow-sm mt-1 cursor-pointer"
             >
               {submitting ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> {t('login.actions.signingIn')}</>
+                <><CircleNotch className="w-4 h-4 animate-spin" /> {t('login.actions.signingIn')}</>
               ) : (
                 <>{t('login.actions.signIn')} <ArrowRight className="w-4 h-4" /></>
               )}

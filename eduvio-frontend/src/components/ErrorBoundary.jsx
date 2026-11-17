@@ -1,5 +1,5 @@
 import { Component } from 'react'
-import { AlertTriangle } from 'lucide-react'
+import { Warning } from './ui/icons'
 import { withTranslation } from 'react-i18next'
 
 class ErrorBoundary extends Component {
@@ -27,7 +27,7 @@ class ErrorBoundary extends Component {
         <div className="min-h-screen flex items-center justify-center bg-background px-4 font-inter">
           <div className="w-full max-w-md bg-surface border border-outline-variant rounded-xl shadow-ambient p-8 text-center flex flex-col items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center">
-              <AlertTriangle className="w-6 h-6" />
+              <Warning className="w-6 h-6" />
             </div>
             <div className="flex flex-col gap-2">
               <h1 className="text-headline-md font-semibold text-on-surface">{t('somethingWentWrong')}</h1>

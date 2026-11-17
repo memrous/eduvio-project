@@ -1,11 +1,11 @@
-import { Flame, Zap, GraduationCap } from 'lucide-react'
+import { Flame, GraduationCap, Lightning } from '../ui/icons'
 import { getSubjectStyle } from './useCalendarState'
 import { useTranslation } from 'react-i18next'
 import { deadlineTitle } from '../../utils/assessments'
 
 const getDeadlineIcon = (type) => {
   const t = String(type || '').toLowerCase()
-  if (t.includes('test') || t.includes('quiz')) return Zap
+  if (t.includes('test') || t.includes('quiz')) return Lightning
   if (t.includes('exam') || t.includes('zkouška')) return GraduationCap
   return Flame
 }

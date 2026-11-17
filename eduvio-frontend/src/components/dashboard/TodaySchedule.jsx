@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Check, Coffee, PartyPopper } from 'lucide-react'
+import { Check, Coffee, Confetti } from '../ui/icons'
 import { useTranslation } from 'react-i18next'
 import { formatRoom } from '../../utils/room'
 
@@ -106,7 +106,7 @@ const TodaySchedule = ({ schedule }) => {
           {t('todaySchedule.title')}
         </h2>
         <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-outline-variant bg-surface-container-low px-4 py-8 text-center">
-          <PartyPopper className="size-6 text-primary" aria-hidden="true" />
+          <Confetti className="size-6 text-primary" aria-hidden="true" />
           <p className="text-sm font-semibold text-foreground">{t('todaySchedule.noClassesTitle')}</p>
           <p className="max-w-[15rem] text-xs text-on-surface-variant text-pretty">
             {t('todaySchedule.noClassesSubtitle')}
@@ -195,7 +195,7 @@ const TodaySchedule = ({ schedule }) => {
                   className={`absolute -left-[9px] top-1 z-10 flex size-4 items-center justify-center rounded-full border-2 border-surface-container-lowest ${getDotColorClass(item.data)}`}
                   aria-hidden="true"
                 >
-                  {isDone && <Check className="size-2.5 text-on-success" strokeWidth={3.5} />}
+                  {isDone && <Check className="size-2.5 text-on-success" weight="bold" />}
                 </span>
                 <p className="text-xs font-medium tabular-nums text-on-surface-variant">
                   {item.data.startTime} – {item.data.endTime}

@@ -3,17 +3,17 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
+  ArrowsClockwise,
+  CaretRight,
   Check,
-  ChevronRight,
   Copy,
   GraduationCap,
-  LockKeyhole,
-  LogOut,
+  LockKey,
   Palette,
-  RefreshCw,
+  SignOut,
   SlidersHorizontal,
-  UserRound,
-} from 'lucide-react'
+  User,
+} from './ui/icons'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import AccountTab from './profile/tabs/AccountTab'
@@ -147,10 +147,10 @@ const Profile = ({ user: initialUser }) => {
   }
 
   const tabs = [
-    { id: 'overview', label: t('tabs.overview', 'Přehled'), icon: UserRound },
+    { id: 'overview', label: t('tabs.overview', 'Přehled'), icon: User },
     { id: 'account', label: t('tabs.account', 'Osobní údaje'), icon: SlidersHorizontal },
     { id: 'appearance', label: t('tabs.appearance'), icon: Palette },
-    { id: 'security', label: t('tabs.security', 'Zabezpečení'), icon: LockKeyhole },
+    { id: 'security', label: t('tabs.security', 'Zabezpečení'), icon: LockKey },
   ]
 
   const displayName = effectiveUser.name || effectiveUser.username || effectiveUser.email || ''
@@ -191,7 +191,7 @@ const Profile = ({ user: initialUser }) => {
               ) : userInitials ? (
                 userInitials
               ) : (
-                <UserRound className="size-6 text-on-surface-variant" />
+                <User className="size-6 text-on-surface-variant" />
               )}
             </div>
 
@@ -242,7 +242,7 @@ const Profile = ({ user: initialUser }) => {
               onClick={logout}
               className="lg:hidden mt-4 w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-surface-container-low hover:bg-surface-container text-error rounded-lg text-label-md font-semibold transition-colors cursor-pointer border border-error/20"
             >
-              <LogOut className="size-4" />
+              <SignOut className="size-4" />
               {t('common:sidebar.logout')}
             </button>
           </section>
@@ -319,7 +319,7 @@ const Profile = ({ user: initialUser }) => {
               <section className="bg-surface border border-outline-variant rounded-2xl p-6 space-y-5 shadow-ambient">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <UserRound className="w-4 h-4" />
+                    <User className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-on-surface">{t('overview.personalInfo', 'Osobní údaje')}</h3>
@@ -365,7 +365,7 @@ const Profile = ({ user: initialUser }) => {
               <section className="bg-surface border border-outline-variant rounded-2xl p-6 space-y-4 shadow-ambient">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <RefreshCw className="w-4 h-4" />
+                    <ArrowsClockwise className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-on-surface">{t('overview.integrationsTitle', 'Univerzitní integrace')}</h3>
@@ -403,7 +403,7 @@ const Profile = ({ user: initialUser }) => {
                           className="cursor-pointer inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                         >
                           <span>{item.connected ? t('overview.manage') : t('overview.connect')}</span>
-                          <ChevronRight className="size-4" />
+                          <CaretRight className="size-4" />
                         </button>
                       </div>
                     </div>

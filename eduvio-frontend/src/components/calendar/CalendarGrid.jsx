@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { Flame, Zap, GraduationCap } from 'lucide-react'
+import { Flame, GraduationCap, Lightning } from '../ui/icons'
 import { useTranslation } from 'react-i18next'
 import { getSubjectStyle, formatDateKey } from './useCalendarState'
 import { getLocaleFromLanguage } from '../../utils/locale'
@@ -14,7 +14,7 @@ import MobileDayDetailSheet from './MobileDayDetailSheet'
 const getDeadlineIcon = (type) => {
   if (isAssessmentType(type)) return getAssessmentIcon(type)
   const t = String(type || '').toLowerCase()
-  if (t.includes('test') || t.includes('quiz')) return Zap
+  if (t.includes('test') || t.includes('quiz')) return Lightning
   if (t.includes('exam') || t.includes('zkouška')) return GraduationCap
   return Flame
 }

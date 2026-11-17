@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useRef, useEffect } from 'react'
 import { renderAsync } from 'docx-preview'
 import { useTranslation } from 'react-i18next'
-import { Download, File, X } from 'lucide-react'
+import { DownloadSimple, File, X } from '../ui/icons'
 import { getPreviewInfo, loadMaterialFile, needsCanvasPdfViewer } from '../../utils/materialPreview'
 import { hasPrivateFile } from '../../utils/materialKinds'
 import MaterialDownloadLink from './MaterialDownloadLink'
@@ -123,7 +123,7 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
               href={url}
               className="flex items-center gap-1.5 px-3 py-1.5 border border-outline-variant hover:bg-surface-container rounded-xl text-sm font-semibold text-on-surface transition-colors"
             >
-              <Download className="size-4" />
+              <DownloadSimple className="size-4" />
               <span>{t('resources:actions.download')}</span>
             </MaterialDownloadLink>
             <button
@@ -209,7 +209,7 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
                     <p className="text-sm text-error font-semibold mb-1">{t('resources:preview.failedRenderDocument')}</p>
                     <p className="text-sm text-on-surface-variant mb-4">{docxError}</p>
                     <MaterialDownloadLink resource={resource} href={url} newTab={false} className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
-                      <Download className="w-4 h-4" />
+                      <DownloadSimple className="w-4 h-4" />
                       <span>{t('resources:actions.downloadFile')}</span>
                     </MaterialDownloadLink>
                   </div>
@@ -232,7 +232,7 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
                   newTab={false}
                   className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
                 >
-                  <Download className="w-4 h-4" />
+                  <DownloadSimple className="w-4 h-4" />
                   <span>{t('resources:actions.downloadFile')}</span>
                 </MaterialDownloadLink>
               </div>
@@ -248,7 +248,7 @@ const ResourcePreviewModal = ({ resource, onClose }) => {
                     href={url}
                     className="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
                   >
-                    <Download className="w-4 h-4" />
+                    <DownloadSimple className="w-4 h-4" />
                     <span>{t('resources:actions.downloadFile')}</span>
                   </MaterialDownloadLink>
                 ) : (

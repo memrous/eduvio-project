@@ -1,4 +1,10 @@
-import { AlertTriangle, TrendingDown, Upload, ArrowRight, CheckCircle2 } from 'lucide-react'
+import {
+  ArrowRight,
+  CheckCircle,
+  TrendDown,
+  UploadSimple,
+  Warning,
+} from '../ui/icons'
 import { useTranslation } from 'react-i18next'
 import { getAssessmentIcon, getAssessmentLabel } from '../../utils/assessments'
 
@@ -32,7 +38,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
       {isEmpty ? (
         <div className="flex items-center gap-4 rounded-xl border border-success/30 bg-success-container/40 p-5">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-success-container text-on-success-container">
-            <CheckCircle2 className="size-6" aria-hidden="true" />
+            <CheckCircle className="size-6" aria-hidden="true" />
           </div>
           <div>
             <p className="font-semibold text-foreground">{t('needsAttention.allDone')}</p>
@@ -48,7 +54,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
             const isDeadline = alert.type === 'deadline'
             // Written test etc. from the teacher's course page
             const isAssessment = alert.type === 'assessment'
-            const Icon = isAssessment ? getAssessmentIcon(alert.assessmentType) : isDeadline ? AlertTriangle : TrendingDown
+            const Icon = isAssessment ? getAssessmentIcon(alert.assessmentType) : isDeadline ? Warning : TrendDown
 
             return (
               <div
@@ -92,7 +98,7 @@ const NeedsAttention = ({ alerts, subjects, onUploadClick, onViewSubject }) => {
                         onClick={() => onUploadClick?.(alert)}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 cursor-pointer"
                       >
-                        <Upload className="size-4" aria-hidden="true" />
+                        <UploadSimple className="size-4" aria-hidden="true" />
                         {t('needsAttention.uploadSolution')}
                       </button>
                     ) : (

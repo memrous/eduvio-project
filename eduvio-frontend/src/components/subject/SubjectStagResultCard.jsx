@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Landmark } from 'lucide-react'
+import { Bank } from '../ui/icons'
 import { getLocaleFromLanguage } from '../../utils/locale'
 import { classifyResult, getCompletionParts, getCreditMarkKey } from '../../utils/subjectDetails'
 
@@ -79,7 +79,7 @@ const SubjectStagResultCard = ({ subject }) => {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant pb-4">
         <div className="flex items-center gap-3">
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <Landmark className="size-5" />
+            <Bank className="size-5" />
           </div>
           <div>
             <h3 className="text-base font-bold tracking-tight text-foreground">
@@ -92,7 +92,7 @@ const SubjectStagResultCard = ({ subject }) => {
         </div>
 
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
-          <Landmark className="size-4" />
+          <Bank className="size-4" />
           {t('academic:subjectDetail.sections.stagBadge')}
         </span>
       </div>

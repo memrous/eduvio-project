@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ShieldCheck, KeyRound, LogOut } from 'lucide-react'
+import { Key, ShieldCheck, SignOut } from '../../ui/icons'
 
 // Password change and signing out other devices need backend endpoints (next step)
 const ComingSoon = () => {
@@ -40,7 +40,7 @@ const SecurityTab = () => {
               disabled
               className="cursor-not-allowed opacity-60 inline-flex items-center gap-1.5 bg-surface-container-low border border-outline-variant text-on-surface-variant text-xs font-semibold px-3.5 py-2 rounded-xl"
             >
-              <KeyRound className="size-4" />
+              <Key className="size-4" />
               <span>{t('security.password.action')}</span>
             </button>
           </div>
@@ -59,7 +59,7 @@ const SecurityTab = () => {
               disabled
               className="cursor-not-allowed opacity-60 inline-flex items-center gap-1.5 bg-surface-container-low border border-outline-variant text-on-surface-variant text-xs font-semibold px-3.5 py-2 rounded-xl"
             >
-              <LogOut className="size-4" />
+              <SignOut className="size-4" />
               <span>{t('security.sessions.action')}</span>
             </button>
           </div>
